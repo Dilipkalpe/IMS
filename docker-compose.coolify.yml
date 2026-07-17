@@ -52,6 +52,9 @@ services:
     depends_on:
       api:
         condition: service_healthy
+    ports:
+      # Host nginx on :80 serves TMS; IMS reachable at 127.0.0.1:8081 (see deploy/coolify/nginx-host-ims.conf)
+      - '8081:80'
     expose:
       - '80'
     environment:
