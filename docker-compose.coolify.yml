@@ -30,7 +30,7 @@ services:
       HOST: 0.0.0.0
       NODE_ENV: production
       MONGODB_URI: mongodb://mongodb:27017/ims
-      IMS_AUTH_SECRET: ${IMS_AUTH_SECRET:?Set IMS_AUTH_SECRET in Coolify env}
+      IMS_AUTH_SECRET: ${IMS_AUTH_SECRET:-change-me-in-coolify-env}
       IMS_PUBLIC_URL: ${IMS_PUBLIC_URL:-http://ims.144.91.98.218.nip.io}
     expose:
       - '3000'
