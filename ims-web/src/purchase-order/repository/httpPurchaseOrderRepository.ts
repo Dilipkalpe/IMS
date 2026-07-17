@@ -1,0 +1,84 @@
+import { apiFetch } from '../../api/client';
+import { appendTransactionListQueryParams } from '../../components/transaction/transactionListQuery';
+import { buildSavePayload, recordToEditor } from './recordMappers';
+import type {
+  PurchaseOrderListQuery,
+  PurchaseOrderListResult,
+  PurchaseOrderListStats,
+  PurchaseOrderNextNo,
+  PurchaseOrderRecord,
+  PurchaseOrderRepository,
+  SavePurchaseOrderInput,
+  SavePurchaseOrderResult,
+} from './types';
+
+const BASE = '/api/purchase-orders';
+
+export class HttpPurchaseOrderRepository implements PurchaseOrderRepository {
+  readonly mode = 'http' as const;
+
+  async fetchList(query: PurchaseOrderListQuery = {}): Promise<PurchaseOrderListResult> {
+    const params = new URLSearchParams();
+    appendTransactionListQueryParams(params, query);
+    const q = params.toString();
+    return apiFetch<PurchaseOrderListResult>(`${BASE}${q ? `?${q}` : ''}`);
+  }
+
+  async fetchStats(): Promise<PurchaseOrderListStats> {
+    const stats = await apiFetch<{
+      total: number;
+      draft: number;
+      open: number;
+      dispatched?: number;
+      posted?: number;
+    }>(`${BASE}/stats`);
+    return {
+      total: stats.total,
+      draft: stats.draft,
+      open: stats.open,
+      confirmed: stats.dispatched ?? stats.posted ?? 0,
+    };
+  }
+
+  async loadById(id: string): Promise<PurchaseOrderRecord> {
+    return normalizeRecord(await apiFetch<PurchaseOrderRecord & { id?: string }>(`${BASE}/${id}`));
+  }
+
+  async loadByFormatted(formatted: string): Promise<PurchaseOrderRecord> {
+    const enc = encodeURIComponent(formatted);
+    return normalizeRecord(
+      await apiFetch<PurchaseOrderRecord & { id?: string }>(`${BASE}/by-formatted/${enc}`),
+    );
+  }
+
+  async peekNextNo(prefix?: string): Promise<PurchaseOrderNextNo> {
+    const q = prefix ? `?prefix=${encodeURIComponent(prefix)}` : '';
+    return apiFetch<PurchaseOrderNextNo>(`${BASE}/next-no${q}`);
+  }
+
+  async save(input: SavePurchaseOrderInput): Promise<SavePurchaseOrderResult> {
+    const payload = buildSavePayload(input);
+    if (input.id) {
+      const item = await apiFetch<PurchaseOrderRecord & { id?: string }>(`${BASE}/${input.id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+      return { record: normalizeRecord(item), created: false };
+    }
+    const item = await apiFetch<PurchaseOrderRecord & { id?: string }>(BASE, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    return { record: normalizeRecord(item), created: true };
+  }
+
+  async deleteById(id: string): Promise<void> {
+    await apiFetch(`${BASE}/${id}`, { method: 'DELETE' });
+  }
+}
+
+function normalizeRecord(raw: PurchaseOrderRecord & { id?: string }): PurchaseOrderRecord {
+  return { ...raw, _id: String(raw._id ?? raw.id ?? '') };
+}
+
+export { recordToEditor };

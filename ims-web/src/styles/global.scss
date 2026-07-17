@@ -1,0 +1,74 @@
+@import './wpf/index.scss';
+@import './breakpoints';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+  height: 100%;
+}
+
+body {
+  font-family: var(--app-font);
+  color: var(--text-primary, #1a2b3c);
+  background: var(--content-background, #eef1f4);
+  overflow-x: hidden;
+}
+
+@include bp-down(lg) {
+  html,
+  body,
+  #root {
+    min-height: 100dvh;
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+
+  body {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+}
+
+:root {
+  /* Corporate Navy — default fallback before themeService initializes */
+  --sidebar: #0c2340;
+  --sidebar-mid: #163b5c;
+  --sidebar-active: #1e4a6e;
+  --sidebar-selected: #006b9e;
+  --sidebar-border: #163b5c;
+  --sidebar-text: #e8eef4;
+  --sidebar-text-muted: #9bb0c4;
+  --content-background: #eef1f4;
+  --card: #ffffff;
+  --border: #d5dce4;
+  --text-primary: #1a2b3c;
+  --text-on-light: #1a2b3c;
+  --accent: #006b9e;
+  --accent-hover: #005a85;
+  --accent-light: #e8f4fa;
+  --panel-muted: #f6f8fa;
+  --teal: #00857a;
+  --success: #0d7a55;
+  --warning: #b8860b;
+  --transaction-page-background: #e6ebf1;
+  --text-secondary: #5a6b7d;
+  --danger: #b42318;
+  --danger-light: #fdecec;
+  --danger-border: #f5c4c4;
+  --gold: #c5a572;
+  --theme-shadow: #0c2340;
+  --header-bar: #ffffff;
+  /* Login screen palette (scoped on .login-window; matches LoginResources.xaml) */
+  --login-text: #0f172a;
+  --login-text-muted: #64748b;
+  --login-field-border: #e2e8f0;
+  --login-error: #f87171;
+}

@@ -1,0 +1,144 @@
+@import '../transaction/transaction-list-layout.scss';
+
+.standard-report {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+.standard-report__toolbar {
+  margin-bottom: 4px;
+}
+
+.standard-report__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: flex-end;
+}
+
+.standard-report__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 140px;
+  flex: 0 1 auto;
+}
+
+.standard-report__field--checkbox {
+  justify-content: flex-end;
+  padding-bottom: 4px;
+
+  label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-secondary, #5a6b7d);
+    cursor: pointer;
+  }
+}
+
+.standard-report__field label {
+  font-size: 12px;
+  color: var(--text-secondary, #5a6b7d);
+}
+
+.standard-report__field .wpf-subpage-form-input,
+.standard-report__field .wpf-subpage-form-combo,
+.standard-report__field .wpf-form-input,
+.standard-report__field .wpf-form-combo {
+  width: 100%;
+  min-width: 0;
+  max-width: 280px;
+}
+
+.standard-report__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.standard-report__grid {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .corporate-data-grid {
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+.standard-report__footer {
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 4px 0;
+}
+
+.standard-report__busy {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  z-index: 2;
+}
+
+.standard-report__wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+@include bp-down(lg) {
+  .standard-report__filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .standard-report__field {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .standard-report__field .wpf-subpage-form-input,
+  .standard-report__field .wpf-subpage-form-combo,
+  .standard-report__field .wpf-form-input,
+  .standard-report__field .wpf-form-combo {
+    max-width: none;
+    width: 100%;
+  }
+
+  .standard-report__actions {
+    width: 100%;
+
+    .wpf-action-button,
+    .wpf-secondary-button {
+      flex: 1 1 auto;
+      justify-content: center;
+    }
+  }
+}
+
+@include bp-down(sm) {
+  .standard-report__actions {
+    flex-direction: column;
+    align-items: stretch;
+
+    .wpf-action-button,
+    .wpf-secondary-button {
+      width: 100%;
+    }
+  }
+}

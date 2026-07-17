@@ -1,0 +1,52 @@
+.pay-history {
+  border: 1px solid var(--si-border, #d1d5db);
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: var(--si-panel-bg, #fafafa);
+}
+
+.pay-history__title {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.pay-history__totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.pay-history__empty {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.pay-history__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.pay-history__table th,
+.pay-history__table td {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.pay-history__num {
+  text-align: right;
+}
+
+.pay-history__link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #2563eb;
+  cursor: pointer;
+  text-decoration: underline;
+  font: inherit;
+}

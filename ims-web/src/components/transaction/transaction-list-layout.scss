@@ -1,0 +1,188 @@
+@import '../../styles/breakpoints';
+
+/* Shared toolbar controls (replaces fixed inline widths on list screens). */
+.si-list-toolbar__search {
+  width: min(280px, 100%);
+  min-width: 160px;
+  height: 32px;
+  margin: 0;
+  flex: 1 1 200px;
+}
+
+.si-list-toolbar__filter {
+  width: min(160px, 100%);
+  min-width: 120px;
+  min-height: 32px;
+  flex: 0 1 140px;
+}
+
+.si-list-toolbar__row {
+  .wpf-action-button,
+  .wpf-secondary-button {
+    flex-shrink: 0;
+  }
+}
+
+.si-list-column-filters-scroll {
+  overflow-x: auto;
+  min-width: 0;
+  flex-shrink: 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.si-list-column-filters-scroll .si-list-column-filters {
+  min-width: 640px;
+}
+
+.loading-host {
+  position: relative;
+  min-height: 0;
+
+}
+
+.loading-host--entry {
+  flex: 1;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+}
+
+.si-list-grid-wrap,
+.fv-list__grid-wrap {
+  min-width: 0;
+
+  .corporate-data-grid {
+    min-width: 0;
+    overflow-x: auto;
+  }
+
+  .corporate-data-grid__body {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+  }
+}
+
+.fv-list {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+@include bp-down(lg) {
+  .si-list-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .si-list-toolbar__row {
+    gap: 6px;
+  }
+
+  .fv-list,
+  .loading-host--entry {
+    flex: none;
+    height: auto;
+    min-height: 0;
+  }
+
+  .si-list-grid-wrap .corporate-data-grid__body,
+  .fv-list__grid-wrap .corporate-data-grid__body {
+    max-height: none;
+  }
+
+  .si-list-pagination--paged {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .si-list-pagination__info {
+    min-width: 0;
+    flex: none;
+    text-align: center;
+  }
+
+  .si-list-pagination__nav {
+    justify-content: center;
+  }
+
+  .standard-report__filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .standard-report__field {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .standard-report__actions {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+}
+
+@include bp-down(md) {
+  .si-list-column-filters-scroll .si-list-column-filters {
+    min-width: 560px;
+  }
+}
+
+@include bp-down(sm) {
+  .si-list-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .si-list-toolbar {
+    padding: 8px 6px;
+  }
+
+  .si-list-toolbar__row,
+  .fv-list__toolbar.si-list-toolbar__row {
+    flex-direction: column;
+    align-items: stretch;
+
+    .wpf-action-button {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .si-list-toolbar__search,
+    .si-list-toolbar__filter,
+    .wpf-form-input:not(.si-list-column-filters__input),
+    .wpf-form-combo:not(.si-list-toolbar__filter) {
+      width: 100%;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+  }
+
+  .si-stat-card {
+    padding: 8px 6px;
+  }
+
+  .si-stat-card__value {
+    font-size: 17px;
+  }
+
+  .si-list-row-actions {
+    gap: 2px;
+  }
+
+  .si-list-row-actions__btn {
+    width: 30px;
+    height: 30px;
+  }
+
+  .si-list-pagination__nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    width: 100%;
+
+    .wpf-secondary-button {
+      width: 100%;
+    }
+  }
+}

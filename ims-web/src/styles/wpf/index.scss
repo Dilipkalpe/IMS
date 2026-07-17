@@ -1,0 +1,15 @@
+:root {
+  --app-font: "Segoe UI", system-ui, sans-serif;
+  --icon-font: "Segoe MDL2 Assets", sans-serif;
+  --logininputbackgroundbrush: #ffffff;
+  --logininputborderbrush: #cbd5e1;
+  --loginchromebackgroundbrush: rgba(255, 255, 255, 0.094);
+  --loginchromeborderbrush: rgba(255, 255, 255, 0.157);
+  --loginerrorbgbrush: rgba(248, 113, 113, 0.15);
+  --logincardbrush: rgba(255, 255, 255, 0.094);
+  --loginborderbrush: rgba(255, 255, 255, 0.157);
+}
+
+@import "./transaction-tokens.scss";
+@import "./app-resources.scss";
+@import "./login-resources.scss";

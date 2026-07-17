@@ -1,0 +1,22 @@
+.palloc {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+.palloc__header {
+  margin-bottom: 4px;
+}
+
+.palloc__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  font-size: 0.95rem;
+}
+
+.palloc__actions {
+  margin-top: 8px;
+}

@@ -1,0 +1,50 @@
+// Shared responsive breakpoints for the WPF → React migration.
+$bp-sm: 640px;
+$bp-md: 768px;
+$bp-lg: 1024px;
+$bp-xl: 1280px;
+$bp-transaction: 1100px;
+
+@mixin bp-down($size) {
+  @if $size == sm {
+    @media (max-width: #{$bp-sm - 1px}) {
+      @content;
+    }
+  } @else if $size == md {
+    @media (max-width: #{$bp-md - 1px}) {
+      @content;
+    }
+  } @else if $size == lg {
+    @media (max-width: #{$bp-lg - 1px}) {
+      @content;
+    }
+  } @else if $size == xl {
+    @media (max-width: #{$bp-xl - 1px}) {
+      @content;
+    }
+  } @else if $size == transaction {
+    @media (max-width: #{$bp-transaction - 1px}) {
+      @content;
+    }
+  }
+}
+
+@mixin bp-up($size) {
+  @if $size == sm {
+    @media (min-width: $bp-sm) {
+      @content;
+    }
+  } @else if $size == md {
+    @media (min-width: $bp-md) {
+      @content;
+    }
+  } @else if $size == lg {
+    @media (min-width: $bp-lg) {
+      @content;
+    }
+  } @else if $size == xl {
+    @media (min-width: $bp-xl) {
+      @content;
+    }
+  }
+}

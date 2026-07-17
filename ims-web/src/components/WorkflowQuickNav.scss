@@ -1,0 +1,31 @@
+.workflow-quick-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.workflow-quick-nav__label {
+  font-size: 11px;
+  color: var(--text-secondary, #5a6b7d);
+  font-weight: 600;
+}
+
+.workflow-quick-nav__select {
+  font-size: 11px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border, #d5dce4);
+  background: var(--card, #fff);
+  max-width: 200px;
+  cursor: pointer;
+}
+
+@media (max-width: 1023px) {
+  .workflow-quick-nav__label {
+    display: none;
+  }
+
+  .workflow-quick-nav__select {
+    max-width: min(200px, 55vw);
+  }
+}

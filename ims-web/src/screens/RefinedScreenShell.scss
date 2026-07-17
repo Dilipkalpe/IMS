@@ -1,0 +1,36 @@
+@import '../styles/breakpoints';
+
+.refined-screen-shell {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  background: var(--transaction-page-background, #e6ebf1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.refined-screen-shell .wpf-root {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+@include bp-down(lg) {
+  .refined-screen-shell {
+    height: auto;
+    min-height: 100%;
+    flex: none;
+    overflow: visible;
+  }
+
+  .refined-screen-shell .wpf-root {
+    height: auto;
+    min-height: 0;
+    flex: none;
+    overflow: visible;
+  }
+}

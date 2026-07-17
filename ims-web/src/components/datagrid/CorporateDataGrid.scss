@@ -1,0 +1,197 @@
+@import '../../styles/wpf/transaction-tokens.scss';
+@import '../../styles/breakpoints';
+
+/* Transaction line grid (TransactionLineGrid / CorporateDataGrid) */
+.corporate-data-grid {
+  border: 1px solid var(--transaction-grid-border);
+  background: #fff;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: auto;
+}
+
+.corporate-data-grid__header {
+  display: grid;
+  background: #f2f2f2;
+  border-bottom: 1px solid var(--transaction-grid-border);
+  flex-shrink: 0;
+}
+
+.corporate-data-grid__header-cell {
+  padding: 4px 6px;
+  font-weight: 600;
+  color: var(--text-primary, #1a2b3c);
+  border-right: 1px solid var(--transaction-grid-border);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:last-child {
+    border-right: 0;
+  }
+}
+
+.corporate-data-grid__sort-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    color: var(--accent, #0078d7);
+  }
+
+  &--active {
+    color: var(--accent, #0078d7);
+  }
+}
+
+.corporate-data-grid__sort-indicator {
+  font-size: 10px;
+  opacity: 0.75;
+  flex-shrink: 0;
+}
+
+.corporate-data-grid__body {
+  overflow: auto;
+  flex: 1;
+  max-height: min(60vh, 480px);
+}
+
+@include bp-down(lg) {
+  .corporate-data-grid__body {
+    max-height: min(50vh, 400px);
+  }
+}
+
+@include bp-down(sm) {
+  .corporate-data-grid__body {
+    max-height: min(45vh, 320px);
+  }
+}
+
+.corporate-data-grid__row {
+  display: grid;
+  background: #fff;
+
+  &:hover {
+    background: #f8fafc;
+  }
+}
+
+.corporate-data-grid__cell {
+  border-right: 1px solid var(--transaction-grid-border);
+  border-bottom: 1px solid var(--transaction-grid-border);
+  padding: 3px 4px;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 12px;
+
+  &:last-child {
+    border-right: 0;
+  }
+
+  &--readonly {
+    color: var(--text-primary, #1a2b3c);
+  }
+
+  &--active {
+    outline: 2px solid #0078d7;
+    outline-offset: -2px;
+    z-index: 1;
+    background: #fff;
+  }
+}
+
+.corporate-data-grid__input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  padding: 2px 0;
+  outline: none;
+  min-width: 0;
+}
+
+.corporate-data-grid__delete-btn {
+  width: 28px;
+  height: 24px;
+  padding: 0;
+  margin: 2px 0;
+  border: 1px solid var(--danger-border, #f5c4c4);
+  background: var(--danger-light, #fdecec);
+  color: var(--danger, #b42318);
+  border-radius: 0;
+  cursor: pointer;
+  font-family: var(--icon-font, 'Segoe MDL2 Assets'), sans-serif;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.corporate-data-grid__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+/* StandardListView / SoListOrdersGrid */
+.corporate-data-grid--so-list {
+  border-color: var(--accent, #006b9e);
+
+  .corporate-data-grid__header {
+    background: var(--panel-muted, #f6f8fa);
+    border-bottom-color: var(--accent, #006b9e);
+  }
+
+  .corporate-data-grid__header-cell {
+    padding: 8px 10px;
+    font-size: 13px;
+    color: var(--text-secondary, #5a6b7d);
+    border-right-color: var(--accent, #006b9e);
+    border-bottom: 1px solid var(--accent, #006b9e);
+  }
+
+  .corporate-data-grid__cell {
+    border-right-color: var(--accent, #006b9e);
+    border-bottom-color: var(--accent, #006b9e);
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .corporate-data-grid__row--alt {
+    background: var(--panel-muted, #f6f8fa);
+
+    &:hover {
+      background: var(--accent-light, #e8f4fa);
+    }
+  }
+
+  .corporate-data-grid__row:hover {
+    background: var(--accent-light, #e8f4fa);
+  }
+
+  .corporate-data-grid__row--selected {
+    background: var(--accent-light, #e8f4fa);
+    outline: 1px solid var(--accent, #006b9e);
+    outline-offset: -1px;
+  }
+}

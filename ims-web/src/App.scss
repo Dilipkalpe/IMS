@@ -1,0 +1,34 @@
+@import './styles/breakpoints';
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: stretch;
+  background: #0a0a0f;
+  padding: 0;
+}
+
+.app-shell--login {
+  width: 100%;
+}
+
+.app-shell__gallery-link {
+  margin-top: 12px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #94a3b8;
+  font-size: 12px;
+  cursor: pointer;
+  max-width: 100%;
+  text-align: center;
+}
+
+@include bp-down(lg) {
+  .app-shell--login .app-shell__gallery-link {
+    margin: 8px 16px 16px;
+  }
+}

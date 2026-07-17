@@ -1,0 +1,39 @@
+{
+  "name": "ims-api",
+  "version": "1.0.0",
+  "description": "IMS Inventory Management System API",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "stop": "node scripts/kill-port.js 3000",
+    "dev": "node scripts/kill-port.js 3000 && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ensure-mongo-dev.ps1 && node --watch-path=src --watch src/index.js",
+    "dev:once": "node scripts/kill-port.js 3000 && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ensure-mongo-dev.ps1 && node src/index.js",
+    "mongo:dev": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-mongo-dev.ps1",
+    "seed": "node src/seed.js",
+    "seed:2y": "node --max-old-space-size=12288 scripts/seed-2y.js",
+    "seed:verify": "node scripts/verify-seed.js",
+    "seed:passwords": "node scripts/set-default-passwords.js",
+    "ensure:users": "node scripts/ensure-users.js",
+    "set-admin-password": "node scripts/set-admin-password.js",
+    "reset:business-data": "node scripts/system-reset-business-data.js",
+    "set-all-passwords": "node scripts/set-all-user-passwords.js",
+    "migrate:so": "node -e \"import('./src/config/db.js').then(m=>m.connectDb()).then(()=>import('./src/migrateSalesOrderIndexes.js')).then(m=>m.migrateSalesOrderIndexes()).then(()=>process.exit(0)).catch(e=>{console.error(e);process.exit(1)})\"",
+    "perf:indexes": "node perf/ensureIndexes.js",
+    "perf:seed": "node perf/seedLoadData.js",
+    "perf:benchmark": "node perf/runBenchmarks.js",
+    "perf:analyze": "node perf/analyzeQueries.js",
+    "perf:report": "node perf/generateReport.js",
+    "perf:all": "node perf/runAll.js",
+    "test": "node --test src/services/documentConsolidation.test.js src/services/invoicePayment.test.js src/services/payrollCalc.test.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mongoose": "^8.9.3",
+    "multer": "^2.1.1",
+    "xlsx": "^0.18.5"
+  }
+}

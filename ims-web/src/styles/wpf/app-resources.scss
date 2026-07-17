@@ -1,0 +1,214 @@
+/* Converted from IMS/Resources/AppResources.xaml — core control styles */
+
+.wpf-page-icon-host {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--accent-light, #e8f4fa);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wpf-card {
+  background: var(--card, #fff);
+  border: 1px solid var(--border, #d5dce4);
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 2px 16px color-mix(in srgb, var(--theme-shadow, #0c2340) 8%, transparent);
+}
+
+.wpf-page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary, #1a2b3c);
+  margin: 0;
+}
+
+.wpf-page-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary, #5a6b7d);
+  margin: 4px 0 0;
+}
+
+.wpf-section-header {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent, #006b9e);
+  margin: 0 0 12px;
+}
+
+.wpf-form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #1a2b3c);
+  margin: 0 0 6px;
+  display: block;
+}
+
+.wpf-form-input,
+.wpf-subpage-form-input {
+  padding: 8px 10px;
+  font-size: 13px;
+  border: 1px solid var(--border, #d5dce4);
+  background: var(--card, #fff);
+  border-radius: 4px;
+  font-family: inherit;
+  width: 100%;
+}
+
+.wpf-subpage-form-input {
+  height: 26px;
+  font-size: 12px;
+  padding: 3px 5px;
+}
+
+.wpf-form-combo,
+.wpf-subpage-form-combo {
+  padding: 8px 10px;
+  font-size: 13px;
+  border: 1px solid var(--border, #d5dce4);
+  background: var(--card, #fff);
+  border-radius: 4px;
+  font-family: inherit;
+  min-height: 36px;
+}
+
+.wpf-subpage-form-combo {
+  height: 28px;
+  min-height: 28px;
+  font-size: 12px;
+  padding: 3px 5px;
+}
+
+.wpf-primary-button {
+  background: var(--accent, #006b9e);
+  color: #fff;
+  font-weight: 600;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.wpf-primary-button:hover {
+  background: var(--accent-hover, #005a85);
+}
+
+.wpf-secondary-button {
+  background: var(--card, #fff);
+  color: var(--text-primary, #1a2b3c);
+  padding: 10px 16px;
+  border: 1px solid var(--border, #d5dce4);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.wpf-secondary-button:hover {
+  background: var(--panel-muted, #f6f8fa);
+}
+
+.wpf-action-button {
+  background: var(--accent, #006b9e);
+  color: #fff;
+  font-weight: 600;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.wpf-delete-action-button {
+  color: var(--danger, #b42318);
+  background: var(--danger-light, #fdecec);
+  border: 1px solid var(--danger-border, #f5c4c4);
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.wpf-sales-compact-input {
+  height: 26px;
+  font-size: 12px;
+  padding: 3px 5px;
+  border: 1px solid var(--border, #d5dce4);
+  background: var(--card, #fff);
+  font-family: inherit;
+}
+
+.wpf-sales-field-label {
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0 8px 0 0;
+  vertical-align: middle;
+}
+
+.wpf-transaction-page-background,
+.wpf-transactionpagebackgroundbrush {
+  background: var(--transaction-page-background, #e6ebf1);
+}
+
+.wpf-corporate-data-grid {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  background: var(--card, #fff);
+}
+
+.wpf-corporate-data-grid th {
+  background: var(--panel-muted, #f6f8fa);
+  color: var(--text-secondary, #5a6b7d);
+  font-weight: 600;
+  font-size: 12px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border, #d5dce4);
+  text-align: left;
+}
+
+.wpf-corporate-data-grid td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border, #d5dce4);
+  height: 28px;
+}
+
+.wpf-corporate-data-grid tr:nth-child(even) td {
+  background: var(--panel-muted, #f6f8fa);
+}
+
+.wpf-tab-chip {
+  background: #fff;
+  border: 1px solid var(--border, #d5dce4);
+  padding: 6px 12px;
+  margin: 0 6px 0 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.wpf-tab-chip:hover {
+  background: var(--accent-light, #e8f4fa);
+}
+
+.wpf-highlight-panel {
+  background: var(--accent-light, #e8f4fa);
+  border: 1px solid var(--border, #d5dce4);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.wpf-toolbar-badge {
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--accent-light, #e8f4fa);
+  border: 1px solid var(--border, #d5dce4);
+}
+
+.wpf-dynamic-form-field-cell {
+  min-width: 148px;
+  width: 172px;
+  margin: 0 10px 8px 0;
+  vertical-align: top;
+}

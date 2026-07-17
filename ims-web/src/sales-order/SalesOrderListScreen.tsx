@@ -1,0 +1,290 @@
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CorporateDataGrid, type DataGridColumn } from '../components/datagrid/CorporateDataGrid';
+import { ListGridArea } from '../components/loading';
+import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
+import { TransactionListColumnFilters } from '../components/transaction/TransactionListColumnFilters';
+import {
+  SALES_LIST_COLUMN_FILTER_DEFS,
+  SALES_LIST_GRID_TEMPLATE,
+  salesOrderSortField,
+} from '../components/transaction/transactionListQuery';
+import { useListNewShortcut } from '../components/transaction/useListNewShortcut';
+import { TransactionListPagination } from '../components/transaction/TransactionListPagination';
+import { SALES_MODULE_CONFIG } from '../components/transaction/salesModuleConfig';
+import { createListActionColumn, useListRowSelection } from '../components/transaction/transactionListCrud';
+import { ListExportMenu } from '../components/transaction/ListExportMenu';
+import { useListExportActions } from '../components/transaction/useListExportActions';
+import { useProtectedSalesListActions } from '../components/transaction/useProtectedSalesListActions';
+import { useTransactionListLoader } from '../components/transaction/useTransactionListLoader';
+import { useListStats } from '../components/transaction/useListStats';
+import { useAppNavigation } from '../context/AppNavigationContext';
+import { FormKeyboardScope } from '../keyboard/FormKeyboardScope';
+import { FIELD_FOCUS_KEY } from '../keyboard/formKeyboardNavigation';
+import { RefinedScreenShell } from '../screens/RefinedScreenShell';
+import '../sales-invoice/sales-invoice.scss';
+import { useSalesOrderNavIntent } from './context/SalesOrderNavIntent';
+import { invalidateSalesOrderList } from './repository/listCache';
+import { listRowsFromRecords } from './repository/localSalesOrderRepository';
+import type { SalesOrderListSummary } from '../api/salesOrders';
+import { mapSalesOrderToPrintableDocument } from '../document/mappers/salesOrderPrintMapper';
+import {
+  loadSalesListRecord,
+  useSalesListRowPrint,
+} from '../components/transaction/useSalesListRowPrint';
+import { listSummaryToListRow, recordToUiSnapshot } from './repository/recordMappers';
+import {
+  useSalesOrderListVersion,
+  useSalesOrderRepositoryOptional,
+} from './repository/SalesOrderRepositoryContext';
+import { SALES_ORDER_STATUS_FILTERS } from './mockData';
+import { parseFormattedSoNo } from './soDocumentNo';
+import type { SalesOrderListRow } from './types';
+import type { SalesOrderRecord } from './repository/types';
+
+const SORTABLE_COLUMN_IDS = ['billNo', 'date', 'customer', 'amount', 'status'];
+
+export function SalesOrderListScreen() {
+  const navigate = useAppNavigation();
+  const { publishOpenIntent } = useSalesOrderNavIntent();
+  const repoCtx = useSalesOrderRepositoryOptional();
+  const repository = repoCtx?.repository;
+  const listVersion = useSalesOrderListVersion();
+  const [stats, setStats] = useState({ open: 0, toShip: 0, shipped: 0, cancelled: 0 });
+
+  const mapRows = useCallback(
+    (items: unknown[], mode: 'http' | 'local') =>
+      mode === 'local'
+        ? listRowsFromRecords(items as SalesOrderRecord[])
+        : (items as SalesOrderListSummary[]).map(listSummaryToListRow),
+    [],
+  );
+
+  const list = useTransactionListLoader({
+    repository,
+    listVersion,
+    mapRows,
+    toSortField: salesOrderSortField,
+    defaultSortColumn: 'billNo',
+    defaultSortDir: 'desc',
+    docLabelPlural: 'sales order(s)',
+    supportsColumnFilters: true,
+  });
+
+  const onStats = useCallback((listStats: Awaited<ReturnType<NonNullable<typeof repository>['fetchStats']>>) => {
+    setStats({
+      open: listStats.open,
+      toShip: listStats.toShip ?? listStats.confirmed + listStats.draft,
+      shipped: listStats.shipped ?? 0,
+      cancelled: listStats.cancelled ?? 0,
+    });
+  }, []);
+
+  useListStats(repository, listVersion, onStats);
+
+  const { selectedId, setSelectedId, selectedRow } = useListRowSelection(list.rows);
+
+  const openWorkspaceRaw = useCallback(
+    (row?: SalesOrderListRow) => {
+      publishOpenIntent(row ? { type: 'edit', documentId: row.id } : { type: 'new' });
+      navigate('sales-order-entry');
+    },
+    [navigate, publishOpenIntent],
+  );
+
+  const { canAdd, canEdit, canDelete, canExport, openWorkspace, authorizeDeleteRow } =
+    useProtectedSalesListActions<SalesOrderListRow>(SALES_MODULE_CONFIG.salesOrder, {
+      onOpenNew: () => openWorkspaceRaw(),
+      onOpenEdit: (row) => openWorkspaceRaw(row),
+      setStatusMessage: list.setStatusMessage,
+    });
+
+  const printRow = useSalesListRowPrint<SalesOrderListRow, SalesOrderRecord>({
+    repository,
+    documentType: 'sales_order',
+    recordToPrintable: (record) => mapSalesOrderToPrintableDocument(recordToUiSnapshot(record)),
+    loadRecord: async (row) => {
+      if (!repository) throw new Error('Repository not ready.');
+      if (row.billNo?.trim() && parseFormattedSoNo(row.billNo)) {
+        try {
+          return await repository.loadByFormatted(row.billNo.trim());
+        } catch {
+          /* fall through */
+        }
+      }
+      return loadSalesListRecord(repository, row, 'Sales order');
+    },
+    setStatusMessage: list.setStatusMessage,
+  });
+
+  const deleteRow = useCallback(
+    async (row: SalesOrderListRow) => {
+      if (!repository) return;
+      const allowed = await authorizeDeleteRow(row);
+      if (!allowed) return;
+      try {
+        if (repository.deleteByBillNo && parseFormattedSoNo(row.billNo)) {
+          await repository.deleteByBillNo(row.billNo);
+        } else {
+          await repository.deleteById(row.id);
+        }
+        invalidateSalesOrderList();
+        await list.reload();
+        list.setStatusMessage(`Deleted ${row.billNo}.`);
+      } catch (err) {
+        list.setStatusMessage(err instanceof Error ? err.message : 'Delete failed.');
+      }
+    },
+    [authorizeDeleteRow, list, repository],
+  );
+
+  const columns = useMemo((): DataGridColumn<SalesOrderListRow>[] => {
+    return [
+      createListActionColumn({
+        onPrint: (row) => void printRow(row),
+        onEdit: (row) => void openWorkspace(row),
+        onDelete: (row) => void deleteRow(row),
+        canEdit,
+        canDelete,
+      }),
+      { id: 'billNo', header: 'Order No', width: 120, readOnly: true, getValue: (r) => r.billNo },
+      { id: 'date', header: 'Date', width: 100, readOnly: true, getValue: (r) => r.date },
+      { id: 'customer', header: 'Customer', width: '*', minWidth: 180, readOnly: true, getValue: (r) => r.customer },
+      { id: 'amount', header: 'Amount', width: 110, readOnly: true, getValue: (r) => r.amount },
+      { id: 'status', header: 'Status', width: 90, readOnly: true, getValue: (r) => r.status },
+    ];
+  }, [canDelete, canEdit, deleteRow, openWorkspace, printRow]);
+
+  const exportColumns = useMemo(
+    () => columns.filter((c) => c.id !== 'actions').map((c) => ({ id: c.id, header: String(c.header) })),
+    [columns],
+  );
+
+  const listExport = useListExportActions({
+    title: 'Sales Order Register',
+    documentType: 'sales_order',
+    docLabelPlural: 'sales order(s)',
+    canExport,
+    columns: exportColumns,
+    rowToRecord: (r) => ({
+      billNo: r.billNo,
+      date: r.date,
+      customer: r.customer,
+      amount: r.amount,
+      status: r.status,
+    }),
+    rows: list.rows,
+    total: list.total,
+    loading: list.loading,
+    repository,
+    mapRows,
+    getExportQuery: list.getExportQuery,
+    setStatusMessage: list.setStatusMessage,
+  });
+
+  useListNewShortcut(canAdd, () => void openWorkspace());
+
+  return (
+    <RefinedScreenShell className="sales-invoice-list-screen">
+      <TransactionEntryShell title="Sales Orders">
+        <FormKeyboardScope className="si-list-layout" autoFocusFieldKey="list-search">
+          <div className="si-list-stats">
+            {[
+              { label: 'Open Orders', value: String(stats.open) },
+              { label: 'To Ship', value: String(stats.toShip) },
+              { label: 'Shipped', value: String(stats.shipped) },
+              { label: 'Cancelled', value: String(stats.cancelled) },
+            ].map((s) => (
+              <div key={s.label} className="si-stat-card">
+                <div className="si-stat-card__value">{s.value}</div>
+                <div className="si-stat-card__label">{s.label}</div>
+              </div>
+            ))}
+          </div>
+          <div className="si-list-toolbar">
+            <div className="si-list-toolbar__row">
+              <button
+                type="button"
+                className="wpf-action-button"
+                {...{ [FIELD_FOCUS_KEY]: 'list-new' }}
+                title="New order (Ctrl+N)"
+                onClick={() => void openWorkspace()}
+                disabled={!canAdd}
+              >
+                New
+              </button>
+              <input
+                className="wpf-form-input si-list-toolbar__search"
+                {...{ [FIELD_FOCUS_KEY]: 'list-search' }}
+                placeholder="Search order no, customer…"
+                value={list.searchInput}
+                onChange={(e) => list.setSearchInput(e.target.value)}
+              />
+              <select
+                className="wpf-form-combo si-list-toolbar__filter"
+                value={list.statusFilter}
+                onChange={(e) => list.setStatusFilter(e.target.value)}
+              >
+                {SALES_ORDER_STATUS_FILTERS.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+              <button type="button" className="wpf-action-button" onClick={() => void list.reload()} disabled={list.loading}>
+                Refresh
+              </button>
+              <button
+                type="button"
+                className="wpf-action-button"
+                onClick={list.clearFilters}
+                disabled={!list.hasActiveFilters}
+              >
+                Clear filters
+              </button>
+              <ListExportMenu
+                disabled={listExport.exportDisabled}
+                busy={listExport.exporting}
+                onExport={(format) => void listExport.runExport(format)}
+              />
+            </div>
+            {list.statusMessage ? (
+              <p className="si-list-toolbar__status" role="status">{list.statusMessage}</p>
+            ) : null}
+          </div>
+          <ListGridArea loading={list.loading}>
+            <TransactionListColumnFilters
+              columns={SALES_LIST_COLUMN_FILTER_DEFS}
+              values={list.columnFilters}
+              gridTemplate={SALES_LIST_GRID_TEMPLATE}
+              disabled={list.loading}
+              onChange={list.setColumnFilter}
+            />
+            <CorporateDataGrid
+              columns={columns}
+              data={list.rows}
+              minHeight={360}
+              rowHeight={42}
+              headerHeight={44}
+              variant="so-list"
+              virtualize={list.pageSize > 50}
+              selectedRowId={selectedId}
+              sortColumnId={list.sortColumn}
+              sortDir={list.sortDir}
+              sortableColumnIds={SORTABLE_COLUMN_IDS}
+              onSortColumn={list.handleSortColumn}
+              onRowClick={(row) => setSelectedId(row.id)}
+              onRowDoubleClick={(row) => void openWorkspace(row)}
+            />
+            <TransactionListPagination
+              page={list.page}
+              pageSize={list.pageSize}
+              totalPages={list.totalPages}
+              totalRecords={list.total}
+              loading={list.loading}
+              onPageChange={list.setPage}
+              onPageSizeChange={list.setPageSize}
+            />
+          </ListGridArea>
+        </FormKeyboardScope>
+      </TransactionEntryShell>
+    </RefinedScreenShell>
+  );
+}

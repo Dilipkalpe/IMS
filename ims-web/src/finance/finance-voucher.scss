@@ -1,0 +1,87 @@
+@import '../components/transaction/transaction-list-layout.scss';
+
+.fv-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  min-height: 0;
+}
+
+.fv-list__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.fv-list__grid-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.fv-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 960px;
+}
+
+.fv-entry__section-title {
+  font-size: 11px;
+  font-weight: 600;
+  margin: 8px 0 4px;
+  color: var(--text-secondary, #555);
+}
+
+.fv-entry__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 12px;
+}
+
+.fv-entry__field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fv-entry__account-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  align-items: end;
+}
+
+.fv-entry__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.fv-entry__status {
+  font-size: 12px;
+  color: var(--text-secondary, #555);
+}
+
+.fv-entry__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fv-entry__line-row {
+  display: grid;
+  grid-template-columns: 48px 1fr 140px auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.fv-entry__total {
+  font-weight: 600;
+  text-align: right;
+  padding-top: 4px;
+}

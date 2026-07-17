@@ -1,0 +1,38 @@
+.list-export-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.list-export-menu__popup {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 40;
+  min-width: 168px;
+  padding: 4px 0;
+  background: #fff;
+  border: 1px solid #c5d0dc;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.list-export-menu__item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.list-export-menu__item:hover:not(:disabled) {
+  background: #eef4fa;
+}
+
+.list-export-menu__item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
