@@ -460,28 +460,29 @@ export function SalesInvoiceEntryForm({
             </section>
           </div>
 
-        <InvoicePaymentHistoryPanel
-          billAmount={doc.totals.invoiceTotal}
-          paidAmount={doc.totals.paidAmount}
-          balanceDue={doc.totals.balanceDue}
-          paymentLinks={doc.paymentLinks}
-          voucherKind="receipt"
-          onOpenVoucher={(voucherNo) => {
-            openReceiptVoucher({
-              type: 'view',
-              voucherNo,
-              returnNavKey: NavKeys.SalesInvoice,
-            });
-            navigate('receipt-voucher-entry');
-          }}
-        />
-
-        <SalesInvoiceTotalsRail
-          displayTotals={doc.displayTotals}
-          isPartialPayment={doc.isPartialPayment}
-          partialPaidAmount={doc.header.paidAmount}
-          onPartialPaidChange={doc.updatePaidAmount}
-        />
+        <aside className="si-entry-rail" aria-label="Totals and payment">
+          <SalesInvoiceTotalsRail
+            displayTotals={doc.displayTotals}
+            isPartialPayment={doc.isPartialPayment}
+            partialPaidAmount={doc.header.paidAmount}
+            onPartialPaidChange={doc.updatePaidAmount}
+          />
+          <InvoicePaymentHistoryPanel
+            billAmount={doc.totals.invoiceTotal}
+            paidAmount={doc.totals.paidAmount}
+            balanceDue={doc.totals.balanceDue}
+            paymentLinks={doc.paymentLinks}
+            voucherKind="receipt"
+            onOpenVoucher={(voucherNo) => {
+              openReceiptVoucher({
+                type: 'view',
+                voucherNo,
+                returnNavKey: NavKeys.SalesInvoice,
+              });
+              navigate('receipt-voucher-entry');
+            }}
+          />
+        </aside>
       </FormKeyboardScope>
       </LoadingHost>
     </TransactionEntryShell>

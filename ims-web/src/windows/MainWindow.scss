@@ -351,18 +351,20 @@
 @include bp-down(lg) {
   .main-window {
     grid-template-columns: 1fr;
-    height: 100dvh;
-    max-height: 100dvh;
+    height: auto;
+    min-height: 100dvh;
+    max-height: none;
   }
 
   .main-window__content {
-    max-height: 100dvh;
+    max-height: none;
     min-height: 0;
+    height: auto;
   }
 
   .main-window__content-host {
     overflow-x: hidden;
-    overflow-y: auto;
+    overflow-y: visible;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
     touch-action: pan-y;

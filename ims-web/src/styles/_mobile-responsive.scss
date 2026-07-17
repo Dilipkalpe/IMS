@@ -1,0 +1,112 @@
+@import './breakpoints';
+
+// Global mobile / touch fixes for phones and small tablets.
+@include bp-down(lg) {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #root {
+    height: auto;
+    min-height: 100dvh;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .main-window {
+    height: auto;
+    min-height: 100dvh;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .main-window__content {
+    height: auto;
+    min-height: calc(100dvh - 56px);
+    max-height: none;
+    overflow: visible;
+  }
+
+  .main-window__content-host {
+    overflow: visible;
+    min-height: 0;
+    flex: 1 1 auto;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .main-window__header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    padding-top: max(10px, env(safe-area-inset-top, 0));
+  }
+
+  .wpf-root,
+  .refined-screen-shell,
+  .transaction-entry-shell,
+  .transaction-entry-shell__content {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .wpf-action-button,
+  .wpf-secondary-button,
+  .wpf-primary-button,
+  .main-window__menu-toggle {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .wpf-form-input,
+  .wpf-form-combo,
+  .wpf-subpage-form-input,
+  .wpf-subpage-form-combo,
+  .login-field-input {
+    font-size: 16px;
+    min-height: 44px;
+  }
+
+  img,
+  video,
+  svg {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+@include bp-down(md) {
+  .fv-entry__grid,
+  .fv-entry__account-row,
+  .fv-entry__line-row {
+    grid-template-columns: 1fr;
+  }
+
+  .security-role-form__name,
+  .security-role-form__filter {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .security-list-screen .transaction-entry-shell__content,
+  .security-form-screen .transaction-entry-shell__content {
+    overflow: visible;
+    height: auto;
+  }
+}
+
+@include bp-down(sm) {
+  .si-totals-rail {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dash-panel {
+    min-height: 280px;
+  }
+}

@@ -1,4 +1,5 @@
 @import '../components/transaction/transaction-list-layout.scss';
+@import '../styles/breakpoints';
 
 .fv-list {
   display: flex;
@@ -84,4 +85,38 @@
   font-weight: 600;
   text-align: right;
   padding-top: 4px;
+}
+
+@include bp-down(lg) {
+  .fv-list__grid-wrap {
+    overflow: visible;
+    height: auto;
+    min-height: 240px;
+  }
+
+  .fv-entry {
+    max-width: 100%;
+    padding: 0 4px 16px;
+  }
+}
+
+@include bp-down(md) {
+  .fv-entry__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fv-entry__account-row,
+  .fv-entry__line-row {
+    grid-template-columns: 1fr;
+  }
+
+  .fv-entry__actions {
+    flex-direction: column;
+
+    .wpf-action-button,
+    .wpf-secondary-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
 }

@@ -1,5 +1,6 @@
 @import './wpf/index.scss';
 @import './breakpoints';
+@import './mobile-responsive';
 
 *,
 *::before,
@@ -27,13 +28,12 @@ body {
   body,
   #root {
     min-height: 100dvh;
-    height: 100dvh;
-    max-height: 100dvh;
+    height: auto;
+    max-height: none;
   }
 
   body {
-    overflow: hidden;
-    overscroll-behavior: none;
+    overscroll-behavior-y: contain;
   }
 }
 

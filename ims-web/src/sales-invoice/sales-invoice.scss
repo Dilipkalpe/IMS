@@ -33,6 +33,12 @@
     grid-template-columns: 1fr;
   }
 
+  .si-entry-main,
+  .si-entry-rail {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
   .si-entry-main {
     min-height: 0;
     height: auto;
@@ -59,6 +65,30 @@
   min-height: 0;
   min-width: 0;
   gap: 0;
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.si-entry-rail {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--transaction-section-gap);
+  align-self: stretch;
+  min-height: 0;
+  min-width: 0;
+
+  .si-totals-rail {
+    flex: 0 0 auto;
+  }
+
+  .pay-history {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    margin: 0;
+  }
 }
 
 .si-section {
@@ -1056,6 +1086,12 @@
 @media (max-width: 1100px) {
   .si-entry-layout {
     grid-template-columns: 1fr;
+  }
+
+  .si-entry-main,
+  .si-entry-rail {
+    grid-column: 1;
+    grid-row: auto;
   }
 
   .si-totals-rail {

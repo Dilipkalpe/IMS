@@ -375,23 +375,24 @@ export function PurchaseInvoiceEntryForm({
             </section>
           </div>
 
-        <InvoicePaymentHistoryPanel
-          billAmount={doc.totals.invoiceTotal}
-          paidAmount={doc.totals.paidAmount}
-          balanceDue={doc.totals.balanceDue}
-          paymentLinks={doc.paymentLinks}
-          voucherKind="payment"
-          onOpenVoucher={(voucherNo) => {
-            openPaymentVoucher({
-              type: 'allocation',
-              voucherNo,
-              returnNavKey: NavKeys.PurchaseInvoice,
-            });
-            navigate('payment-voucher-allocation');
-          }}
-        />
-
-        <PurchaseInvoiceTotalsRail displayTotals={doc.displayTotals} />
+        <aside className="si-entry-rail" aria-label="Totals and payment">
+          <PurchaseInvoiceTotalsRail displayTotals={doc.displayTotals} />
+          <InvoicePaymentHistoryPanel
+            billAmount={doc.totals.invoiceTotal}
+            paidAmount={doc.totals.paidAmount}
+            balanceDue={doc.totals.balanceDue}
+            paymentLinks={doc.paymentLinks}
+            voucherKind="payment"
+            onOpenVoucher={(voucherNo) => {
+              openPaymentVoucher({
+                type: 'allocation',
+                voucherNo,
+                returnNavKey: NavKeys.PurchaseInvoice,
+              });
+              navigate('payment-voucher-allocation');
+            }}
+          />
+        </aside>
       </FormKeyboardScope>
       </LoadingHost>
     </TransactionEntryShell>
