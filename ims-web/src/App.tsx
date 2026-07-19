@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { getAuthSession } from './api/auth';
 import { LoginWindow } from './windows/LoginWindow';
-import { MainWindow } from './windows/MainWindow';
 import { XamlUiGallery } from './XamlUiGallery';
 import './App.scss';
+
+const MainWindow = lazy(() =>
+  import('./windows/MainWindow').then((module) => ({ default: module.MainWindow })),
+);
 
 type Screen = 'login' | 'main' | 'gallery';
 
@@ -15,7 +18,11 @@ export default function App() {
   }
 
   if (screen === 'main') {
-    return <MainWindow onLogout={() => setScreen('login')} />;
+    return (
+      <Suspense fallback={<div className="app-shell app-shell--login">Loading application…</div>}>
+        <MainWindow onLogout={() => setScreen('login')} />
+      </Suspense>
+    );
   }
 
   return (

@@ -36,13 +36,16 @@ export function LoginWindow({ onClose, onSignedIn }: LoginWindowProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [licenseNotice, setLicenseNotice] = useState<string | null>(null);
   const [licenseExpired, setLicenseExpired] = useState(false);
-  const selectedYear = financialYears.find((y) => y.id === financialYearId);
-  const dbNameDisplay = selectedYear?.databaseName ?? '—';
+  const yearOptions = Array.isArray(financialYears) ? financialYears : [];
   const { branding } = useCompanyBranding({
-    yearDb: selectedYear?.databaseName,
+    yearDb: yearOptions.find((y) => y.id === financialYearId)?.databaseName,
     authenticated: false,
   });
-  const inputsEnabled = !loadingYears && apiConnected && !isLoggingIn && financialYears.length > 0;
+  const selectedYear = yearOptions.find((y) => y.id === financialYearId);
+  const dbNameDisplay = selectedYear?.databaseName ?? '—';
+  const businessName = branding.businessName?.trim() || 'IMS';
+  const logoText = branding.logoText?.trim() || 'Inventory + Production';
+  const inputsEnabled = !loadingYears && apiConnected && !isLoggingIn && yearOptions.length > 0;
 
   const apiLinkDisplay = (() => {
     const base = getApiBaseUrl();
@@ -73,7 +76,8 @@ export function LoginWindow({ onClose, onSignedIn }: LoginWindowProps) {
       setLicenseNotice(notice);
       setLicenseExpired(Boolean(license?.isExpired));
       // Match WPF LoginViewModel: only IsActive matters for the login dropdown.
-      const loginYears = years.filter((y) => y.isActive !== false);
+      const yearList = Array.isArray(years) ? years : [];
+      const loginYears = yearList.filter((y) => y.isActive !== false);
       setFinancialYears(loginYears);
       setFinancialYearId((current) => {
         if (current && loginYears.some((y) => y.id === current)) return current;
@@ -169,16 +173,16 @@ export function LoginWindow({ onClose, onSignedIn }: LoginWindowProps) {
             {branding.hasLogo ? (
               <img src={branding.logoImage} alt="" className="login-window__hero-logo-img" />
             ) : (
-              branding.businessName.slice(0, 3).toUpperCase()
+              businessName.slice(0, 3).toUpperCase()
             )}
           </div>
-          <span className="login-window__eyebrow">{branding.businessName.toUpperCase()}</span>
+          <span className="login-window__eyebrow">{businessName.toUpperCase()}</span>
           <h2 className="login-window__hero-title">
             Run your entire
             <span className="login-window__hero-accent"> operations from one place</span>
           </h2>
           <p className="login-window__hero-tagline">
-            {branding.logoText || 'Inventory, billing, production & finance in one workspace.'}
+            {logoText || 'Inventory, billing, production & finance in one workspace.'}
           </p>
         </header>
 
@@ -234,11 +238,11 @@ export function LoginWindow({ onClose, onSignedIn }: LoginWindowProps) {
             {branding.hasLogo ? (
               <img src={branding.logoImage} alt="" className="login-window__mobile-logo-img" />
             ) : (
-              branding.businessName.slice(0, 2).toUpperCase()
+              businessName.slice(0, 2).toUpperCase()
             )}
           </div>
           <div>
-            <div className="login-window__mobile-title">{branding.businessName}</div>
+            <div className="login-window__mobile-title">{businessName}</div>
             <div className="login-window__mobile-subtitle">Inventory &amp; Billing ERP</div>
           </div>
         </div>
@@ -271,7 +275,7 @@ export function LoginWindow({ onClose, onSignedIn }: LoginWindowProps) {
           <div className="login-window__card">
             <header className="login-window__card-header">
               <h1 className="login-window__signin-title">Sign in</h1>
-              <p className="login-window__signin-subtitle">Access {branding.businessName}</p>
+              <p className="login-window__signin-subtitle">Access {businessName}</p>
             </header>
 
             <div className="login-window__api-status">
@@ -316,10 +320,10 @@ export function LoginWindow({ onClose, onSignedIn }: LoginWindowProps) {
                   onChange={(e) => setFinancialYearId(e.target.value)}
                 >
                   {loadingYears && <option value="">Loading…</option>}
-                  {!loadingYears && financialYears.length === 0 && (
+                  {!loadingYears && yearOptions.length === 0 && (
                     <option value="">No financial years available</option>
                   )}
-                  {financialYears.map((year) => (
+                  {yearOptions.map((year) => (
                     <option key={year.id} value={year.id}>
                       {year.financialYearName}
                       {year.closed ? ' (Closed)' : ''}

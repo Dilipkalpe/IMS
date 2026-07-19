@@ -46,6 +46,9 @@ export function getAuthSession(): AuthSession | null {
     if (!raw) return null;
     const session = JSON.parse(raw) as AuthSession;
     if (!session?.token || !session?.user) return null;
+    if (session.permissions != null && !Array.isArray(session.permissions)) {
+      session.permissions = [];
+    }
     return session;
   } catch {
     return null;
