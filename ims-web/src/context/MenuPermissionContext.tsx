@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { clearAuthSession, getAuthSession, normalizeSessionPermissions } from '../api/auth';
 
 export interface MenuPermission {
   menuKey: string;
@@ -24,25 +25,15 @@ const FULL_ACCESS: Omit<MenuPermission, 'menuKey'> = {
   canExport: true,
 };
 
-const STORAGE_KEY = 'ims.authSession';
-
-interface StoredAuthSession {
-  isAdministrator?: boolean;
-  permissions?: MenuPermission[];
-  user?: { role?: string };
-}
-
-function readStoredSession(): StoredAuthSession | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as StoredAuthSession;
-    const isAdministrator =
-      parsed.isAdministrator === true || /^administrator$/i.test(parsed.user?.role ?? '');
-    return { ...parsed, isAdministrator };
-  } catch {
-    return null;
-  }
+function readStoredSession(): { isAdministrator: boolean; permissions: MenuPermission[] } | null {
+  const session = getAuthSession();
+  if (!session) return null;
+  const isAdministrator =
+    session.isAdministrator === true || /^administrator$/i.test(session.user.role ?? '');
+  return {
+    isAdministrator,
+    permissions: normalizeSessionPermissions(session.permissions).map(normalizePermission),
+  };
 }
 
 function normalizePermission(raw: Partial<MenuPermission> & { menuKey: string }): MenuPermission {
@@ -81,15 +72,10 @@ export function MenuPermissionProvider({ children }: { children: ReactNode }) {
     (session: { isAdministrator?: boolean; permissions?: MenuPermission[] }) => {
       setIsAdministrator(session.isAdministrator === true);
       const map = new Map<string, MenuPermission>();
-      for (const p of session.permissions ?? []) {
+      for (const p of normalizeSessionPermissions(session.permissions)) {
         if (p?.menuKey) map.set(p.menuKey, normalizePermission(p));
       }
       setByKey(map);
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-      } catch {
-        // ignore
-      }
     },
     [],
   );
@@ -97,11 +83,7 @@ export function MenuPermissionProvider({ children }: { children: ReactNode }) {
   const clearSession = useCallback(() => {
     setIsAdministrator(false);
     setByKey(new Map());
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      // ignore
-    }
+    clearAuthSession();
   }, []);
 
   const getPermission = useCallback(

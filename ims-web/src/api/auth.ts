@@ -40,14 +40,22 @@ export interface AuthSession {
   permissions?: LoginMenuPermission[];
 }
 
+export function normalizeSessionPermissions(
+  permissions: LoginMenuPermission[] | unknown,
+): LoginMenuPermission[] {
+  return Array.isArray(permissions) ? permissions : [];
+}
+
 export function getAuthSession(): AuthSession | null {
   try {
     const raw = localStorage.getItem(SESSION_KEY);
     if (!raw) return null;
     const session = JSON.parse(raw) as AuthSession;
     if (!session?.token || !session?.user) return null;
-    if (session.permissions != null && !Array.isArray(session.permissions)) {
-      session.permissions = [];
+    const permissions = normalizeSessionPermissions(session.permissions);
+    if (session.permissions !== permissions) {
+      session.permissions = permissions;
+      saveAuthSession(session);
     }
     return session;
   } catch {
