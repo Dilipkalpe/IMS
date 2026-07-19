@@ -10,9 +10,9 @@ import { useListNewShortcut } from '../components/transaction/useListNewShortcut
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { RefinedScreenShell } from '../screens/RefinedScreenShell';
-import { StatCounterCard } from '../dashboard/components/StatCounterCard';
+import { ListStatsRow } from '../components/transaction/ListStatsRow';
+import { listStat } from '../components/transaction/listStatBuilders';
 import { useUserNavIntent } from './context/UserNavIntent';
-import '../dashboard/dashboard.scss';
 import './security.scss';
 
 interface UserListRow {
@@ -46,10 +46,10 @@ function buildUserStats(users: AppUserRecord[]) {
   ).size;
 
   return [
-    { label: 'Total Users', value: users.length.toLocaleString('en-IN'), iconGlyph: '\uE77B', accentColor: '#2563eb' },
-    { label: 'Active', value: active.toLocaleString('en-IN'), iconGlyph: '\uE73E', accentColor: '#16a34a' },
-    { label: 'Admins', value: admins.toLocaleString('en-IN'), iconGlyph: '\uE8D7', accentColor: '#7c3aed' },
-    { label: 'Departments', value: departments.toLocaleString('en-IN'), iconGlyph: '\uE8F1', accentColor: '#64748b' },
+    listStat('Total Users', users.length, 'users'),
+    listStat('Active', active, 'active'),
+    listStat('Admins', admins, 'admin'),
+    listStat('Departments', departments, 'department'),
   ];
 }
 
@@ -182,11 +182,7 @@ export function UserListScreen() {
         <div className="si-list-layout fv-list security-list">
           <p className="security-list__subtitle">Users, roles, and permissions.</p>
 
-          <div className="dash__stats-row security-list__stats">
-            {stats.map((stat) => (
-              <StatCounterCard key={stat.label} stat={stat} />
-            ))}
-          </div>
+          <ListStatsRow stats={stats} className="security-list__stats" />
 
           <div className="si-list-toolbar">
             <div className="fv-list__toolbar si-list-toolbar__row">

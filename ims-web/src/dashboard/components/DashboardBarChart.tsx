@@ -1,4 +1,5 @@
 import type { DashboardChartSeries } from '../../api/dashboard';
+import { formatLocaleNumber } from '../../utils/formatLocaleNumber';
 
 function legendItem(name: string | undefined, color: string | undefined) {
   if (!name) return null;
@@ -66,7 +67,7 @@ export function DashboardBarChart({ chart }: { chart: DashboardChartSeries }) {
                 rx={2}
                 fill={chart.series1Color ?? '#006B9E'}
               >
-                <title>{`${chart.series1Name}\n${label}: ${v1.toLocaleString('en-IN')}`}</title>
+                <title>{`${chart.series1Name}\n${label}: ${formatLocaleNumber(v1)}`}</title>
               </rect>
               <rect
                 x={cx + 2}
@@ -76,7 +77,7 @@ export function DashboardBarChart({ chart }: { chart: DashboardChartSeries }) {
                 rx={2}
                 fill={chart.series2Color ?? '#B8860B'}
               >
-                <title>{`${chart.series2Name}\n${label}: ${v2.toLocaleString('en-IN')}`}</title>
+                <title>{`${chart.series2Name}\n${label}: ${formatLocaleNumber(v2)}`}</title>
               </rect>
               <text
                 x={leftPad + groupW * i + groupW / 2}

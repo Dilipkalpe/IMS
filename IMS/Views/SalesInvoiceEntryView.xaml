@@ -1,0 +1,130 @@
+<UserControl x:Class="IMS.Views.SalesInvoiceEntryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:IMS.Views.Controls"
+             mc:Ignorable="d"
+             d:DesignHeight="720" d:DesignWidth="1200"
+             VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+             Background="{StaticResource TransactionPageBackgroundBrush}">
+    <UserControl.InputBindings>
+        <KeyBinding Key="F11" Command="{Binding SaveAndNextCommand}" />
+        <KeyBinding Key="F12" Command="{Binding PrintSaveNextCommand}" />
+        <KeyBinding Key="F7" Command="{Binding CancelCommand}" />
+    </UserControl.InputBindings>
+    <controls:TransactionEntryShell Title="Sales Invoice">
+        <Grid Margin="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="232" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource TransactionSectionBorder}" Padding="10" Margin="0,0,6,6">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <UniformGrid Grid.Row="0" Columns="5">
+                        <StackPanel Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="Prefix" Style="{StaticResource SubPageFormLabel}" />
+                            <TextBox x:Name="DocPrefixBox"
+                                     Text="{Binding EntryDocPrefix, UpdateSourceTrigger=LostFocus}"
+                                     IsReadOnly="{Binding IsEntryPrefixReadOnly}"
+                                     CharacterCasing="Upper" MaxLength="12"
+                                     Style="{StaticResource SubPageFormInput}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="Invoice No" Style="{StaticResource SubPageFormLabel}" />
+                            <TextBox Text="{Binding BillNo, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding IsBillNoReadOnly}" Style="{StaticResource SubPageFormInput}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="Customer Name" Style="{StaticResource SubPageFormLabel}" />
+                            <ComboBox ItemsSource="{Binding Customers}" Text="{Binding Customer, UpdateSourceTrigger=PropertyChanged}"
+                                      IsEditable="True" Style="{StaticResource SubPageFormCombo}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="Invoice Date" Style="{StaticResource SubPageFormLabel}" />
+                            <DatePicker SelectedDate="{Binding InvoiceDate, Mode=TwoWay}" Height="28" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="Due Date" Style="{StaticResource SubPageFormLabel}" />
+                            <DatePicker SelectedDate="{Binding DueDate, Mode=TwoWay}" Height="28" />
+                        </StackPanel>
+                    </UniformGrid>
+                    <StackPanel Grid.Row="1" Style="{StaticResource SubPageFieldCell}" Margin="0,2,8,0">
+                        <TextBlock Text="DC Reference" Style="{StaticResource SubPageFormLabel}" />
+                        <Grid MaxWidth="520" HorizontalAlignment="Left">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" MinWidth="200" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" Text="{Binding DcReference, UpdateSourceTrigger=PropertyChanged}"
+                                     IsReadOnly="True" Style="{StaticResource SubPageFormInput}" Margin="0,0,6,0"
+                                     ToolTip="Filled automatically from selected delivery challans" />
+                            <Button Grid.Column="1" Content="Load DCs"
+                                    Style="{StaticResource EntryFormLoadButton}"
+                                    Command="{Binding LoadFromDeliveryChallansCommand}"
+                                    ToolTip="Select multiple delivery challans for this customer" />
+                        </Grid>
+                    </StackPanel>
+                    <controls:TransactionSalesGstHeaderRow Grid.Row="2" />
+                    <UniformGrid Grid.Row="3" Columns="6" Margin="0,6,0,0">
+                        <StackPanel Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="E-way Bill No" Style="{StaticResource SubPageFormLabel}" />
+                            <TextBox Text="{Binding EwayBillNo, UpdateSourceTrigger=PropertyChanged}"
+                                     MaxLength="24"
+                                     Style="{StaticResource SubPageFormInput}"
+                                     ToolTip="Enter E-way Bill number from the GST portal" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="E-way Bill Date" Style="{StaticResource SubPageFormLabel}" />
+                            <DatePicker SelectedDate="{Binding EwayBillDate, Mode=TwoWay}" Height="28" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="Vehicle No" Style="{StaticResource SubPageFormLabel}" />
+                            <TextBox Text="{Binding VehicleNo, UpdateSourceTrigger=PropertyChanged}"
+                                     CharacterCasing="Upper" MaxLength="20"
+                                     Style="{StaticResource SubPageFormInput}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="Transporter" Style="{StaticResource SubPageFormLabel}" />
+                            <TextBox Text="{Binding Transporter, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource SubPageFormInput}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="Transporter ID" Style="{StaticResource SubPageFormLabel}" />
+                            <TextBox Text="{Binding TransporterId, UpdateSourceTrigger=PropertyChanged}"
+                                     CharacterCasing="Upper" MaxLength="15"
+                                     Style="{StaticResource SubPageFormInput}"
+                                     ToolTip="Transporter GSTIN / ID" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="Distance (Km)" Style="{StaticResource SubPageFormLabel}" />
+                            <TextBox Text="{Binding DistanceKm, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource SubPageFormInput}" />
+                        </StackPanel>
+                    </UniformGrid>
+                </Grid>
+            </Border>
+
+            <controls:SalesInvoiceLineItemsPanel Grid.Row="1" Grid.Column="0" Margin="0,0,6,6" />
+
+            <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource TransactionSectionBorder}" Padding="10" Margin="0,0,6,0">
+                <controls:TransactionEntryBottomPanel />
+            </Border>
+
+            <Border Grid.Row="0" Grid.RowSpan="3" Grid.Column="1" Style="{StaticResource TransactionTotalsRailHighlightPanel}" Padding="10,8">
+                <controls:TransactionGstTotalsRail />
+            </Border>
+        </Grid>
+    </controls:TransactionEntryShell>
+</UserControl>

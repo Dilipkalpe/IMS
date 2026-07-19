@@ -1,0 +1,163 @@
+<UserControl x:Class="IMS.Views.CashEntryEntryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:IMS.Views.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="640" d:DesignWidth="1000"
+             VerticalAlignment="Stretch"
+             Background="{StaticResource TransactionPageBackgroundBrush}">
+    <controls:TransactionEntryShell Title="{Binding PageTitle}">
+        <controls:TransactionEntryShell.TitleRightHeader>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Entry type" Style="{StaticResource TransactionInlineFieldLabel}" Margin="0,0,8,0" />
+                <Border Style="{StaticResource MockBadge}" Padding="10,4" MinWidth="100">
+                    <TextBlock Text="{Binding VoucherTypeLabel}" FontSize="12" FontWeight="Bold"
+                               Foreground="{DynamicResource WarningBrush}" HorizontalAlignment="Center" />
+                </Border>
+            </StackPanel>
+        </controls:TransactionEntryShell.TitleRightHeader>
+
+        <Grid Margin="0" VerticalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" MinHeight="160" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Text="{Binding PageDescription}" Style="{StaticResource PageSubtitle}" Margin="0,0,0,10" />
+
+            <Border Grid.Row="1" Style="{StaticResource TransactionSectionBorder}" Padding="12,10,12,6">
+                <UniformGrid Columns="2">
+                    <StackPanel Style="{StaticResource SubPageFieldCell}">
+                        <TextBlock Text="Entry No *" Style="{StaticResource SubPageFormLabel}" />
+                        <TextBox Text="{Binding EntryNo, UpdateSourceTrigger=PropertyChanged}"
+                                 IsReadOnly="{Binding IsEdit}"
+                                 Style="{StaticResource SubPageFormInput}" />
+                    </StackPanel>
+                    <StackPanel Style="{StaticResource SubPageFieldCell}">
+                        <TextBlock Text="Date *" Style="{StaticResource SubPageFormLabel}" />
+                        <DatePicker SelectedDate="{Binding EntryDate, Mode=TwoWay}" Height="28" />
+                    </StackPanel>
+                </UniformGrid>
+            </Border>
+
+            <Border Grid.Row="2" Style="{StaticResource TransactionSectionBorder}" Padding="12,8" Margin="0,6,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="Particular" Style="{StaticResource SubPageFormLabel}" />
+                            <ComboBox ItemsSource="{Binding ParticularOptions}"
+                                      SelectedItem="{Binding SelectedParticular, Mode=TwoWay}"
+                                      IsEditable="True"
+                                      Style="{StaticResource SubPageFormCombo}" Height="28" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="Amount" Style="{StaticResource SubPageFormLabel}" />
+                            <TextBox Text="{Binding LineAmount, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource SubPageFormInput}" />
+                        </StackPanel>
+                        <Button Grid.Column="2" Content="Add" Command="{Binding AddLineCommand}"
+                                Style="{StaticResource SecondaryButton}" MinWidth="72" Height="28"
+                                VerticalAlignment="Bottom" Margin="0,0,0,6" />
+                    </Grid>
+
+                    <Border Grid.Row="1" BorderBrush="{StaticResource TransactionGridBorderBrush}"
+                            BorderThickness="1" Background="White">
+                        <DataGrid Style="{StaticResource TransactionLineGrid}"
+                                  ItemsSource="{Binding LineItems}"
+                                  SelectionUnit="Cell" SelectionMode="Single"
+                                  CanUserAddRows="False" CanUserDeleteRows="False">
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="DataGridColumnHeader"
+                                       BasedOn="{StaticResource TransactionLineGridColumnHeader}" />
+                            </DataGrid.ColumnHeaderStyle>
+                            <DataGrid.CellStyle>
+                                <Style TargetType="DataGridCell" BasedOn="{StaticResource TransactionLineGridCell}" />
+                            </DataGrid.CellStyle>
+                            <DataGrid.RowStyle>
+                                <Style TargetType="DataGridRow" BasedOn="{StaticResource TransactionLineGridRow}" />
+                            </DataGrid.RowStyle>
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="" Width="40" IsReadOnly="True">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button ToolTip="Delete line" Width="28" Height="24" Padding="0" Margin="2,0"
+                                                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                    Background="{DynamicResource DangerLightBrush}"
+                                                    BorderBrush="{DynamicResource DangerBorderBrush}" BorderThickness="1"
+                                                    Cursor="Hand"
+                                                    Command="{Binding DataContext.DeleteLineCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}">
+                                                <TextBlock Text="&#xE74D;" FontFamily="{StaticResource IconFont}" FontSize="13"
+                                                           Foreground="{DynamicResource DangerBrush}"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Button>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Particular" Binding="{Binding Particular}" Width="*" MinWidth="200"
+                                                    IsReadOnly="True" />
+                                <DataGridTextColumn Header="Amount" Binding="{Binding Amount}" Width="120"
+                                                    IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="TextAlignment" Value="Right" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="3" Padding="12,8,12,0" Margin="0,6,0,0">
+                <Grid HorizontalAlignment="Right" MinWidth="280">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Total" FontWeight="SemiBold" FontSize="13"
+                               VerticalAlignment="Center" Margin="0,0,12,0"
+                               Foreground="{DynamicResource TextPrimaryBrush}" />
+                    <TextBox Grid.Column="1" Text="{Binding TotalDisplay, Mode=OneWay}"
+                             IsReadOnly="True" Style="{StaticResource SubPageFormInput}"
+                             Background="{DynamicResource SuccessLightBrush}"
+                             BorderBrush="{DynamicResource SuccessBrush}" FontWeight="SemiBold"
+                             TextAlignment="Right" />
+                </Grid>
+            </Border>
+
+            <StackPanel Grid.Row="4" Margin="12,10,12,0">
+                <CheckBox Content="Clear form after save (stay on entry for next cash entry)"
+                          IsChecked="{Binding ClearAfterSave, Mode=TwoWay}"
+                          Margin="0,0,0,8"
+                          Foreground="{DynamicResource TextSecondaryBrush}" />
+                <StackPanel Orientation="Horizontal">
+                    <Button Style="{StaticResource PrimaryButton}" Command="{Binding SaveCommand}" MinWidth="110" Margin="0,0,10,0">
+                        <TextBlock Text="Save" Foreground="White" FontWeight="SemiBold" FontSize="12" />
+                    </Button>
+                    <Button Style="{StaticResource SecondaryButton}" Command="{Binding CancelCommand}" MinWidth="110">
+                        <TextBlock Text="Cancel" FontSize="12" />
+                    </Button>
+                </StackPanel>
+                <TextBlock Style="{StaticResource SubPageFooterNote}" Margin="0,8,0,0"
+                           Text="Select a particular and amount, click Add for each line, then Save to post to MongoDB." />
+            </StackPanel>
+        </Grid>
+    </controls:TransactionEntryShell>
+</UserControl>

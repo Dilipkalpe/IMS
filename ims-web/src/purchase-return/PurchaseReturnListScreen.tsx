@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CorporateDataGrid, type DataGridColumn } from '../components/datagrid/CorporateDataGrid';
+import { CorporateDataGrid, buildGridTemplateColumns, type DataGridColumn } from '../components/datagrid/CorporateDataGrid';
 import { ListGridArea } from '../components/loading';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
 import { TransactionListColumnFilters } from '../components/transaction/TransactionListColumnFilters';
 import {
   PURCHASE_LIST_COLUMN_FILTER_DEFS,
-  SALES_LIST_GRID_TEMPLATE,
   purchaseReturnSortField,
 } from '../components/transaction/transactionListQuery';
 import { TransactionListPagination } from '../components/transaction/TransactionListPagination';
@@ -20,6 +19,8 @@ import { useListExportActions } from '../components/transaction/useListExportAct
 import { useListNewShortcut } from '../components/transaction/useListNewShortcut';
 import { useProtectedSalesListActions } from '../components/transaction/useProtectedSalesListActions';
 import { useTransactionListLoader } from '../components/transaction/useTransactionListLoader';
+import { ListStatsRow } from '../components/transaction/ListStatsRow';
+import { buildDataSourceStat, listStat } from '../components/transaction/listStatBuilders';
 import { useListStats } from '../components/transaction/useListStats';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { FormKeyboardScope } from '../keyboard/FormKeyboardScope';
@@ -117,6 +118,11 @@ export function PurchaseReturnListScreen() {
     ];
   }, [canDelete, canEdit, handleDelete, openWorkspace]);
 
+  const gridTemplate = useMemo(
+    () => buildGridTemplateColumns(columns as DataGridColumn<unknown>[]),
+    [columns],
+  );
+
   const exportColumns = useMemo(
     () => columns.filter((c) => c.id !== 'actions').map((c) => ({ id: c.id, header: String(c.header) })),
     [columns],
@@ -150,19 +156,14 @@ export function PurchaseReturnListScreen() {
     <RefinedScreenShell className="sales-invoice-list-screen">
       <TransactionEntryShell title="Purchase Return">
         <FormKeyboardScope className="si-list-layout" autoFocusFieldKey="list-search">
-          <div className="si-list-stats">
-            {[
-              { label: 'Total returns', value: String(stats.total) },
-              { label: 'Open', value: String(stats.open) },
-              { label: 'Draft', value: String(stats.draft) },
-              { label: 'Source', value: repoCtx?.mode === 'http' ? 'API' : 'Local' },
-            ].map((s) => (
-              <div key={s.label} className="si-stat-card">
-                <div className="si-stat-card__value">{s.value}</div>
-                <div className="si-stat-card__label">{s.label}</div>
-              </div>
-            ))}
-          </div>
+          <ListStatsRow
+            stats={[
+              listStat('Total returns', stats.total, 'total'),
+              listStat('Open', stats.open, 'open'),
+              listStat('Draft', stats.draft, 'draft'),
+              buildDataSourceStat(repoCtx?.mode),
+            ]}
+          />
           <div className="si-list-toolbar">
             <div className="si-list-toolbar__row">
               <button
@@ -222,7 +223,7 @@ export function PurchaseReturnListScreen() {
             <TransactionListColumnFilters
               columns={PURCHASE_LIST_COLUMN_FILTER_DEFS}
               values={list.columnFilters}
-              gridTemplate={SALES_LIST_GRID_TEMPLATE}
+              gridTemplate={gridTemplate}
               disabled={list.loading}
               onChange={list.setColumnFilter}
             />

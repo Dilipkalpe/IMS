@@ -3,6 +3,7 @@ import { useWorkspaceTabShortcuts } from '../keyboard/useWorkspaceTabShortcuts';
 import { useQuotationRepositoryOptional } from './repository/QuotationRepositoryContext';
 import { RefinedScreenShell } from '../screens/RefinedScreenShell';
 import '../sales-invoice/sales-invoice.scss';
+import { WorkspaceTabBarStatus } from '../components/transaction/WorkspaceDocumentStatusBanner';
 import { QuotationEntryForm } from './QuotationEntryForm';
 import { QuotationWorkspaceProvider, useQuotationWorkspace } from './workspace/QuotationWorkspaceProvider';
 
@@ -64,6 +65,7 @@ function QuotationWorkspaceInner({ lineCount = 0 }: { lineCount?: number }) {
               + New Tab
             </button>
           </div>
+          <WorkspaceTabBarStatus activeTabId={activeTab?.id} documents={ws.documents} />
         </div>
         <div className="si-workspace__content" role="tabpanel">
           {mountedTabs.map((tab) => (

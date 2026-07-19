@@ -1,0 +1,160 @@
+<UserControl x:Class="IMS.Views.PayrollEmployeeFormView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:IMS.Views.Controls"
+             xmlns:converters="clr-namespace:IMS.Converters"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="1000"
+             VerticalAlignment="Stretch"
+             Background="{StaticResource TransactionPageBackgroundBrush}">
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVis" />
+        <Style x:Key="PayrollFieldCell" TargetType="StackPanel" BasedOn="{StaticResource SubPageFieldCell}">
+            <Setter Property="Width" Value="300" />
+            <Setter Property="Margin" Value="0,0,12,10" />
+        </Style>
+    </UserControl.Resources>
+
+    <controls:TransactionEntryShell Title="{Binding PageTitle}">
+        <Grid Margin="0" VerticalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0"
+                       Text="{Binding PageDescription}"
+                       Style="{StaticResource PageSubtitle}"
+                       Margin="0,0,0,10" />
+
+            <Border Grid.Row="1"
+                    Style="{StaticResource TransactionSectionBorder}"
+                    Padding="12,10"
+                    VerticalAlignment="Stretch">
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel>
+                        <WrapPanel Orientation="Horizontal">
+                            <StackPanel Style="{StaticResource PayrollFieldCell}">
+                                <TextBlock Text="Employee Code *" Style="{StaticResource SubPageFormLabel}" />
+                                <TextBox Text="{Binding EmployeeCode, UpdateSourceTrigger=PropertyChanged}"
+                                         IsReadOnly="{Binding IsEmployeeCodeReadOnly}"
+                                         Style="{StaticResource SubPageFormInput}" />
+                            </StackPanel>
+
+                            <StackPanel Style="{StaticResource PayrollFieldCell}">
+                                <TextBlock Text="Full Name *" Style="{StaticResource SubPageFormLabel}" />
+                                <TextBox Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource SubPageFormInput}" />
+                            </StackPanel>
+
+                            <StackPanel Style="{StaticResource PayrollFieldCell}">
+                                <TextBlock Text="Employee Type *" Style="{StaticResource SubPageFormLabel}" />
+                                <ComboBox ItemsSource="{Binding EmployeeTypeOptions}"
+                                          SelectedItem="{Binding SelectedEmployeeType, Mode=TwoWay}"
+                                          Style="{StaticResource SubPageFormCombo}" />
+                            </StackPanel>
+
+                            <StackPanel Style="{StaticResource PayrollFieldCell}">
+                                <TextBlock Text="Department" Style="{StaticResource SubPageFormLabel}" />
+                                <TextBox Text="{Binding Department, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource SubPageFormInput}" />
+                            </StackPanel>
+
+                            <StackPanel Style="{StaticResource PayrollFieldCell}">
+                                <TextBlock Text="Designation" Style="{StaticResource SubPageFormLabel}" />
+                                <TextBox Text="{Binding Designation, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource SubPageFormInput}" />
+                            </StackPanel>
+
+                            <StackPanel Style="{StaticResource PayrollFieldCell}">
+                                <TextBlock Text="PAN" Style="{StaticResource SubPageFormLabel}" />
+                                <TextBox Text="{Binding PanNo, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource SubPageFormInput}" />
+                            </StackPanel>
+
+                            <StackPanel Style="{StaticResource PayrollFieldCell}">
+                                <TextBlock Text="Payable Account Code" Style="{StaticResource SubPageFormLabel}" />
+                                <TextBox Text="{Binding PayableAccountCode, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource SubPageFormInput}" />
+                            </StackPanel>
+
+                            <StackPanel Style="{StaticResource PayrollFieldCell}"
+                                        Visibility="{Binding ShowMonthlySalary, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="Monthly Salary *" Style="{StaticResource SubPageFormLabel}" />
+                                <TextBox Text="{Binding MonthlySalaryText, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource SubPageFormInput}" />
+                            </StackPanel>
+
+                            <StackPanel Style="{StaticResource PayrollFieldCell}"
+                                        Visibility="{Binding ShowDailyWage, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="Daily Wage Rate *" Style="{StaticResource SubPageFormLabel}" />
+                                <TextBox Text="{Binding DailyWageText, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource SubPageFormInput}" />
+                            </StackPanel>
+
+                            <StackPanel Style="{StaticResource PayrollFieldCell}"
+                                        Visibility="{Binding ShowContractDates, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="Contract Start Date *" Style="{StaticResource SubPageFormLabel}" />
+                                <DatePicker SelectedDate="{Binding ContractStartDate, Mode=TwoWay}" Height="28" />
+                            </StackPanel>
+
+                            <StackPanel Style="{StaticResource PayrollFieldCell}"
+                                        Visibility="{Binding ShowContractDates, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="Contract End Date *" Style="{StaticResource SubPageFormLabel}" />
+                                <DatePicker SelectedDate="{Binding ContractEndDate, Mode=TwoWay}" Height="28" />
+                            </StackPanel>
+
+                            <StackPanel Style="{StaticResource PayrollFieldCell}"
+                                        Visibility="{Binding ShowHraBonus, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="HRA %" Style="{StaticResource SubPageFormLabel}" />
+                                <TextBox Text="{Binding HraPercentText, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource SubPageFormInput}" />
+                            </StackPanel>
+
+                            <StackPanel Style="{StaticResource PayrollFieldCell}"
+                                        Visibility="{Binding ShowHraBonus, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="Bonus %" Style="{StaticResource SubPageFormLabel}" />
+                                <TextBox Text="{Binding BonusPercentText, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource SubPageFormInput}" />
+                            </StackPanel>
+
+                            <StackPanel Style="{StaticResource PayrollFieldCell}">
+                                <TextBlock Text="TDS %" Style="{StaticResource SubPageFormLabel}" />
+                                <TextBox Text="{Binding TdsPercentText, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource SubPageFormInput}" />
+                            </StackPanel>
+
+                            <StackPanel Style="{StaticResource PayrollFieldCell}">
+                                <TextBlock Text="Status" Style="{StaticResource SubPageFormLabel}" />
+                                <ComboBox ItemsSource="{Binding StatusOptions}"
+                                          SelectedItem="{Binding SelectedStatus, Mode=TwoWay}"
+                                          Style="{StaticResource SubPageFormCombo}" />
+                            </StackPanel>
+                        </WrapPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <Button Style="{StaticResource PrimaryButton}"
+                                    Command="{Binding SaveCommand}"
+                                    MinWidth="110"
+                                    Margin="0,0,10,0">
+                                <TextBlock Text="Save" Foreground="White" FontWeight="SemiBold" FontSize="12" />
+                            </Button>
+                            <Button Style="{StaticResource SecondaryButton}"
+                                    Command="{Binding CancelCommand}"
+                                    MinWidth="110">
+                                <TextBlock Text="Cancel" FontSize="12" />
+                            </Button>
+                        </StackPanel>
+
+                        <TextBlock Style="{StaticResource SubPageFooterNote}"
+                                   Margin="0,6,0,0"
+                                   Text="Fields rearrange automatically by employee type. Required fields are marked with *." />
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </controls:TransactionEntryShell>
+</UserControl>

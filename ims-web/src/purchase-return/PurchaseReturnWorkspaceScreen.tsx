@@ -3,6 +3,7 @@ import { useWorkspaceTabShortcuts } from '../keyboard/useWorkspaceTabShortcuts';
 import { usePurchaseReturnRepositoryOptional } from './repository/PurchaseReturnRepositoryContext';
 import { RefinedScreenShell } from '../screens/RefinedScreenShell';
 import '../sales-invoice/sales-invoice.scss';
+import { WorkspaceTabBarStatus } from '../components/transaction/WorkspaceDocumentStatusBanner';
 import { PurchaseReturnEntryForm } from './PurchaseReturnEntryForm';
 import { PurchaseReturnWorkspaceProvider, usePurchaseReturnWorkspace } from './workspace/PurchaseReturnWorkspaceProvider';
 
@@ -64,6 +65,7 @@ function PurchaseReturnWorkspaceInner({ lineCount = 0 }: { lineCount?: number })
               + New Tab
             </button>
           </div>
+          <WorkspaceTabBarStatus activeTabId={activeTab?.id} documents={ws.documents} />
         </div>
         <div className="si-workspace__content" role="tabpanel">
           {mountedTabs.map((tab) => (

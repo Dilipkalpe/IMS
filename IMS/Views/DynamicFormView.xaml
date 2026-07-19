@@ -1,0 +1,166 @@
+<UserControl x:Class="IMS.Views.DynamicFormView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="clr-namespace:IMS.Models"
+             xmlns:converters="clr-namespace:IMS.Converters"
+             xmlns:controls="clr-namespace:IMS.Views.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="1000"
+             VerticalAlignment="Stretch"
+             Background="{StaticResource TransactionPageBackgroundBrush}">
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <converters:FormFieldKindToVisibilityConverter x:Key="VisText" TargetKind="{x:Static models:FormFieldKind.Text}" />
+        <converters:FormFieldKindToVisibilityConverter x:Key="VisNumber" TargetKind="{x:Static models:FormFieldKind.Number}" />
+        <converters:FormFieldKindToVisibilityConverter x:Key="VisDate" TargetKind="{x:Static models:FormFieldKind.Date}" />
+        <converters:FormFieldKindToVisibilityConverter x:Key="VisCombo" TargetKind="{x:Static models:FormFieldKind.Combo}" />
+        <converters:FormFieldKindToVisibilityConverter x:Key="VisMultiline" TargetKind="{x:Static models:FormFieldKind.Multiline}" />
+        <converters:FormFieldKindToVisibilityConverter x:Key="VisBoolean" TargetKind="{x:Static models:FormFieldKind.Boolean}" />
+        <converters:FormFieldKindToVisibilityConverter x:Key="VisFilePath" TargetKind="{x:Static models:FormFieldKind.FilePath}" />
+
+        <DataTemplate x:Key="DynamicFormFieldCellTemplate">
+            <Border Style="{StaticResource DynamicFormFieldCell}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="{Binding DisplayLabel}" Style="{StaticResource SubPageFormLabel}"
+                               ToolTip="{Binding ToolTip}" />
+
+                    <Grid Grid.Row="1">
+                        <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
+                                 Tag="{Binding Placeholder}"
+                                 Style="{StaticResource SubPageFormInput}"
+                                 Visibility="{Binding Kind, Converter={StaticResource VisText}}" />
+                        <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
+                                 Tag="{Binding Placeholder}"
+                                 Style="{StaticResource SubPageFormInput}"
+                                 Visibility="{Binding Kind, Converter={StaticResource VisNumber}}" />
+                        <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
+                                 Tag="{Binding Placeholder}"
+                                 Style="{StaticResource SubPageFormInput}"
+                                 Visibility="{Binding Kind, Converter={StaticResource VisDate}}" />
+
+                        <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
+                                 Tag="{Binding Placeholder}"
+                                 Style="{StaticResource SubPageFormMultiline}"
+                                 Visibility="{Binding Kind, Converter={StaticResource VisMultiline}}" />
+
+                        <ComboBox ItemsSource="{Binding Options}"
+                                  SelectedItem="{Binding SelectedOption, Mode=TwoWay}"
+                                  Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
+                                  IsEditable="True"
+                                  Style="{StaticResource SubPageFormCombo}"
+                                  Visibility="{Binding Kind, Converter={StaticResource VisCombo}}" />
+
+                        <CheckBox IsChecked="{Binding BoolValue, Mode=TwoWay}"
+                                  Content="{Binding Label}"
+                                  VerticalAlignment="Center"
+                                  FontSize="11"
+                                  Visibility="{Binding Kind, Converter={StaticResource VisBoolean}}" />
+
+                        <Grid Visibility="{Binding Kind, Converter={StaticResource VisFilePath}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource SubPageFormInput}" Margin="0,0,6,0" />
+                            <Button Grid.Column="1" Content="Browse"
+                                    Style="{StaticResource SecondaryButton}"
+                                    MinWidth="72" Height="28" Padding="12,0"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding DataContext.BrowseFieldCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}"
+                                    Visibility="{Binding HasBrowseButton, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        </Grid>
+                    </Grid>
+
+                    <TextBlock Grid.Row="2" Text="{Binding ValidationMessage}" Foreground="#C62828"
+                               FontSize="10" Margin="0,2,0,0" TextWrapping="Wrap">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ValidationMessage}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ValidationMessage}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <controls:TransactionEntryShell Title="{Binding PageTitle}">
+        <Grid Margin="0" VerticalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Text="{Binding PageDescription}" Style="{StaticResource PageSubtitle}" Margin="0,0,0,8" />
+
+            <WrapPanel Grid.Row="1" Margin="0,0,0,10">
+                <Button Style="{StaticResource ActionButton}" Content="Manage fields" Margin="0,0,8,8"
+                        Command="{Binding ManageFieldsCommand}" />
+                <Button Style="{StaticResource ActionButton}" Content="Show all" Margin="0,0,8,8"
+                        Command="{Binding ShowAllFieldsCommand}" />
+                <Button Style="{StaticResource ActionButton}" Content="Hide optional" Margin="0,0,8,8"
+                        Command="{Binding HideOptionalFieldsCommand}" />
+                <Button Style="{StaticResource ActionButton}" Content="Reset layout" Margin="0,0,8,8"
+                        Command="{Binding ResetLayoutCommand}" />
+                <Button Style="{StaticResource ActionButton}" Content="Save layout" Margin="0,0,8,8"
+                        Command="{Binding SaveLayoutCommand}" />
+            </WrapPanel>
+
+            <Border Grid.Row="2" Style="{StaticResource TransactionSectionBorder}" Padding="12,10" VerticalAlignment="Stretch">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel>
+                        <ItemsControl ItemsSource="{Binding FormSections}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type models:FormSectionViewModel}">
+                                    <StackPanel Margin="0,0,0,10">
+                                        <TextBlock Text="{Binding Title}" Style="{StaticResource SubPageSectionHeader}"
+                                                   Visibility="{Binding HasTitle, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                        <ItemsControl ItemsSource="{Binding Fields}"
+                                                      ItemTemplate="{StaticResource DynamicFormFieldCellTemplate}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <Button Style="{StaticResource PrimaryButton}" Command="{Binding SaveCommand}" MinWidth="110" Margin="0,0,10,0">
+                                <TextBlock Text="Save" Foreground="White" FontWeight="SemiBold" FontSize="12" />
+                            </Button>
+                            <Button Style="{StaticResource SecondaryButton}" Command="{Binding CancelCommand}" MinWidth="110">
+                                <TextBlock Text="Cancel" FontSize="12" />
+                            </Button>
+                        </StackPanel>
+
+                        <TextBlock Style="{StaticResource SubPageFooterNote}" Margin="0,6,0,0"
+                                   Text="Required fields are marked with *. Use Manage fields to customize visibility; layout is saved per user." />
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </controls:TransactionEntryShell>
+</UserControl>

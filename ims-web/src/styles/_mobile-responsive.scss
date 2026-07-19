@@ -79,6 +79,56 @@
     max-width: 100%;
     height: auto;
   }
+
+  .module-hub,
+  .sales-hub,
+  .procurement-hub {
+    height: auto;
+    min-height: 100%;
+    overflow: visible;
+  }
+
+  .module-hub__content,
+  .module-hub__panel,
+  .sales-hub__content,
+  .sales-hub__panel,
+  .procurement-hub__content,
+  .procurement-hub__panel {
+    overflow: visible;
+    height: auto;
+    min-height: 0;
+  }
+
+  .header-user-menu__icon-btn,
+  .header-user-menu__avatar {
+    width: 44px;
+    height: 44px;
+  }
+
+  .header-user-menu__item {
+    min-height: 44px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .si-list-row-actions__btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .bl-dialog__shell,
+  .confirm-password-dialog,
+  .invoice-comm-dialog {
+    width: min(100%, calc(100vw - 16px));
+    max-height: calc(100dvh - 24px);
+    overflow: auto;
+  }
+
+  .bl-dialog__backdrop,
+  .confirm-password-overlay {
+    padding: 8px;
+    align-items: flex-end;
+  }
 }
 
 @include bp-down(md) {

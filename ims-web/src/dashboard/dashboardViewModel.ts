@@ -6,6 +6,10 @@ import type {
   DashboardStat,
   DashboardSummaryLine,
 } from '../api/dashboard';
+import {
+  coerceFiniteNumber,
+  normalizeNumericSeries,
+} from '../utils/formatLocaleNumber';
 
 export interface DashboardViewState {
   stats: DashboardStat[];
@@ -72,21 +76,67 @@ function buildInventoryStockChartFromSummary(
   };
 }
 
+function normalizeChartSeries(chart: DashboardChartSeries | undefined | null): DashboardChartSeries {
+  const labels = (chart?.labels ?? []).map((label) => String(label ?? '').trim()).filter(Boolean);
+  if (labels.length === 0) {
+    return {
+      title: chart?.title ?? '',
+      series1Name: chart?.series1Name,
+      series2Name: chart?.series2Name,
+      series1Color: chart?.series1Color,
+      series2Color: chart?.series2Color,
+      labels: [],
+      series1: [],
+      series2: [],
+      slices: [],
+    };
+  }
+
+  const slices = (chart?.slices ?? [])
+    .map((slice) => ({
+      label: String(slice?.label ?? '—').trim() || '—',
+      value: coerceFiniteNumber(slice?.value),
+      color: slice?.color ?? '#006B9E',
+    }))
+    .filter((slice) => slice.value > 0);
+
+  return {
+    title: chart?.title ?? '',
+    series1Name: chart?.series1Name,
+    series2Name: chart?.series2Name,
+    series1Color: chart?.series1Color,
+    series2Color: chart?.series2Color,
+    labels,
+    series1: normalizeNumericSeries(chart?.series1, labels.length),
+    series2: normalizeNumericSeries(chart?.series2, labels.length),
+    slices,
+  };
+}
+
 function resolveInventoryStockChart(
   charts: DashboardPayload['charts'],
   summaryLines: DashboardSummaryLine[],
 ): DashboardChartSeries {
-  const stockByType = charts.stockByType;
-  if (stockByType?.labels?.length) return stockByType;
+  const stockByType = charts?.stockByType;
+  if (stockByType?.labels?.length) return normalizeChartSeries(stockByType);
 
   const fromSummary = buildInventoryStockChartFromSummary(summaryLines);
-  if (fromSummary) return fromSummary;
+  if (fromSummary) return normalizeChartSeries(fromSummary);
 
-  return {
+  return normalizeChartSeries({
     title: 'Inventory trend by type',
     labels: [],
     series1: [],
     series2: [],
+  });
+}
+
+function normalizeDashboardStat(stat: DashboardStat): DashboardStat {
+  return {
+    label: stat?.label?.trim() || '—',
+    value: stat?.value != null ? String(stat.value) : '—',
+    iconGlyph: stat?.iconGlyph ?? '',
+    accentColor: stat?.accentColor ?? '#006B9E',
   };
 }
 
@@ -94,14 +144,24 @@ export function prepareDashboardView(payload: DashboardPayload): DashboardViewSt
   const summaryLines = padToFour(payload.summaryLines ?? [], () => ({ ...EMPTY_SUMMARY }));
   const activityRows = padToFour(payload.rows ?? [], () => ({ ...EMPTY_ROW }));
   const alerts = padToFour(payload.alerts ?? [], () => ({ ...EMPTY_ALERT }));
+  const salesPurchaseChart = normalizeChartSeries(payload.charts?.salesVsPurchase);
+  const stockCategoryChart = normalizeChartSeries(payload.charts?.stockByCategory);
+  const inventoryStockChart = resolveInventoryStockChart(payload.charts, summaryLines);
 
   return {
-    stats: (payload.stats ?? []).slice(0, 4),
+    stats: (payload.stats ?? []).slice(0, 4).map(normalizeDashboardStat),
     activityRows,
     summaryLines,
     alerts,
-    salesPurchaseChart: payload.charts?.salesVsPurchase ?? { title: '', labels: [] },
-    inventoryStockChart: resolveInventoryStockChart(payload.charts, summaryLines),
-    stockCategoryChart: payload.charts?.stockByCategory ?? { title: '', labels: [], slices: [] },
+    salesPurchaseChart,
+    inventoryStockChart,
+    stockCategoryChart:
+      stockCategoryChart.slices?.length
+        ? stockCategoryChart
+        : normalizeChartSeries({
+            title: stockCategoryChart.title,
+            labels: [],
+            slices: [{ label: 'No stock', value: 1, color: '#006B9E' }],
+          }),
   };
 }

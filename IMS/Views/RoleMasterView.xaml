@@ -1,0 +1,73 @@
+<UserControl x:Class="IMS.Views.RoleMasterView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:IMS.Views.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="760" d:DesignWidth="1100"
+             Background="{StaticResource TransactionPageBackgroundBrush}">
+
+    <controls:TransactionEntryShell Title="{Binding Title}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0"
+                       Text="{Binding Description}"
+                       Style="{StaticResource PageSubtitle}"
+                       Margin="0,0,0,10" />
+
+            <WrapPanel Grid.Row="1" Margin="0,0,0,10">
+                <Button Style="{StaticResource ActionButton}" Content="Refresh" Margin="0,0,8,8"
+                        Command="{Binding RefreshCommand}" />
+                <Button Style="{StaticResource ActionButton}" Content="Add role" Margin="0,0,8,8"
+                        Command="{Binding AddCommand}" />
+                <Button Style="{StaticResource ActionButton}" Content="Edit" Margin="0,0,8,8"
+                        Command="{Binding EditCommand}" />
+                <Button Style="{StaticResource ActionButton}" Content="Delete" Margin="0,0,8,8"
+                        Command="{Binding DeleteCommand}" />
+                <Button Style="{StaticResource ActionButton}"
+                        Content="{Binding ToggleActiveButtonText}" Margin="0,0,8,8"
+                        Command="{Binding ToggleActiveCommand}" />
+            </WrapPanel>
+
+            <Border Grid.Row="2" Style="{StaticResource TransactionSectionBorder}" Padding="12,10">
+                <Grid>
+                    <DataGrid x:Name="RolesGrid"
+                              ItemsSource="{Binding Roles}"
+                              SelectedItem="{Binding SelectedRole}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              IsReadOnly="True"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="None"
+                              MouseDoubleClick="RolesGrid_OnMouseDoubleClick">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Role Name" Binding="{Binding RoleName}" Width="*" />
+                            <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive}" Width="90" />
+                            <DataGridCheckBoxColumn Header="System" Binding="{Binding IsSystem}" Width="90" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock Text="No roles found. Use Add role to create the first role."
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               Visibility="{Binding ShowEmptyState, Converter={StaticResource BoolToVisibility}}" />
+
+                    <Border Panel.ZIndex="10" Style="{StaticResource ListBusyLoadingHost}"
+                            Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
+                        <controls:ListLoadingOverlay Title="Loading roles…" Subtitle="Please wait" />
+                    </Border>
+                </Grid>
+            </Border>
+
+            <TextBlock Grid.Row="3" Text="{Binding StatusMessage}" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,10,0,0" />
+        </Grid>
+    </controls:TransactionEntryShell>
+</UserControl>

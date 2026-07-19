@@ -1,0 +1,17 @@
+# Optional MongoDB on Contabo (if not using MongoDB Atlas)
+# Run from /var/www/ims: docker compose -f docker-compose.mongo.yml up -d
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: ims-mongodb
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:27017:27017'
+    volumes:
+      - ims_mongo_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: ims
+
+volumes:
+  ims_mongo_data:

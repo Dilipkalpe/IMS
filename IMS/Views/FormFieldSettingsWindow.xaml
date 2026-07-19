@@ -1,0 +1,44 @@
+<Window x:Class="IMS.Views.FormFieldSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Manage Fields"
+        SizeToContent="WidthAndHeight"
+        MinWidth="360"
+        MaxHeight="560"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResizeWithGrip"
+        ShowInTaskbar="False">
+    <Border Padding="20" Background="{DynamicResource TransactionPageBackgroundBrush}">
+        <StackPanel>
+            <TextBlock Text="Show / hide fields" FontSize="16" FontWeight="SemiBold"
+                       Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
+            <TextBlock Text="Changes apply immediately. Required fields cannot be hidden."
+                       FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap"
+                       Margin="0,0,0,12" />
+
+            <WrapPanel Margin="0,0,0,12">
+                <Button Style="{StaticResource ActionButton}" Content="Show all" Margin="0,0,8,8" Click="ShowAll_Click" />
+                <Button Style="{StaticResource ActionButton}" Content="Hide optional" Margin="0,0,8,8" Click="HideOptional_Click" />
+                <Button Style="{StaticResource ActionButton}" Content="Reset default" Margin="0,0,8,8" Click="Reset_Click" />
+                <Button Style="{StaticResource ActionButton}" Content="Save layout" Margin="0,0,8,8" Click="SaveLayout_Click" />
+            </WrapPanel>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="360">
+                <ItemsControl x:Name="FieldList">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox Content="{Binding Label}" IsChecked="{Binding IsVisible, Mode=TwoWay}"
+                                      IsEnabled="{Binding CanToggle}" Margin="0,4" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                <Button Style="{StaticResource SecondaryButton}" Content="Close" MinWidth="88" Margin="0,0,8,0" IsCancel="True" />
+                <Button Style="{StaticResource ActionButton}" Content="Apply &amp; save" MinWidth="110" IsDefault="True"
+                        Click="Apply_Click" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>

@@ -1,0 +1,118 @@
+{
+  "generatedAt": "2026-05-31T14:31:21.339Z",
+  "counts": {
+    "products": 15013,
+    "customers": 10006,
+    "salesOrders": 128748,
+    "salesInvoices": 128751,
+    "perfProducts": 15000,
+    "perfSalesOrders": 118748
+  },
+  "explains": [
+    {
+      "label": "products list",
+      "collection": "products",
+      "nReturned": 25,
+      "totalDocsExamined": 25,
+      "totalKeysExamined": 25,
+      "executionTimeMillis": 1,
+      "winningPlan": "LIMIT"
+    },
+    {
+      "label": "products search",
+      "collection": "products",
+      "nReturned": 25,
+      "totalDocsExamined": 1034,
+      "totalKeysExamined": 1034,
+      "executionTimeMillis": 4,
+      "winningPlan": "SUBPLAN"
+    },
+    {
+      "label": "customers list",
+      "collection": "accounts",
+      "nReturned": 25,
+      "totalDocsExamined": 25,
+      "totalKeysExamined": 25,
+      "executionTimeMillis": 2,
+      "winningPlan": "LIMIT"
+    },
+    {
+      "label": "sales orders search",
+      "collection": "salesorders",
+      "nReturned": 25,
+      "totalDocsExamined": 118748,
+      "totalKeysExamined": 257496,
+      "executionTimeMillis": 2492,
+      "winningPlan": "SUBPLAN"
+    },
+    {
+      "label": "sales orders list",
+      "collection": "salesorders",
+      "nReturned": 25,
+      "totalDocsExamined": 128748,
+      "totalKeysExamined": 0,
+      "executionTimeMillis": 744,
+      "winningPlan": "SORT"
+    },
+    {
+      "label": "sales invoices status filter",
+      "collection": "salesinvoices",
+      "nReturned": 25,
+      "totalDocsExamined": 25,
+      "totalKeysExamined": 25,
+      "executionTimeMillis": 0,
+      "winningPlan": "LIMIT"
+    },
+    {
+      "label": "delivery challans list",
+      "collection": "deliverychallans",
+      "nReturned": 25,
+      "totalDocsExamined": 128751,
+      "totalKeysExamined": 0,
+      "executionTimeMillis": 757,
+      "winningPlan": "SORT"
+    }
+  ],
+  "recommendations": [
+    {
+      "area": "products search",
+      "issue": "COLLSCAN or high examine ratio (1034 examined, 25 returned)",
+      "suggestion": "Add compound index matching filter + sort; avoid leading-regex scans where possible"
+    },
+    {
+      "area": "sales orders search",
+      "issue": "COLLSCAN or high examine ratio (118748 examined, 25 returned)",
+      "suggestion": "Add compound index matching filter + sort; avoid leading-regex scans where possible"
+    },
+    {
+      "area": "sales orders search",
+      "issue": "Slow query (2492ms)",
+      "suggestion": "Review index coverage and reduce projection size"
+    },
+    {
+      "area": "sales orders list",
+      "issue": "COLLSCAN or high examine ratio (128748 examined, 25 returned)",
+      "suggestion": "Add compound index matching filter + sort; avoid leading-regex scans where possible"
+    },
+    {
+      "area": "sales orders list",
+      "issue": "Slow query (744ms)",
+      "suggestion": "Review index coverage and reduce projection size"
+    },
+    {
+      "area": "delivery challans list",
+      "issue": "COLLSCAN or high examine ratio (128751 examined, 25 returned)",
+      "suggestion": "Add compound index matching filter + sort; avoid leading-regex scans where possible"
+    },
+    {
+      "area": "delivery challans list",
+      "issue": "Slow query (757ms)",
+      "suggestion": "Review index coverage and reduce projection size"
+    },
+    {
+      "area": "GET /api/accounts/names",
+      "issue": "Loads all active customers into one response",
+      "suggestion": "Replace with paginated typeahead search endpoint for WPF dropdowns"
+    }
+  ]
+}

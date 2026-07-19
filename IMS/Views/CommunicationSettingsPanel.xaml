@@ -1,0 +1,139 @@
+<UserControl x:Class="IMS.Views.CommunicationSettingsPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:IMS.Converters">
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVis" />
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisInvert" Invert="True" />
+    </UserControl.Resources>
+    <StackPanel>
+        <TextBlock Text="Communication settings" Style="{StaticResource SectionHeader}" />
+        <TextBlock Text="Configure WhatsApp, SMS, and email notifications for sales and purchase invoices. API keys and passwords are encrypted on this computer. Administrator access required."
+                   Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,12" />
+
+        <TextBlock Text="Only administrators can change these settings."
+                   Visibility="{Binding CanManageCommunicationSettings, Converter={StaticResource BoolToVisInvert}}"
+                   Foreground="#C62828" FontSize="12" Margin="0,0,0,12" TextWrapping="Wrap" />
+
+        <StackPanel IsEnabled="{Binding CanManageCommunicationSettings}">
+            <CheckBox Content="None — disable all communication services"
+                      IsChecked="{Binding DisableAll, Mode=TwoWay}" FontSize="13" Margin="0,0,0,10" />
+            <CheckBox Content="Enable WhatsApp notifications" IsChecked="{Binding WhatsAppEnabled, Mode=TwoWay}" FontSize="13" Margin="0,0,0,6" />
+            <CheckBox Content="Enable SMS notifications" IsChecked="{Binding SmsEnabled, Mode=TwoWay}" FontSize="13" Margin="0,0,0,6" />
+            <CheckBox Content="Enable email notifications" IsChecked="{Binding EmailEnabled, Mode=TwoWay}" FontSize="13" Margin="0,0,0,12" />
+
+            <CheckBox Content="Prompt before sending after invoice save" IsChecked="{Binding PromptBeforeSend, Mode=TwoWay}" FontSize="13" Margin="0,0,0,6" />
+            <CheckBox Content="Send notification after save (default when not prompting)" IsChecked="{Binding SendAfterSaveByDefault, Mode=TwoWay}" FontSize="13" Margin="0,0,0,16" />
+
+            <TextBlock Text="WhatsApp" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,8" />
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="API URL" Style="{StaticResource FormLabel}" VerticalAlignment="Center" />
+                <TextBox Grid.Column="1" Text="{Binding WhatsAppApiUrl, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormInput}" />
+            </Grid>
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="API key / token" Style="{StaticResource FormLabel}" VerticalAlignment="Center" />
+                <PasswordBox x:Name="WhatsAppApiKeyBox" Grid.Column="1" Height="36" Padding="10,6" PasswordChanged="WhatsAppApiKeyBox_OnPasswordChanged" />
+            </Grid>
+            <Grid Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Sender details" Style="{StaticResource FormLabel}" VerticalAlignment="Center" />
+                <TextBox Grid.Column="1" Text="{Binding WhatsAppSenderDetails, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormInput}" />
+            </Grid>
+
+            <TextBlock Text="SMS" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,8" />
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Gateway URL" Style="{StaticResource FormLabel}" VerticalAlignment="Center" />
+                <TextBox Grid.Column="1" Text="{Binding SmsGatewayUrl, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormInput}" />
+            </Grid>
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="API key" Style="{StaticResource FormLabel}" VerticalAlignment="Center" />
+                <PasswordBox x:Name="SmsApiKeyBox" Grid.Column="1" Height="36" Padding="10,6" PasswordChanged="SmsApiKeyBox_OnPasswordChanged" />
+            </Grid>
+            <Grid Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Sender ID" Style="{StaticResource FormLabel}" VerticalAlignment="Center" />
+                <TextBox Grid.Column="1" Text="{Binding SmsSenderId, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormInput}" />
+            </Grid>
+
+            <TextBlock Text="Email (SMTP)" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,8" />
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="SMTP server" Style="{StaticResource FormLabel}" VerticalAlignment="Center" />
+                <TextBox Grid.Column="1" Text="{Binding SmtpServer, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormInput}" />
+            </Grid>
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="80" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="SMTP port" Style="{StaticResource FormLabel}" VerticalAlignment="Center" />
+                <TextBox Grid.Column="1" Text="{Binding SmtpPort, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormInput}" />
+                <CheckBox Grid.Column="2" Content="Use SSL/TLS" IsChecked="{Binding EmailUseSsl, Mode=TwoWay}" VerticalAlignment="Center" Margin="16,0,0,0" />
+            </Grid>
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Email address" Style="{StaticResource FormLabel}" VerticalAlignment="Center" />
+                <TextBox Grid.Column="1" Text="{Binding EmailAddress, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormInput}" />
+            </Grid>
+            <Grid Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Password" Style="{StaticResource FormLabel}" VerticalAlignment="Center" />
+                <PasswordBox x:Name="EmailPasswordBox" Grid.Column="1" Height="36" Padding="10,6" PasswordChanged="EmailPasswordBox_OnPasswordChanged" />
+            </Grid>
+
+            <TextBlock Text="Message templates" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,8" />
+            <TextBlock Text="{Binding PlaceholderHelp}" FontSize="11" TextWrapping="Wrap"
+                       Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,8" />
+            <TextBlock Text="Sales invoice template" Style="{StaticResource FormLabel}" Margin="0,0,0,4" />
+            <TextBox Text="{Binding SalesInvoiceTemplate, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource FormInput}" AcceptsReturn="True" TextWrapping="Wrap"
+                     MinHeight="80" VerticalScrollBarVisibility="Auto" Margin="0,0,0,12" />
+            <TextBlock Text="Purchase invoice template" Style="{StaticResource FormLabel}" Margin="0,0,0,4" />
+            <TextBox Text="{Binding PurchaseInvoiceTemplate, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource FormInput}" AcceptsReturn="True" TextWrapping="Wrap"
+                     MinHeight="80" VerticalScrollBarVisibility="Auto" Margin="0,0,0,12" />
+
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <Button Content="Set None" Command="{Binding SetNoneCommand}" Style="{StaticResource SecondaryButton}" Padding="14,8" Margin="0,0,10,0" />
+                <Button Content="Reset templates" Command="{Binding ResetTemplatesCommand}" Style="{StaticResource SecondaryButton}" Padding="14,8" Margin="0,0,10,0" />
+                <Button Content="Save communication settings" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButton}" Padding="14,8" />
+            </StackPanel>
+
+            <TextBlock Text="{Binding StatusMessage}" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource AccentBrush}" />
+            <TextBlock Text="Delivery logs: %LocalAppData%\IMS\communication-logs.jsonl"
+                       FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,8,0,0" TextWrapping="Wrap" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>

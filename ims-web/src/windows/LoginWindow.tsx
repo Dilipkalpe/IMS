@@ -11,6 +11,13 @@ import './LoginWindow.scss';
 
 const REMEMBER_LOGIN_KEY = 'ims.rememberLoginId';
 
+const ERP_FEATURES = [
+  { icon: '◈', label: 'Inventory & stock control' },
+  { icon: '◎', label: 'GST billing & invoicing' },
+  { icon: '⬡', label: 'Production & BOM' },
+  { icon: '◇', label: 'Financial reporting' },
+] as const;
+
 export interface LoginWindowProps {
   onClose?: () => void;
   onSignedIn?: () => void;
@@ -151,10 +158,13 @@ export function LoginWindow({ onClose, onSignedIn }: LoginWindowProps) {
       onKeyDown={handleKeyDown}
       tabIndex={-1}
     >
-      <div className="login-window__glow" aria-hidden />
+      <div className="login-window__backdrop" aria-hidden>
+        <div className="login-window__glow" />
+        <div className="login-window__pattern" />
+      </div>
 
       <section className="login-window__hero" aria-label="Brand hero">
-        <div>
+        <header className="login-window__hero-brand">
           <div className="login-window__hero-logo">
             {branding.hasLogo ? (
               <img src={branding.logoImage} alt="" className="login-window__hero-logo-img" />
@@ -162,162 +172,230 @@ export function LoginWindow({ onClose, onSignedIn }: LoginWindowProps) {
               branding.businessName.slice(0, 3).toUpperCase()
             )}
           </div>
-          <span className="login-eyebrow">{branding.businessName.toUpperCase()}</span>
-          <div className="login-hero-title">Run your entire</div>
-          <div className="login-hero-accent">operations from one place</div>
-          <p className="login-window__hero-tagline">Inventory, billing, production &amp; finance in one workspace.</p>
-        </div>
+          <span className="login-window__eyebrow">{branding.businessName.toUpperCase()}</span>
+          <h2 className="login-window__hero-title">
+            Run your entire
+            <span className="login-window__hero-accent"> operations from one place</span>
+          </h2>
+          <p className="login-window__hero-tagline">
+            {branding.logoText || 'Inventory, billing, production & finance in one workspace.'}
+          </p>
+        </header>
 
-        <div className="login-window__hero-center">
-          <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-            <div className="login-module-pill"><span className="login-module-pill-text">◈  Inventory</span></div>
-            <div className="login-module-pill"><span className="login-module-pill-text">◎  Billing</span></div>
-            <div className="login-module-pill"><span className="login-module-pill-text">⬡  Production</span></div>
-            <div className="login-module-pill"><span className="login-module-pill-text">◇  Finance</span></div>
-          </div>
+        <div className="login-window__hero-body">
+          <ul className="login-window__feature-list">
+            {ERP_FEATURES.map((feature) => (
+              <li key={feature.label} className="login-window__feature-item">
+                <span className="login-window__feature-icon" aria-hidden>
+                  {feature.icon}
+                </span>
+                <span>{feature.label}</span>
+              </li>
+            ))}
+          </ul>
+
           <div className="login-window__hero-stats">
-            <div>
+            <div className="login-window__hero-stat">
               <div className="login-window__hero-stat-value">24/7</div>
-              <div className="login-window__hero-stat-label">LIVE STOCK SYNC</div>
+              <div className="login-window__hero-stat-label">Live stock sync</div>
             </div>
-            <div>
+            <div className="login-window__hero-stat">
               <div className="login-window__hero-stat-value">GST</div>
-              <div className="login-window__hero-stat-label">READY INVOICING</div>
+              <div className="login-window__hero-stat-label">Ready invoicing</div>
             </div>
-            <div>
+            <div className="login-window__hero-stat">
               <div className="login-window__hero-stat-value">Multi</div>
-              <div className="login-window__hero-stat-label">WAREHOUSE</div>
+              <div className="login-window__hero-stat-label">Warehouse</div>
             </div>
           </div>
         </div>
 
         <footer className="login-window__hero-footer">
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 6 }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#34d399', marginRight: 8 }} />
-            <span style={{ fontSize: 12, color: '#818cf8' }}>Enterprise-grade · Secure sign-in</span>
+          <div className="login-window__secure-badge">
+            <span className="login-window__secure-dot" aria-hidden />
+            <span>Enterprise-grade · Secure sign-in</span>
           </div>
-          <div className="login-window__meta-grid">
-            <span className="login-window__meta-label">API Link</span>
-            <span className="login-window__meta-value" title={apiLinkDisplay}>{apiLinkDisplay}</span>
-            <span className="login-window__meta-label">Db Name</span>
-            <span className="login-window__meta-value" title={dbNameDisplay}>{dbNameDisplay}</span>
-          </div>
+          <dl className="login-window__meta-grid">
+            <div className="login-window__meta-row">
+              <dt>API Link</dt>
+              <dd title={apiLinkDisplay}>{apiLinkDisplay}</dd>
+            </div>
+            <div className="login-window__meta-row">
+              <dt>Db Name</dt>
+              <dd title={dbNameDisplay}>{dbNameDisplay}</dd>
+            </div>
+          </dl>
         </footer>
       </section>
 
       <section className="login-window__panel" onKeyDown={handleKeyDown}>
+        <div className="login-window__mobile-brand">
+          <div className="login-window__mobile-logo">
+            {branding.hasLogo ? (
+              <img src={branding.logoImage} alt="" className="login-window__mobile-logo-img" />
+            ) : (
+              branding.businessName.slice(0, 2).toUpperCase()
+            )}
+          </div>
+          <div>
+            <div className="login-window__mobile-title">{branding.businessName}</div>
+            <div className="login-window__mobile-subtitle">Inventory &amp; Billing ERP</div>
+          </div>
+        </div>
+
         <div className="login-window__panel-toolbar">
-          <button type="button" className="login-ghost-button" title="Refresh API status" onClick={() => void loadBootstrap()}>
-            <span className="icon-text" style={{ marginRight: 6 }}>&#xE72C;</span>
+          <button
+            type="button"
+            className="login-window__ghost-button"
+            title="Refresh API status"
+            onClick={() => void loadBootstrap()}
+          >
+            <span className="login-window__icon" aria-hidden>
+              &#xE72C;
+            </span>
             Refresh
           </button>
-          <button type="button" className="login-icon-button login-close-button" title="Close application" onClick={onClose}>
-            <span className="icon-text" style={{ fontSize: 12 }}>&#xE8BB;</span>
+          <button
+            type="button"
+            className="login-window__icon-button login-window__close-button"
+            title="Close application"
+            onClick={onClose}
+          >
+            <span className="login-window__icon login-window__icon--sm" aria-hidden>
+              &#xE8BB;
+            </span>
           </button>
         </div>
 
         <div className="login-window__panel-body">
-          <div className="login-glass-card">
-            <h1 className="login-window__signin-title">Sign in</h1>
-            <p className="login-window__signin-subtitle">Access your company workspace</p>
+          <div className="login-window__card">
+            <header className="login-window__card-header">
+              <h1 className="login-window__signin-title">Sign in</h1>
+              <p className="login-window__signin-subtitle">Access {branding.businessName}</p>
+            </header>
 
             <div className="login-window__api-status">
-              <span className={`login-window__api-dot${apiConnected ? ' login-window__api-dot--connected' : ''}`} />
+              <span
+                className={`login-window__api-dot${apiConnected ? ' login-window__api-dot--connected' : ''}`}
+                aria-hidden
+              />
               {apiConnected ? 'API connected' : 'API offline'}
             </div>
 
             {licenseNotice && (
               <div
-                className={`login-license-banner${licenseExpired ? ' login-license-banner--expired' : ''}`}
+                className={`login-window__license-banner${licenseExpired ? ' login-window__license-banner--expired' : ''}`}
                 role="status"
               >
-                <span className="icon-text" style={{ marginRight: 8 }}>&#xE7BA;</span>
+                <span className="login-window__icon" aria-hidden>
+                  &#xE7BA;
+                </span>
                 {licenseNotice}
               </div>
             )}
 
             {errorMessage && (
-              <div className="login-error-banner">
-                <span className="icon-text" style={{ marginRight: 8 }}>&#xE783;</span>
+              <div className="login-window__error-banner" role="alert">
+                <span className="login-window__icon" aria-hidden>
+                  &#xE783;
+                </span>
                 {errorMessage}
               </div>
             )}
 
-            <label className="login-field-label">Financial year</label>
-            <div className="login-field-shell" style={{ marginBottom: 16 }}>
-              <select
-                className="login-field-input"
-                disabled={!inputsEnabled && !loadingYears}
-                value={financialYearId}
-                onChange={(e) => setFinancialYearId(e.target.value)}
-              >
-                {loadingYears && <option value="">Loading…</option>}
-                {!loadingYears && financialYears.length === 0 && (
-                  <option value="">No financial years available</option>
-                )}
-                {financialYears.map((year) => (
-                  <option key={year.id} value={year.id}>
-                    {year.financialYearName}
-                    {year.closed ? ' (Closed)' : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <div className="login-window__form">
+              <label className="login-window__field-label" htmlFor="login-financial-year">
+                Financial year
+              </label>
+              <div className="login-window__field-shell">
+                <select
+                  id="login-financial-year"
+                  className="login-window__field-input"
+                  disabled={!inputsEnabled && !loadingYears}
+                  value={financialYearId}
+                  onChange={(e) => setFinancialYearId(e.target.value)}
+                >
+                  {loadingYears && <option value="">Loading…</option>}
+                  {!loadingYears && financialYears.length === 0 && (
+                    <option value="">No financial years available</option>
+                  )}
+                  {financialYears.map((year) => (
+                    <option key={year.id} value={year.id}>
+                      {year.financialYearName}
+                      {year.closed ? ' (Closed)' : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <label className="login-field-label">Employee ID or email</label>
-            <div className="login-field-shell" style={{ marginBottom: 16 }}>
-              <input
-                className="login-field-input"
-                value={loginId}
-                onChange={(e) => setLoginId(e.target.value)}
-                disabled={!inputsEnabled}
-                autoComplete="username"
-              />
-            </div>
-
-            <label className="login-field-label">Password</label>
-            <div className="login-window__password-row">
-              <div className="login-field-shell">
+              <label className="login-window__field-label" htmlFor="login-id">
+                Employee ID or email
+              </label>
+              <div className="login-window__field-shell">
                 <input
-                  type={showPassword ? 'text' : 'password'}
-                  className="login-field-input"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  id="login-id"
+                  className="login-window__field-input"
+                  value={loginId}
+                  onChange={(e) => setLoginId(e.target.value)}
                   disabled={!inputsEnabled}
-                  autoComplete="current-password"
+                  autoComplete="username"
                 />
               </div>
+
+              <label className="login-window__field-label" htmlFor="login-password">
+                Password
+              </label>
+              <div className="login-window__password-row">
+                <div className="login-window__field-shell">
+                  <input
+                    id="login-password"
+                    type={showPassword ? 'text' : 'password'}
+                    className="login-window__field-input"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={!inputsEnabled}
+                    autoComplete="current-password"
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="login-window__icon-button"
+                  title="Show or hide password"
+                  onClick={() => setShowPassword((v) => !v)}
+                >
+                  <span className="login-window__icon login-window__icon--lg" aria-hidden>
+                    {showPassword ? '\uED1A' : '\uED1B'}
+                  </span>
+                </button>
+              </div>
+
+              <label className="login-window__remember">
+                <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
+                Remember me
+              </label>
+
               <button
                 type="button"
-                className="login-icon-button"
-                title="Show or hide password"
-                onClick={() => setShowPassword((v) => !v)}
+                className="login-window__primary-button"
+                disabled={!inputsEnabled}
+                onClick={() => void handleSignIn()}
               >
-                <span className="icon-text" style={{ fontSize: 18 }}>{showPassword ? '\uED1A' : '\uED1B'}</span>
+                {isLoggingIn ? (
+                  <span className="login-window__button-content">
+                    <span className="login-window__icon" aria-hidden>
+                      &#xE1CD;
+                    </span>
+                    Signing in…
+                  </span>
+                ) : (
+                  'Sign in to ERP'
+                )}
               </button>
+
+              <p className="login-window__footer-note">
+                Default: admin / admin (after seed). Contact your administrator for access.
+              </p>
             </div>
-
-            <label className="login-window__remember">
-              <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
-              Remember me
-            </label>
-
-            <button
-              type="button"
-              className="login-primary-button"
-              disabled={!inputsEnabled}
-              onClick={() => void handleSignIn()}
-            >
-              {isLoggingIn ? (
-                <span><span className="icon-text" style={{ marginRight: 8 }}>&#xE1CD;</span>Signing in…</span>
-              ) : (
-                'Sign in to ERP'
-              )}
-            </button>
-
-            <p className="login-window__footer-note">
-              Default: admin / admin (after seed). Contact your administrator for access.
-            </p>
           </div>
         </div>
       </section>

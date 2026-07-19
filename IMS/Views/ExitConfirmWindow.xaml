@@ -1,0 +1,64 @@
+<Window x:Class="IMS.Views.ExitConfirmWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Close IMS"
+        Height="340" Width="500"
+        WindowStartupLocation="CenterOwner"
+        Style="{StaticResource AppDialogWindow}">
+    <Border Style="{StaticResource AppDialogShell}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Style="{StaticResource AppDialogTitleBar}">
+                <DockPanel LastChildFill="True">
+                    <Border Style="{StaticResource AppDialogIconBadge}" DockPanel.Dock="Left">
+                        <TextBlock Text="&#xE7E8;"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   FontSize="18"
+                                   Foreground="{DynamicResource AccentBrush}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Close IMS"
+                                   Style="{StaticResource AppDialogTitleText}" />
+                        <TextBlock Text="Inventory Management System"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   Margin="0,2,0,0" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <StackPanel Grid.Row="1" Margin="20,18,20,20">
+                <TextBlock Text="You are about to exit the application."
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextPrimaryBrush}"
+                           Margin="0,0,0,8" />
+                <TextBlock Style="{StaticResource AppDialogBodyText}"
+                           Text="Save a database backup before closing, exit without backup, or return to your work."
+                           Margin="0,0,0,20" />
+
+                <Button Content="Backup and close"
+                        Style="{StaticResource PrimaryButton}"
+                        MinHeight="38"
+                        Margin="0,0,0,8"
+                        Click="BackupAndClose_Click" />
+                <Button Content="Close without backup"
+                        Style="{StaticResource SecondaryButton}"
+                        MinHeight="38"
+                        Margin="0,0,0,8"
+                        Click="CloseWithoutBackup_Click" />
+                <Button Content="Stay in application"
+                        Style="{StaticResource SecondaryButton}"
+                        MinHeight="38"
+                        IsCancel="True"
+                        Click="Stay_Click" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

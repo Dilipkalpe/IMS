@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Optional: IIS runs Node directly (no separate npm start).
+  Requires: HttpPlatformHandler (ASP.NET Core Hosting Bundle).
+  Rename to web.config to use this mode instead of reverse proxy.
+-->
+<configuration>
+  <system.webServer>
+    <handlers>
+      <remove name="httpPlatformHandler" />
+      <add name="httpPlatformHandler" path="*" verb="*" modules="httpPlatformHandler" resourceType="Unspecified" requireAccess="Script" />
+    </handlers>
+    <httpPlatform processPath="%ProgramFiles%\nodejs\node.exe"
+                  arguments=".\src\index.js"
+                  stdoutLogEnabled="true"
+                  stdoutLogFile=".\iis-logs\node"
+                  startupTimeLimit="120"
+                  processesPerApplication="1"
+                  rapidFailsPerMinute="10">
+      <environmentVariables>
+        <environmentVariable name="PORT" value="%HTTP_PLATFORM_PORT%" />
+        <environmentVariable name="NODE_ENV" value="production" />
+        <environmentVariable name="IMS_API_MOUNT_PATH" value="/IMSWebAPI" />
+      </environmentVariables>
+    </httpPlatform>
+    <httpProtocol>
+      <customHeaders>
+        <remove name="X-Powered-By" />
+      </customHeaders>
+    </httpProtocol>
+  </system.webServer>
+</configuration>

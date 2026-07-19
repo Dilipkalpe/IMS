@@ -114,20 +114,7 @@ export function PurchaseOrderEntryForm({
   const isEdit = doc.isEdit;
 
   return (
-    <TransactionEntryShell
-      title="Purchase Order"
-      titleRight={
-        doc.statusMessage || doc.isDirty || doc.isSaving ? (
-          <span className="si-status-banner" role="status">
-            {doc.statusMessage}
-            {doc.isDirty ? ' · Unsaved changes' : ''}
-            {doc.isSaving ? ' · Saving…' : ''}
-            {doc.isInterState ? ' · IGST (inter-state)' : doc.header.placeOfSupply ? ' · CGST+SGST (intra-state)' : ''}
-            {doc.gstWarnings.length > 0 ? ` · ${doc.gstWarnings[0].message}` : ''}
-          </span>
-        ) : null
-      }
-    >
+    <TransactionEntryShell title="Purchase Order">
       <LoadingHost loading={doc.isLoading} title="Loading document…" className="loading-host--entry">
       <FormKeyboardScope ref={scopeRef} className="si-entry-layout si-entry-layout--wide-totals" autoFocusFieldKey={autoFocusFieldKey}>
         <div className="si-entry-main">

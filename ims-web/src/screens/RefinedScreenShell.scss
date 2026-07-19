@@ -2,6 +2,9 @@
 
 .refined-screen-shell {
   flex: 1;
+  min-width: 0;
+  width: 100%;
+  max-width: none;
   min-height: 0;
   height: 100%;
   background: var(--transaction-page-background, #e6ebf1);

@@ -15,6 +15,7 @@ import type { PurchaseInvoiceHeader, PurchaseInvoiceLineItem, PurchaseInvoiceTab
 import { validatePurchaseWorkspaceDocument } from '../../components/transaction/purchaseWorkspaceValidation';
 import { normalizeDocPrefix, prefixFromPeekNext } from '../../components/transaction/docPrefix';
 import { closeWorkspaceTabWithoutConfirm } from '../../components/transaction/workspaceTabClose';
+import { usePublishWorkspaceDocumentHeader } from '../../components/transaction/usePublishWorkspaceDocumentHeader';
 import { useWorkspaceListIntent } from '../../components/transaction/useWorkspaceListIntent';
 import { confirmDiscardMultipleDirty, confirmDiscardUnsaved } from './confirmUnsaved';
 import { createPurchaseProductScanHandlers } from '../../components/transaction/purchaseWorkspaceProductActions';
@@ -85,6 +86,8 @@ export function PurchaseInvoiceWorkspaceProvider({
   const activeTab = tabs.find((t) => t.isSelected) ?? tabs[0];
   const activeTabId = activeTab?.id ?? initialTabId;
   const tabIds = useMemo(() => tabs.map((t) => t.id), [tabs]);
+
+  usePublishWorkspaceDocumentHeader(documents[activeTabId]);
 
   const syncTabTitle = useCallback((tabId: string, doc: TabDocumentState) => {
     const title = tabTitleFromState(doc);

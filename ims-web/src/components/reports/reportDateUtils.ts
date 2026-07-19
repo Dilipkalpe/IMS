@@ -26,8 +26,9 @@ export function defaultAsOnDate(): string {
   return toIsoDate(new Date());
 }
 
-export function formatMoney(value: number): string {
-  return value.toLocaleString('en-IN', {
+export function formatMoney(value: number | null | undefined): string {
+  const n = Number(value ?? 0);
+  return (Number.isFinite(n) ? n : 0).toLocaleString('en-IN', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });

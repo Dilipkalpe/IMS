@@ -1,4 +1,5 @@
 import type { DashboardChartSeries } from '../../api/dashboard';
+import { formatLocaleNumber } from '../../utils/formatLocaleNumber';
 
 function pointX(index: number, count: number, leftPad: number, plotW: number): number {
   if (count <= 1) return leftPad + plotW / 2;
@@ -51,7 +52,7 @@ export function DashboardLineChart({ chart }: { chart: DashboardChartSeries }) {
         const y = topPad + plotH - (value / max) * plotH;
         return (
           <circle key={`${name}-${labels[i]}`} cx={x} cy={y} r={4} fill={color ?? '#006B9E'}>
-            <title>{`${name}\n${labels[i]}: ${value.toLocaleString('en-IN')}`}</title>
+            <title>{`${name}\n${labels[i]}: ${formatLocaleNumber(value)}`}</title>
           </circle>
         );
       })}

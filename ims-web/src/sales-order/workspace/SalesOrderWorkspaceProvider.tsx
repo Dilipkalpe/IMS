@@ -17,6 +17,7 @@ import { getAuthSession } from '../../api/auth';
 import { useSalesCustomerPicker } from '../../components/transaction/SalesCustomerPickerContext';
 import { validateSalesWorkspaceDocument } from '../../components/transaction/salesWorkspaceValidation';
 import { useWorkspaceListIntent } from '../../components/transaction/useWorkspaceListIntent';
+import { usePublishWorkspaceDocumentHeader } from '../../components/transaction/usePublishWorkspaceDocumentHeader';
 import { confirmDiscardMultipleDirty, confirmDiscardUnsaved } from './confirmUnsaved';
 import { createSalesProductScanHandlers } from '../../components/transaction/salesWorkspaceProductActions';
 import type { SalesProductInfo } from '../../components/transaction/salesProductLines';
@@ -85,6 +86,8 @@ export function SalesOrderWorkspaceProvider({
   const activeTab = tabs.find((t) => t.isSelected) ?? tabs[0];
   const activeTabId = activeTab?.id ?? initialTabId;
   const tabIds = useMemo(() => tabs.map((t) => t.id), [tabs]);
+
+  usePublishWorkspaceDocumentHeader(documents[activeTabId]);
 
   const syncTabTitle = useCallback((tabId: string, doc: TabDocumentState) => {
     const title = tabTitleFromState(doc);

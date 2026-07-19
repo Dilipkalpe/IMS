@@ -1,0 +1,778 @@
+{
+  "generatedAt": "2026-05-31T14:31:17.110Z",
+  "apiBase": "http://127.0.0.1:3000",
+  "targets": {
+    "gridLoadMs": 2000,
+    "searchMs": 1000,
+    "printMs": 3000,
+    "dashboardMs": 3000
+  },
+  "sampleDocuments": {
+    "salesOrder": "PSO-1000000",
+    "salesInvoice": "PSI-1237500"
+  },
+  "memory": {
+    "heapUsedStartMb": 20.769271850585938,
+    "heapUsedEndMb": 76.5194091796875
+  },
+  "results": [
+    {
+      "name": "sales-orders grid page 1",
+      "url": "http://127.0.0.1:3000/api/sales-orders?page=1&limit=25",
+      "timing": {
+        "n": 5,
+        "min": 267.0166999999999,
+        "max": 387.38329999999996,
+        "avg": 323.4286999999999,
+        "p50": 316.5494999999996,
+        "p95": 387.38329999999996
+      },
+      "payload": {
+        "avgBytes": 30838,
+        "maxBytes": 30838
+      },
+      "targetMs": 2000,
+      "pass": true,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "sales-orders grid page 50",
+      "url": "http://127.0.0.1:3000/api/sales-orders?page=50&limit=25",
+      "timing": {
+        "n": 5,
+        "min": 361.7253999999998,
+        "max": 461.7379000000001,
+        "avg": 393.81409999999994,
+        "p50": 382.3676999999998,
+        "p95": 461.7379000000001
+      },
+      "payload": {
+        "avgBytes": 33052,
+        "maxBytes": 33052
+      },
+      "targetMs": 2000,
+      "pass": true,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "sales-orders search \"Perf\"",
+      "url": "http://127.0.0.1:3000/api/sales-orders?page=1&limit=25&search=Perf",
+      "timing": {
+        "n": 5,
+        "min": 838.2668000000003,
+        "max": 1244.4229999999998,
+        "avg": 1085.9442400000003,
+        "p50": 1116.3824999999997,
+        "p95": 1244.4229999999998
+      },
+      "payload": {
+        "avgBytes": 30838,
+        "maxBytes": 30838
+      },
+      "targetMs": 1000,
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "sales-orders filter status=open",
+      "url": "http://127.0.0.1:3000/api/sales-orders?page=1&limit=25&status=open",
+      "timing": {
+        "n": 5,
+        "min": 180.8818999999985,
+        "max": 203.39910000000054,
+        "avg": 196.4537599999996,
+        "p50": 200.80649999999878,
+        "p95": 203.39910000000054
+      },
+      "payload": {
+        "avgBytes": 29848,
+        "maxBytes": 29848
+      },
+      "targetMs": 2000,
+      "pass": true,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "delivery-challans grid page 1",
+      "url": "http://127.0.0.1:3000/api/delivery-challans?page=1&limit=25",
+      "timing": {
+        "n": 5,
+        "min": 540.4886000000006,
+        "max": 882.3356000000003,
+        "avg": 640.0050800000001,
+        "p50": 586.8191000000006,
+        "p95": 882.3356000000003
+      },
+      "payload": {
+        "avgBytes": 31924,
+        "maxBytes": 31924
+      },
+      "targetMs": 2000,
+      "pass": true,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "delivery-challans grid page 50",
+      "url": "http://127.0.0.1:3000/api/delivery-challans?page=50&limit=25",
+      "timing": {
+        "n": 5,
+        "min": 630.0796000000009,
+        "max": 810.100699999999,
+        "avg": 745.8946200000003,
+        "p50": 766.5024999999987,
+        "p95": 810.100699999999
+      },
+      "payload": {
+        "avgBytes": 33341,
+        "maxBytes": 33341
+      },
+      "targetMs": 2000,
+      "pass": true,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "delivery-challans search \"Perf\"",
+      "url": "http://127.0.0.1:3000/api/delivery-challans?page=1&limit=25&search=Perf",
+      "timing": {
+        "n": 5,
+        "min": 1159.571,
+        "max": 1591.8343000000023,
+        "avg": 1359.3309200000003,
+        "p50": 1279.0922000000028,
+        "p95": 1591.8343000000023
+      },
+      "payload": {
+        "avgBytes": 31924,
+        "maxBytes": 31924
+      },
+      "targetMs": 1000,
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "delivery-challans filter status=open",
+      "url": "http://127.0.0.1:3000/api/delivery-challans?page=1&limit=25&status=open",
+      "timing": {
+        "n": 5,
+        "min": 809.4779000000017,
+        "max": 1321.8263000000006,
+        "avg": 998.5171000000003,
+        "p50": 902.1647999999986,
+        "p95": 1321.8263000000006
+      },
+      "payload": {
+        "avgBytes": 32767,
+        "maxBytes": 32767
+      },
+      "targetMs": 2000,
+      "pass": true,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "sales-invoices grid page 1",
+      "url": "http://127.0.0.1:3000/api/sales-invoices?page=1&limit=25",
+      "timing": {
+        "n": 5,
+        "min": 533.3884999999973,
+        "max": 612.2901999999995,
+        "avg": 578.6913799999995,
+        "p50": 577.1677000000018,
+        "p95": 612.2901999999995
+      },
+      "payload": {
+        "avgBytes": 37983,
+        "maxBytes": 37983
+      },
+      "targetMs": 2000,
+      "pass": true,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "sales-invoices grid page 50",
+      "url": "http://127.0.0.1:3000/api/sales-invoices?page=50&limit=25",
+      "timing": {
+        "n": 5,
+        "min": 505.11299999999756,
+        "max": 1223.108900000003,
+        "avg": 755.1466800000017,
+        "p50": 667.261400000003,
+        "p95": 1223.108900000003
+      },
+      "payload": {
+        "avgBytes": 36370,
+        "maxBytes": 36370
+      },
+      "targetMs": 2000,
+      "pass": true,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "sales-invoices search \"Perf\"",
+      "url": "http://127.0.0.1:3000/api/sales-invoices?page=1&limit=25&search=Perf",
+      "timing": {
+        "n": 5,
+        "min": 1196.9344999999958,
+        "max": 2007.3170000000027,
+        "avg": 1501.1175999999991,
+        "p50": 1250.4930000000022,
+        "p95": 2007.3170000000027
+      },
+      "payload": {
+        "avgBytes": 37983,
+        "maxBytes": 37983
+      },
+      "targetMs": 1000,
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "sales-invoices filter status=open",
+      "url": "http://127.0.0.1:3000/api/sales-invoices?page=1&limit=25&status=open",
+      "timing": {
+        "n": 5,
+        "min": 790.4363999999987,
+        "max": 3342.397299999997,
+        "avg": 1358.0230199999992,
+        "p50": 895.1829999999973,
+        "p95": 3342.397299999997
+      },
+      "payload": {
+        "avgBytes": 38414,
+        "maxBytes": 38414
+      },
+      "targetMs": 2000,
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "sales-returns grid page 1",
+      "url": "http://127.0.0.1:3000/api/sales-returns?page=1&limit=25",
+      "timing": {
+        "n": 5,
+        "min": 508.02090000000317,
+        "max": 1372.315300000002,
+        "avg": 850.9675000000003,
+        "p50": 782.8107999999993,
+        "p95": 1372.315300000002
+      },
+      "payload": {
+        "avgBytes": 32440,
+        "maxBytes": 32440
+      },
+      "targetMs": 2000,
+      "pass": true,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "sales-returns grid page 50",
+      "url": "http://127.0.0.1:3000/api/sales-returns?page=50&limit=25",
+      "timing": {
+        "n": 5,
+        "min": 578.3513000000021,
+        "max": 1097.6470999999947,
+        "avg": 719.1955199999982,
+        "p50": 606.7429999999949,
+        "p95": 1097.6470999999947
+      },
+      "payload": {
+        "avgBytes": 31711,
+        "maxBytes": 31711
+      },
+      "targetMs": 2000,
+      "pass": true,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "sales-returns search \"Perf\"",
+      "url": "http://127.0.0.1:3000/api/sales-returns?page=1&limit=25&search=Perf",
+      "timing": {
+        "n": 5,
+        "min": 805.9602000000014,
+        "max": 2290.3377000000037,
+        "avg": 1362.3649800000014,
+        "p50": 1231.3541999999943,
+        "p95": 2290.3377000000037
+      },
+      "payload": {
+        "avgBytes": 32440,
+        "maxBytes": 32440
+      },
+      "targetMs": 1000,
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "sales-returns filter status=open",
+      "url": "http://127.0.0.1:3000/api/sales-returns?page=1&limit=25&status=open",
+      "timing": {
+        "n": 5,
+        "min": 574.5321000000113,
+        "max": 5261.815800000011,
+        "avg": 1805.3354200000017,
+        "p50": 1183.610299999993,
+        "p95": 5261.815800000011
+      },
+      "payload": {
+        "avgBytes": 32845,
+        "maxBytes": 32845
+      },
+      "targetMs": 2000,
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "products grid page 1",
+      "url": "http://127.0.0.1:3000/api/products?page=1&limit=25",
+      "timing": {
+        "n": 5,
+        "min": 32.28450000000885,
+        "max": 32.795100000003,
+        "avg": 32.562200000003216,
+        "p50": 32.609800000005635,
+        "p95": 32.795100000003
+      },
+      "payload": {
+        "avgBytes": 11637,
+        "maxBytes": 11637
+      },
+      "targetMs": 2000,
+      "pass": true,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "products search PERF-P001",
+      "url": "http://127.0.0.1:3000/api/products/search?q=PERF-P001&limit=40",
+      "timing": {
+        "n": 5,
+        "min": 92.53519999999844,
+        "max": 110.84619999999995,
+        "avg": 103.6356999999989,
+        "p50": 109.80860000000393,
+        "p95": 110.84619999999995
+      },
+      "payload": {
+        "avgBytes": 4804,
+        "maxBytes": 4804
+      },
+      "targetMs": 1000,
+      "pass": true,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "customers grid page 1",
+      "url": "http://127.0.0.1:3000/api/accounts?type=customer&page=1&limit=25",
+      "timing": {
+        "n": 5,
+        "min": 11.184999999997672,
+        "max": 26.720799999995506,
+        "avg": 18.99181999999855,
+        "p50": 20.825500000006286,
+        "p95": 26.720799999995506
+      },
+      "payload": {
+        "avgBytes": 10215,
+        "maxBytes": 10215
+      },
+      "targetMs": 2000,
+      "pass": true,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "customers grid search (no API param — page 1 only)",
+      "url": "http://127.0.0.1:3000/api/accounts?type=customer&page=1&limit=100",
+      "timing": {
+        "n": 5,
+        "min": 19.38539999999921,
+        "max": 31.400900000007823,
+        "avg": 25.31808000000019,
+        "p50": 24.11599999999453,
+        "p95": 31.400900000007823
+      },
+      "payload": {
+        "avgBytes": 43610,
+        "maxBytes": 43610
+      },
+      "targetMs": 2000,
+      "pass": true,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "customer names dropdown (full load)",
+      "url": "http://127.0.0.1:3000/api/accounts/names?type=customer",
+      "timing": {
+        "n": 5,
+        "min": 1175.7465000000084,
+        "max": 1465.0116000000125,
+        "avg": 1368.842200000005,
+        "p50": 1400.717300000004,
+        "p95": 1465.0116000000125
+      },
+      "payload": {
+        "avgBytes": 289033,
+        "maxBytes": 289033
+      },
+      "targetMs": 1000,
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "dashboard",
+      "url": "http://127.0.0.1:3000/api/dashboard",
+      "timing": {
+        "n": 5,
+        "min": 3106.445900000006,
+        "max": 3574.1484999999957,
+        "avg": 3422.0877199999986,
+        "p50": 3471.837200000009,
+        "p95": 3574.1484999999957
+      },
+      "payload": {
+        "avgBytes": 2510,
+        "maxBytes": 2510
+      },
+      "targetMs": 3000,
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "document register (sales_invoice, 3 months)",
+      "url": "http://127.0.0.1:3000/api/reports/document-register?type=sales_invoice&dateFrom=01%2F02%2F2026&dateTo=31%2F05%2F2026",
+      "timing": {
+        "n": 5,
+        "min": 17058.450299999997,
+        "max": 20229.108599999978,
+        "avg": 18968.746419999992,
+        "p50": 19530.539300000004,
+        "p95": 20229.108599999978
+      },
+      "payload": {
+        "avgBytes": 26033610,
+        "maxBytes": 26033610
+      },
+      "targetMs": 4000,
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "print data fetch — sales order by formatted",
+      "url": "http://127.0.0.1:3000/api/sales-orders/by-formatted/PSO-1000000",
+      "timing": {
+        "n": 5,
+        "min": 6.587700000003679,
+        "max": 25.04120000000694,
+        "avg": 15.195059999998193,
+        "p50": 15.169399999984307,
+        "p95": 25.04120000000694
+      },
+      "payload": {
+        "avgBytes": 956,
+        "maxBytes": 956
+      },
+      "targetMs": 3000,
+      "pass": true,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "print data fetch — sales invoice by formatted",
+      "url": "http://127.0.0.1:3000/api/sales-invoices/by-formatted/PSI-1237500",
+      "timing": {
+        "n": 5,
+        "min": 5.644200000009732,
+        "max": 12.132099999987986,
+        "avg": 8.529920000006678,
+        "p50": 7.220900000014808,
+        "p95": 12.132099999987986
+      },
+      "payload": {
+        "avgBytes": 1552,
+        "maxBytes": 1552
+      },
+      "targetMs": 3000,
+      "pass": true,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "sales order stats",
+      "url": "http://127.0.0.1:3000/api/sales-orders/stats",
+      "timing": {
+        "n": 5,
+        "min": 160.2326999999932,
+        "max": 200.5639000000083,
+        "avg": 175.47313999999898,
+        "p50": 169.37489999999525,
+        "p95": 200.5639000000083
+      },
+      "payload": {
+        "avgBytes": 148,
+        "maxBytes": 148
+      },
+      "targetMs": null,
+      "pass": null,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "health",
+      "url": "http://127.0.0.1:3000/api/health",
+      "timing": {
+        "n": 3,
+        "min": 1.67960000000312,
+        "max": 2.7155000000202563,
+        "avg": 2.134200000000419,
+        "p50": 2.007499999977881,
+        "p95": 2.7155000000202563
+      },
+      "payload": {
+        "avgBytes": 70,
+        "maxBytes": 70
+      },
+      "targetMs": null,
+      "pass": null,
+      "ok": true,
+      "status": 200,
+      "error": null
+    }
+  ],
+  "slowApis": [
+    {
+      "name": "document register (sales_invoice, 3 months)",
+      "url": "http://127.0.0.1:3000/api/reports/document-register?type=sales_invoice&dateFrom=01%2F02%2F2026&dateTo=31%2F05%2F2026",
+      "timing": {
+        "n": 5,
+        "min": 17058.450299999997,
+        "max": 20229.108599999978,
+        "avg": 18968.746419999992,
+        "p50": 19530.539300000004,
+        "p95": 20229.108599999978
+      },
+      "payload": {
+        "avgBytes": 26033610,
+        "maxBytes": 26033610
+      },
+      "targetMs": 4000,
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "sales-returns filter status=open",
+      "url": "http://127.0.0.1:3000/api/sales-returns?page=1&limit=25&status=open",
+      "timing": {
+        "n": 5,
+        "min": 574.5321000000113,
+        "max": 5261.815800000011,
+        "avg": 1805.3354200000017,
+        "p50": 1183.610299999993,
+        "p95": 5261.815800000011
+      },
+      "payload": {
+        "avgBytes": 32845,
+        "maxBytes": 32845
+      },
+      "targetMs": 2000,
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "dashboard",
+      "url": "http://127.0.0.1:3000/api/dashboard",
+      "timing": {
+        "n": 5,
+        "min": 3106.445900000006,
+        "max": 3574.1484999999957,
+        "avg": 3422.0877199999986,
+        "p50": 3471.837200000009,
+        "p95": 3574.1484999999957
+      },
+      "payload": {
+        "avgBytes": 2510,
+        "maxBytes": 2510
+      },
+      "targetMs": 3000,
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "sales-invoices filter status=open",
+      "url": "http://127.0.0.1:3000/api/sales-invoices?page=1&limit=25&status=open",
+      "timing": {
+        "n": 5,
+        "min": 790.4363999999987,
+        "max": 3342.397299999997,
+        "avg": 1358.0230199999992,
+        "p50": 895.1829999999973,
+        "p95": 3342.397299999997
+      },
+      "payload": {
+        "avgBytes": 38414,
+        "maxBytes": 38414
+      },
+      "targetMs": 2000,
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "sales-returns search \"Perf\"",
+      "url": "http://127.0.0.1:3000/api/sales-returns?page=1&limit=25&search=Perf",
+      "timing": {
+        "n": 5,
+        "min": 805.9602000000014,
+        "max": 2290.3377000000037,
+        "avg": 1362.3649800000014,
+        "p50": 1231.3541999999943,
+        "p95": 2290.3377000000037
+      },
+      "payload": {
+        "avgBytes": 32440,
+        "maxBytes": 32440
+      },
+      "targetMs": 1000,
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "sales-invoices search \"Perf\"",
+      "url": "http://127.0.0.1:3000/api/sales-invoices?page=1&limit=25&search=Perf",
+      "timing": {
+        "n": 5,
+        "min": 1196.9344999999958,
+        "max": 2007.3170000000027,
+        "avg": 1501.1175999999991,
+        "p50": 1250.4930000000022,
+        "p95": 2007.3170000000027
+      },
+      "payload": {
+        "avgBytes": 37983,
+        "maxBytes": 37983
+      },
+      "targetMs": 1000,
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "delivery-challans search \"Perf\"",
+      "url": "http://127.0.0.1:3000/api/delivery-challans?page=1&limit=25&search=Perf",
+      "timing": {
+        "n": 5,
+        "min": 1159.571,
+        "max": 1591.8343000000023,
+        "avg": 1359.3309200000003,
+        "p50": 1279.0922000000028,
+        "p95": 1591.8343000000023
+      },
+      "payload": {
+        "avgBytes": 31924,
+        "maxBytes": 31924
+      },
+      "targetMs": 1000,
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "customer names dropdown (full load)",
+      "url": "http://127.0.0.1:3000/api/accounts/names?type=customer",
+      "timing": {
+        "n": 5,
+        "min": 1175.7465000000084,
+        "max": 1465.0116000000125,
+        "avg": 1368.842200000005,
+        "p50": 1400.717300000004,
+        "p95": 1465.0116000000125
+      },
+      "payload": {
+        "avgBytes": 289033,
+        "maxBytes": 289033
+      },
+      "targetMs": 1000,
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "error": null
+    },
+    {
+      "name": "sales-orders search \"Perf\"",
+      "url": "http://127.0.0.1:3000/api/sales-orders?page=1&limit=25&search=Perf",
+      "timing": {
+        "n": 5,
+        "min": 838.2668000000003,
+        "max": 1244.4229999999998,
+        "avg": 1085.9442400000003,
+        "p50": 1116.3824999999997,
+        "p95": 1244.4229999999998
+      },
+      "payload": {
+        "avgBytes": 30838,
+        "maxBytes": 30838
+      },
+      "targetMs": 1000,
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "error": null
+    }
+  ]
+}

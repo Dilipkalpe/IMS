@@ -15,7 +15,7 @@ export interface TransactionListQueryBase {
 
 export const LIST_PAGE_SIZES = [10, 25, 50, 100, 500] as const;
 
-/** Matches CorporateDataGrid column widths for standard sales list (actions + 5 cols). */
+/** @deprecated Prefer buildGridTemplateColumns(columns) from CorporateDataGrid for filter/grid alignment. */
 export const SALES_LIST_GRID_TEMPLATE = '88px 120px 100px minmax(180px, 1fr) 110px 90px';
 export const DEFAULT_LIST_PAGE_SIZE = 25;
 export const LIST_SEARCH_DEBOUNCE_MS = 350;

@@ -1,0 +1,93 @@
+@import './breakpoints';
+
+:root {
+  --scrollbar-size: 8px;
+  --scrollbar-size-thin: 6px;
+  --scrollbar-track: color-mix(in srgb, var(--border, #d5dce4) 35%, transparent);
+  --scrollbar-thumb: color-mix(in srgb, var(--text-secondary, #5a6b7d) 50%, var(--border, #d5dce4));
+  --scrollbar-thumb-hover: color-mix(in srgb, var(--accent, #006b9e) 50%, var(--text-secondary, #5a6b7d));
+  --scrollbar-thumb-active: var(--accent, #006b9e);
+}
+
+@mixin app-scrollbar(
+  $size: var(--scrollbar-size),
+  $track: var(--scrollbar-track),
+  $thumb: var(--scrollbar-thumb),
+  $thumb-hover: var(--scrollbar-thumb-hover)
+) {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #{$thumb} #{$track};
+
+  &::-webkit-scrollbar {
+    width: $size;
+    height: $size;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $track;
+    border-radius: 999px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $thumb;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: 999px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: $thumb-hover;
+    background-clip: padding-box;
+  }
+
+  &::-webkit-scrollbar-thumb:active {
+    background: var(--scrollbar-thumb-active);
+    background-clip: padding-box;
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: $track;
+  }
+}
+
+@mixin app-scrollbar-sidebar {
+  @include app-scrollbar(
+    var(--scrollbar-size),
+    var(--sidebar),
+    var(--sidebar-mid),
+    var(--sidebar-active)
+  );
+}
+
+html {
+  @include app-scrollbar;
+}
+
+body,
+#root,
+.main-window__content-host,
+.transaction-entry-shell__content,
+.refined-screen-shell,
+.module-hub__content,
+.sales-hub__content,
+.procurement-hub__content,
+.corporate-data-grid,
+.si-list-grid-wrap,
+.si-list-table-scroll,
+.si-list-column-filters-scroll,
+.wo-grid-wrap,
+.dash-chart__donut-legend,
+.header-user-menu__notifications-list,
+.header-user-menu__dropdown,
+.bl-dialog__content,
+.confirm-password-dialog,
+.invoice-comm-dialog,
+.si-so-pick__grid-wrap,
+.si-grid-columns-dialog__list {
+  @include app-scrollbar(var(--scrollbar-size-thin));
+}
+
+.main-window__nav-scroll {
+  @include app-scrollbar-sidebar;
+}

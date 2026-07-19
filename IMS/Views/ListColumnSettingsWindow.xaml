@@ -1,0 +1,29 @@
+<Window x:Class="IMS.Views.ListColumnSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Manage Columns"
+        SizeToContent="WidthAndHeight"
+        MinWidth="320"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False">
+    <Border Padding="20" Background="{DynamicResource TransactionPageBackgroundBrush}">
+        <StackPanel>
+            <TextBlock Text="Show / hide columns" FontSize="16" FontWeight="SemiBold"
+                       Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,12" />
+            <ItemsControl x:Name="ColumnList" MaxHeight="360">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <CheckBox Content="{Binding Header}" IsChecked="{Binding IsVisible, Mode=TwoWay}"
+                                  IsEnabled="{Binding CanToggle}" Margin="0,4" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                <Button Style="{StaticResource SecondaryButton}" Content="Reset" MinWidth="88" Margin="0,0,8,0" Click="Reset_Click" />
+                <Button Style="{StaticResource SecondaryButton}" Content="Cancel" MinWidth="88" Margin="0,0,8,0" IsCancel="True" />
+                <Button Style="{StaticResource ActionButton}" Content="Apply" MinWidth="88" IsDefault="True" Click="Apply_Click" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>

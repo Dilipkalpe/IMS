@@ -1,4 +1,5 @@
 import type { DashboardChartSeries } from '../../api/dashboard';
+import { formatLocaleNumber } from '../../utils/formatLocaleNumber';
 
 function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
   const rad = ((angleDeg - 90) * Math.PI) / 180;
@@ -31,7 +32,7 @@ function donutArcPath(
 
 export function DashboardDonutChart({ chart }: { chart: DashboardChartSeries }) {
   const slices = chart.slices ?? [];
-  const total = slices.reduce((sum, slice) => sum + slice.value, 0);
+  const total = slices.reduce((sum, slice) => sum + (Number(slice.value) || 0), 0);
   if (slices.length === 0 || total <= 0) {
     return (
       <div className="dash-chart dash-chart--empty">
@@ -59,7 +60,7 @@ export function DashboardDonutChart({ chart }: { chart: DashboardChartSeries }) 
             startAngle += sweep;
             return (
               <path key={slice.label} d={path} fill={slice.color}>
-                <title>{`${slice.label}: ${slice.value.toLocaleString('en-IN')}`}</title>
+                <title>{`${slice.label}: ${formatLocaleNumber(slice.value)}`}</title>
               </path>
             );
           })}

@@ -3,6 +3,7 @@ import { useWorkspaceTabShortcuts } from '../keyboard/useWorkspaceTabShortcuts';
 import { usePurchaseInvoiceRepositoryOptional } from './repository/PurchaseInvoiceRepositoryContext';
 import { RefinedScreenShell } from '../screens/RefinedScreenShell';
 import '../sales-invoice/sales-invoice.scss';
+import { WorkspaceTabBarStatus } from '../components/transaction/WorkspaceDocumentStatusBanner';
 import { PurchaseInvoiceEntryForm } from './PurchaseInvoiceEntryForm';
 import {
   PurchaseInvoiceWorkspaceProvider,
@@ -67,6 +68,7 @@ function PurchaseInvoiceWorkspaceInner({ lineCount = 0 }: { lineCount?: number }
               + New Tab
             </button>
           </div>
+          <WorkspaceTabBarStatus activeTabId={activeTab?.id} documents={ws.documents} />
         </div>
         <div className="si-workspace__content" role="tabpanel">
           {mountedTabs.map((tab) => (

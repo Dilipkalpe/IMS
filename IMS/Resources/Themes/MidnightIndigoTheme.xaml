@@ -1,0 +1,57 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Midnight Indigo — deep violet sidebar, indigo accent, cool lavender surfaces -->
+    <Color x:Key="Theme.Sidebar">#1E1B4B</Color>
+    <Color x:Key="Theme.SidebarMid">#312E81</Color>
+    <Color x:Key="Theme.SidebarLight">#4338CA</Color>
+    <Color x:Key="Theme.Accent">#6366F1</Color>
+    <Color x:Key="Theme.AccentHover">#4F46E5</Color>
+    <Color x:Key="Theme.Teal">#14B8A6</Color>
+    <Color x:Key="Theme.Background">#F5F3FF</Color>
+    <Color x:Key="Theme.Card">#FFFFFF</Color>
+    <Color x:Key="Theme.Border">#E0E7FF</Color>
+    <Color x:Key="Theme.Text">#1E1B4B</Color>
+    <Color x:Key="Theme.TextMuted">#64748B</Color>
+    <Color x:Key="Theme.TextOnDark">#E0E7FF</Color>
+    <Color x:Key="Theme.TextOnDarkMuted">#A5B4FC</Color>
+    <Color x:Key="Theme.AccentLight">#EEF2FF</Color>
+    <Color x:Key="Theme.PanelMuted">#F8FAFC</Color>
+    <Color x:Key="Theme.Success">#059669</Color>
+    <Color x:Key="Theme.Warning">#D97706</Color>
+    <Color x:Key="Theme.Danger">#DC2626</Color>
+    <Color x:Key="Theme.DangerLight">#FEE2E2</Color>
+    <Color x:Key="Theme.DangerBorder">#FECACA</Color>
+    <Color x:Key="Theme.Gold">#F59E0B</Color>
+    <Color x:Key="Theme.Shadow">#312E81</Color>
+    <Color x:Key="Theme.TextOnLight">#1E1B4B</Color>
+    <Color x:Key="Theme.HeaderBar">#FFFFFF</Color>
+
+    <SolidColorBrush x:Key="SidebarBrush" Color="{StaticResource Theme.Sidebar}" />
+    <SolidColorBrush x:Key="SidebarHoverBrush" Color="{StaticResource Theme.SidebarMid}" />
+    <SolidColorBrush x:Key="SidebarActiveBrush" Color="{StaticResource Theme.SidebarLight}" />
+    <SolidColorBrush x:Key="SidebarSelectedBrush" Color="{StaticResource Theme.Accent}" />
+    <SolidColorBrush x:Key="SidebarBorderBrush" Color="{StaticResource Theme.SidebarMid}" />
+    <SolidColorBrush x:Key="SidebarTextBrush" Color="{StaticResource Theme.TextOnDark}" />
+    <SolidColorBrush x:Key="SidebarTextMutedBrush" Color="{StaticResource Theme.TextOnDarkMuted}" />
+    <SolidColorBrush x:Key="ContentBackgroundBrush" Color="{StaticResource Theme.Background}" />
+    <SolidColorBrush x:Key="CardBrush" Color="{StaticResource Theme.Card}" />
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource Theme.Border}" />
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource Theme.Text}" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource Theme.TextMuted}" />
+    <SolidColorBrush x:Key="TextOnLightBrush" Color="{StaticResource Theme.TextOnLight}" />
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource Theme.Accent}" />
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource Theme.AccentHover}" />
+    <SolidColorBrush x:Key="AccentLightBrush" Color="{StaticResource Theme.AccentLight}" />
+    <SolidColorBrush x:Key="PanelMutedBrush" Color="{StaticResource Theme.PanelMuted}" />
+    <SolidColorBrush x:Key="TealBrush" Color="{StaticResource Theme.Teal}" />
+    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource Theme.Success}" />
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource Theme.Warning}" />
+    <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource Theme.Danger}" />
+    <SolidColorBrush x:Key="DangerLightBrush" Color="{StaticResource Theme.DangerLight}" />
+    <SolidColorBrush x:Key="DangerBorderBrush" Color="{StaticResource Theme.DangerBorder}" />
+    <SolidColorBrush x:Key="GoldBrush" Color="{StaticResource Theme.Gold}" />
+    <SolidColorBrush x:Key="HeaderBarBrush" Color="{StaticResource Theme.HeaderBar}" />
+    <SolidColorBrush x:Key="ThemeShadowBrush" Color="{StaticResource Theme.Shadow}" />
+
+</ResourceDictionary>

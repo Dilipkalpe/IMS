@@ -1,0 +1,97 @@
+<UserControl x:Class="IMS.Views.SalesOrderEntryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:IMS.Views.Controls"
+             mc:Ignorable="d"
+             d:DesignHeight="720" d:DesignWidth="1200"
+             VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+             Focusable="True"
+             Background="{StaticResource TransactionPageBackgroundBrush}">
+    <UserControl.InputBindings>
+        <KeyBinding Key="F11" Command="{Binding SaveAndNextCommand}" />
+        <KeyBinding Key="F12" Command="{Binding PrintSaveNextCommand}" />
+        <KeyBinding Key="F7" Command="{Binding CancelCommand}" />
+    </UserControl.InputBindings>
+    <controls:TransactionEntryShell Title="Sales Order">
+        <Grid Margin="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="232" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource TransactionSectionBorder}" Padding="10" Margin="0,0,6,6">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <UniformGrid Grid.Row="0" Columns="5" Rows="2">
+                        <StackPanel Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="{Binding PrefixFieldLabel}" Style="{StaticResource SubPageFormLabel}" />
+                            <TextBox x:Name="DocPrefixBox"
+                                     Text="{Binding SoPrefix, UpdateSourceTrigger=LostFocus}"
+                                     IsReadOnly="{Binding IsSoPrefixReadOnly}"
+                                     CharacterCasing="Upper" MaxLength="12"
+                                     Style="{StaticResource SubPageFormInput}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="SO No" Style="{StaticResource SubPageFormLabel}" />
+                            <TextBox Text="{Binding BillNo, UpdateSourceTrigger=PropertyChanged}"
+                                     IsReadOnly="{Binding IsBillNoReadOnly}"
+                                     Style="{StaticResource SubPageFormInput}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="SO Date" Style="{StaticResource SubPageFormLabel}" />
+                            <DatePicker SelectedDate="{Binding SoDate, Mode=TwoWay}" Height="28" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="Sales Person" Style="{StaticResource SubPageFormLabel}" />
+                            <ComboBox ItemsSource="{Binding SalesMen}" Text="{Binding SalesMan, UpdateSourceTrigger=PropertyChanged}"
+                                      IsEditable="True" Style="{StaticResource SubPageFormCombo}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="Customer Name" Style="{StaticResource SubPageFormLabel}" />
+                            <ComboBox ItemsSource="{Binding Customers}" SelectedItem="{Binding Customer, Mode=TwoWay}"
+                                      IsEditable="False" Style="{StaticResource SubPageFormCombo}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="Payment Terms" Style="{StaticResource SubPageFormLabel}" />
+                            <TextBox Text="{Binding PaymentTerms, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SubPageFormInput}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="Delivery Priority" Style="{StaticResource SubPageFormLabel}" />
+                            <ComboBox ItemsSource="{Binding DeliveryPriorities}" SelectedItem="{Binding DeliveryPriority, Mode=TwoWay}"
+                                      Style="{StaticResource SubPageFormCombo}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="Billing Address" Style="{StaticResource SubPageFormLabel}" />
+                            <TextBox Text="{Binding BillingAddress, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SubPageFormInput}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubPageFieldCell}">
+                            <TextBlock Text="Shipping Address" Style="{StaticResource SubPageFormLabel}" />
+                            <TextBox Text="{Binding ShippingAddress, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SubPageFormInput}" />
+                        </StackPanel>
+                    </UniformGrid>
+                    <controls:TransactionSalesGstHeaderRow Grid.Row="1" />
+                </Grid>
+            </Border>
+
+            <controls:SalesInvoiceLineItemsPanel Grid.Row="1" Grid.Column="0" Margin="0,0,6,6" />
+
+            <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource TransactionSectionBorder}" Padding="10" Margin="0,0,6,0">
+                <controls:TransactionEntryBottomPanel />
+            </Border>
+
+            <Border Grid.Row="0" Grid.RowSpan="3" Grid.Column="1" Style="{StaticResource TransactionTotalsRailHighlightPanel}" Padding="10,8">
+                <controls:TransactionGstTotalsRail />
+            </Border>
+        </Grid>
+    </controls:TransactionEntryShell>
+</UserControl>

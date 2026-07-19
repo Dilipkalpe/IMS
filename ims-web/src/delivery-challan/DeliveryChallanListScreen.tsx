@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CorporateDataGrid, type DataGridColumn } from '../components/datagrid/CorporateDataGrid';
+import { CorporateDataGrid, buildGridTemplateColumns, type DataGridColumn } from '../components/datagrid/CorporateDataGrid';
 import { ListGridArea } from '../components/loading';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
 import { useNumberedSalesSortField } from '../components/transaction/numberedSalesListScreenHelpers';
@@ -15,6 +15,8 @@ import { useListExportActions } from '../components/transaction/useListExportAct
 import { useListNewShortcut } from '../components/transaction/useListNewShortcut';
 import { useProtectedSalesListActions } from '../components/transaction/useProtectedSalesListActions';
 import { useTransactionListLoader } from '../components/transaction/useTransactionListLoader';
+import { ListStatsRow } from '../components/transaction/ListStatsRow';
+import { buildDataSourceStat, listStat } from '../components/transaction/listStatBuilders';
 import { useListStats } from '../components/transaction/useListStats';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { mapDeliveryChallanToPrintableDocument } from '../document/mappers/deliveryChallanPrintMapper';
@@ -34,7 +36,6 @@ import { useDeliveryChallanListVersion, useDeliveryChallanRepositoryOptional } f
 import type { DeliveryChallanListRow } from './types';
 import type { DeliveryChallanRecord } from './repository/types';
 
-const DC_LIST_GRID_TEMPLATE = '88px 110px 100px minmax(160px, 1fr) 100px 100px 90px';
 const DC_SORTABLE_IDS = ['billNo', 'date', 'customer', 'amount', 'status'];
 
 export function DeliveryChallanListScreen() {
@@ -131,6 +132,11 @@ export function DeliveryChallanListScreen() {
     ];
   }, [canDelete, canEdit, handleDelete, openWorkspace, printRow]);
 
+  const gridTemplate = useMemo(
+    () => buildGridTemplateColumns(columns as DataGridColumn<unknown>[]),
+    [columns],
+  );
+
   const exportColumns = useMemo(
     () => columns.filter((c) => c.id !== 'actions').map((c) => ({ id: c.id, header: String(c.header) })),
     [columns],
@@ -165,19 +171,14 @@ export function DeliveryChallanListScreen() {
     <RefinedScreenShell className="sales-invoice-list-screen">
       <TransactionEntryShell title="Delivery Challan">
         <FormKeyboardScope className="si-list-layout" autoFocusFieldKey="list-search">
-          <div className="si-list-stats">
-            {[
-              { label: 'Total DCs', value: String(stats.total) },
-              { label: 'Open', value: String(stats.open) },
-              { label: 'Draft', value: String(stats.draft) },
-              { label: 'Source', value: repoCtx?.mode === 'http' ? 'API' : 'Local' },
-            ].map((s) => (
-              <div key={s.label} className="si-stat-card">
-                <div className="si-stat-card__value">{s.value}</div>
-                <div className="si-stat-card__label">{s.label}</div>
-              </div>
-            ))}
-          </div>
+          <ListStatsRow
+            stats={[
+              listStat('Total DCs', stats.total, 'total'),
+              listStat('Open', stats.open, 'open'),
+              listStat('Draft', stats.draft, 'draft'),
+              buildDataSourceStat(repoCtx?.mode),
+            ]}
+          />
           <div className="si-list-toolbar">
             <div className="si-list-toolbar__row">
               <button
@@ -234,7 +235,7 @@ export function DeliveryChallanListScreen() {
             ) : null}
           </div>
           <ListGridArea loading={list.loading}>
-            <div className="si-list-column-filters" style={{ gridTemplateColumns: DC_LIST_GRID_TEMPLATE }}>
+            <div className="si-list-column-filters" style={{ gridTemplateColumns: gridTemplate }}>
               <div className="si-list-column-filters__spacer" aria-hidden />
               <input
                 type="search"

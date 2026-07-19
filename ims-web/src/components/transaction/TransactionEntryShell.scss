@@ -1,8 +1,12 @@
+@import '../../styles/breakpoints';
 @import '../../styles/wpf/transaction-tokens.scss';
 
 .transaction-entry-shell {
   background: var(--transaction-page-background);
   flex: 1;
+  min-width: 0;
+  width: 100%;
+  max-width: none;
   min-height: 0;
   height: 100%;
   padding: 0;
@@ -15,6 +19,9 @@
   background: #fff;
   border: 1px solid var(--transaction-shell-border);
   flex: 1;
+  min-width: 0;
+  width: 100%;
+  max-width: none;
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -37,8 +44,34 @@
   padding-left: 4px;
 }
 
+/* Page title lives in main-window header — suppress duplicate title text. */
+.main-window__content-host .transaction-entry-shell__title {
+  display: none;
+}
+
+/* Keep status/actions row; hide bar when it would be empty. */
+.main-window__content-host .transaction-entry-shell__titlebar {
+  background: transparent;
+  border-bottom: 0;
+  justify-content: flex-end;
+  min-height: auto;
+  padding: 4px 8px;
+}
+
+.main-window__content-host .transaction-entry-shell__titlebar:not(:has(.transaction-entry-shell__title-right)) {
+  display: none;
+}
+
+/* Status lives in si-workspace__tabbar — hide duplicate titlebar in tab panels. */
+.si-workspace__panel .transaction-entry-shell__titlebar {
+  display: none;
+}
+
 .transaction-entry-shell__content {
   flex: 1;
+  min-width: 0;
+  width: 100%;
+  max-width: none;
   min-height: 0;
   background: var(--transaction-page-background);
   overflow: hidden;
@@ -46,7 +79,7 @@
   flex-direction: column;
 }
 
-@media (max-width: 1023px) {
+@include bp-down(lg) {
   .transaction-entry-shell {
     height: auto;
     min-height: 100%;

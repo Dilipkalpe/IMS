@@ -1,4 +1,4 @@
-/** API base URL — override with VITE_API_BASE_URL in .env.production */
+/** API base URL — override with VITE_API_BASE_URL in .env.local (dev) or .env.production (build). */
 export function getApiBaseUrl(): string {
   const fromEnv = import.meta.env.VITE_API_BASE_URL as string | undefined;
   if (fromEnv?.trim()) return fromEnv.replace(/\/$/, '');

@@ -1,0 +1,165 @@
+<UserControl x:Class="IMS.Views.SubPageView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="clr-namespace:IMS.Models"
+             xmlns:controls="clr-namespace:IMS.Views.Controls"
+             xmlns:converters="clr-namespace:IMS.Converters"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="900"
+             VerticalAlignment="Stretch"
+             Background="{StaticResource TransactionPageBackgroundBrush}">
+    <UserControl.Resources>
+        <converters:DataUriToImageSourceConverter x:Key="DataUriToImageSource" />
+        <converters:DataUriImageVisibilityConverter x:Key="DataUriImageVisible" />
+        <converters:DataUriImageVisibilityConverter x:Key="DataUriImageHidden" Invert="True" />
+    </UserControl.Resources>
+    <controls:TransactionEntryShell Title="{Binding PageTitle}">
+        <Grid Margin="0" VerticalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Text="{Binding PageDescription}" Style="{StaticResource PageSubtitle}" Margin="0,0,0,10" />
+
+            <Border Grid.Row="1" Style="{StaticResource TransactionSectionBorder}" Padding="12,10" VerticalAlignment="Stretch">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <ItemsControl Grid.Row="0" ItemsSource="{Binding Fields}" VerticalAlignment="Top">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type models:FormFieldViewModel}">
+                                <StackPanel Width="300" Margin="0,0,12,10"
+                                            Style="{StaticResource SubPageFieldCell}"
+                                            Visibility="{Binding IsVisible, Converter={StaticResource BoolToVisibility}}">
+                                    <TextBlock Text="{Binding Label}" Style="{StaticResource SubPageFormLabel}" />
+
+                                    <Grid>
+                                        <Grid.Style>
+                                            <Style TargetType="Grid">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Kind}" Value="{x:Static models:FormFieldKind.Text}">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Kind}" Value="{x:Static models:FormFieldKind.Number}">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Kind}" Value="{x:Static models:FormFieldKind.Date}">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Grid.Style>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Grid.Column="0"
+                                                 Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
+                                                 IsReadOnly="{Binding IsReadOnly}"
+                                                 Style="{StaticResource SubPageFormInput}"
+                                                 Margin="0,0,6,0" />
+                                        <Button Grid.Column="1" Content="Browse"
+                                                Style="{StaticResource SecondaryButton}"
+                                                MinWidth="72" Height="28" Padding="12,0"
+                                                VerticalAlignment="Center"
+                                                Command="{Binding DataContext.BrowseFieldCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                Visibility="{Binding HasBrowseButton, Converter={StaticResource BoolToVisibility}}" />
+                                    </Grid>
+
+                                    <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}">
+                                        <TextBox.Style>
+                                            <Style TargetType="TextBox" BasedOn="{StaticResource SubPageFormMultiline}">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Kind}" Value="{x:Static models:FormFieldKind.Multiline}">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBox.Style>
+                                    </TextBox>
+
+                                    <ComboBox ItemsSource="{Binding Options}" SelectedItem="{Binding SelectedOption, Mode=TwoWay}">
+                                        <ComboBox.Style>
+                                            <Style TargetType="ComboBox" BasedOn="{StaticResource SubPageFormCombo}">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Kind}" Value="{x:Static models:FormFieldKind.Combo}">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ComboBox.Style>
+                                    </ComboBox>
+
+                                    <StackPanel>
+                                        <StackPanel.Style>
+                                            <Style TargetType="StackPanel">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Kind}" Value="{x:Static models:FormFieldKind.Image}">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </StackPanel.Style>
+                                        <Border Width="88" Height="88" Margin="0,4,0,8"
+                                                Background="{DynamicResource CardBrush}"
+                                                BorderBrush="{DynamicResource BorderBrush}"
+                                                BorderThickness="1" CornerRadius="8">
+                                            <Grid>
+                                                <TextBlock Text="No logo" FontSize="11"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                           Visibility="{Binding Value, Converter={StaticResource DataUriImageHidden}}" />
+                                                <Image Source="{Binding Value, Converter={StaticResource DataUriToImageSource}}"
+                                                       Stretch="Uniform" Margin="6"
+                                                       Visibility="{Binding Value, Converter={StaticResource DataUriImageVisible}}" />
+                                            </Grid>
+                                        </Border>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="Upload image" Style="{StaticResource SecondaryButton}" Height="28" Padding="10,0" Margin="0,0,8,0"
+                                                    Command="{Binding DataContext.BrowseFieldCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}" />
+                                            <Button Content="Remove" Style="{StaticResource SecondaryButton}" Height="28" Padding="10,0"
+                                                    Command="{Binding DataContext.ClearFieldCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding ValidationMessage}" Style="{StaticResource SubPageFormLabel}" Margin="0,6,0,0"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,8,0,0">
+                        <Button Style="{StaticResource PrimaryButton}" Command="{Binding SaveCommand}" MinWidth="110" Margin="0,0,10,0">
+                            <TextBlock Text="Save" Foreground="White" FontWeight="SemiBold" FontSize="12" />
+                        </Button>
+                        <Button Style="{StaticResource SecondaryButton}" Command="{Binding CancelCommand}" MinWidth="110">
+                            <TextBlock Text="Cancel" FontSize="12" />
+                        </Button>
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="2" Style="{StaticResource SubPageFooterNote}"
+                               Text="Save returns to the list. Required fields are marked with *." />
+                </Grid>
+            </Border>
+        </Grid>
+    </controls:TransactionEntryShell>
+</UserControl>

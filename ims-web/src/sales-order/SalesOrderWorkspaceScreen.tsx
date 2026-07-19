@@ -3,6 +3,7 @@ import { useWorkspaceTabShortcuts } from '../keyboard/useWorkspaceTabShortcuts';
 import { useSalesOrderRepositoryOptional } from './repository/SalesOrderRepositoryContext';
 import { RefinedScreenShell } from '../screens/RefinedScreenShell';
 import '../sales-invoice/sales-invoice.scss';
+import { WorkspaceTabBarStatus } from '../components/transaction/WorkspaceDocumentStatusBanner';
 import { SalesOrderEntryForm } from './SalesOrderEntryForm';
 import { SalesOrderWorkspaceProvider, useSalesOrderWorkspace } from './workspace/SalesOrderWorkspaceProvider';
 
@@ -64,6 +65,7 @@ function SalesOrderWorkspaceInner({ lineCount = 0 }: { lineCount?: number }) {
               + New Bill
             </button>
           </div>
+          <WorkspaceTabBarStatus activeTabId={activeTab?.id} documents={ws.documents} />
         </div>
         <div className="si-workspace__content" role="tabpanel">
           {mountedTabs.map((tab) => (

@@ -158,20 +158,7 @@ export function SalesInvoiceEntryForm({
   const isEdit = doc.isEdit;
 
   return (
-    <TransactionEntryShell
-      title="Sales Invoice"
-      titleRight={
-        doc.statusMessage || doc.isDirty || doc.isSaving ? (
-          <span className="si-status-banner" role="status">
-            {doc.statusMessage}
-            {doc.isDirty ? ' · Unsaved changes' : ''}
-            {doc.isSaving ? ' · Saving…' : ''}
-            {doc.isInterState ? ' · IGST (inter-state)' : doc.header.placeOfSupply ? ' · CGST+SGST (intra-state)' : ''}
-            {doc.gstWarnings.length > 0 ? ` · ${doc.gstWarnings[0].message}` : ''}
-          </span>
-        ) : null
-      }
-    >
+    <TransactionEntryShell title="Sales Invoice">
       <LoadingHost loading={doc.isLoading} title="Loading document…" className="loading-host--entry">
       {pickDialog}
       <FormKeyboardScope

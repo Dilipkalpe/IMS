@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react';
+import { Children, isValidElement, type ReactElement, type ReactNode } from 'react';
+import { TransactionListPagination } from '../transaction/TransactionListPagination';
 import { LoadingHost } from './LoadingHost';
 
 export interface ListGridAreaProps {
@@ -9,6 +10,10 @@ export interface ListGridAreaProps {
   children: ReactNode;
 }
 
+function isListPaginationNode(child: ReactNode): child is ReactElement {
+  return isValidElement(child) && child.type === TransactionListPagination;
+}
+
 /** List/report grid region with the standard loading overlay. */
 export function ListGridArea({
   loading = false,
@@ -17,6 +22,10 @@ export function ListGridArea({
   className,
   children,
 }: ListGridAreaProps) {
+  const items = Children.toArray(children);
+  const footer = items.filter(isListPaginationNode);
+  const tableContent = items.filter((child) => !isListPaginationNode(child));
+
   return (
     <LoadingHost
       loading={loading}
@@ -24,7 +33,8 @@ export function ListGridArea({
       subtitle={subtitle}
       className={['si-list-grid-wrap', className].filter(Boolean).join(' ')}
     >
-      {children}
+      <div className="si-list-table-scroll">{tableContent}</div>
+      {footer}
     </LoadingHost>
   );
 }

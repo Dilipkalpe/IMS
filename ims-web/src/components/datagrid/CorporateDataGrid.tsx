@@ -23,6 +23,20 @@ export interface DataGridColumn<T> {
   setValue?: (row: T, value: string) => T;
 }
 
+/** Shared grid track sizing for CorporateDataGrid headers, rows, and list filter rows. */
+export function buildGridTemplateColumns(columns: DataGridColumn<unknown>[]): string {
+  return columns
+    .map((c) => {
+      if (c.width === '*') {
+        const min = c.minWidth ?? 120;
+        return `minmax(${min}px, 1fr)`;
+      }
+      if (typeof c.width === 'number') return `${c.width}px`;
+      return c.width ?? '80px';
+    })
+    .join(' ');
+}
+
 export interface CorporateDataGridProps<T extends { id: string }> {
   columns: DataGridColumn<T>[];
   data: T[];
@@ -362,14 +376,7 @@ function CorporateDataGridInner<T extends { id: string }>(
   }, []);
 
   const gridTemplate = useMemo(
-    () =>
-      columns
-        .map((c) => {
-          if (c.width === '*') return 'minmax(120px, 1fr)';
-          if (typeof c.width === 'number') return `${c.width}px`;
-          return c.width ?? '80px';
-        })
-        .join(' '),
+    () => buildGridTemplateColumns(columns as DataGridColumn<unknown>[]),
     [columns],
   );
 
@@ -426,7 +433,7 @@ function CorporateDataGridInner<T extends { id: string }>(
         style={{ minHeight: minHeight - headerHeight }}
         onScroll={handleScroll}
       >
-        <div style={{ paddingTop, paddingBottom }}>
+        <div className="corporate-data-grid__body-inner" style={{ paddingTop, paddingBottom }}>
           {data.length === 0 && emptyMessage ? (
             <div className="corporate-data-grid__empty" role="status">
               {emptyMessage}

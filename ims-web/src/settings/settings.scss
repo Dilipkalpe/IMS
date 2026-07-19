@@ -13,6 +13,11 @@
   margin-bottom: 4px;
 }
 
+/* Title is shown in the main-window header. */
+.settings-screen__header .wpf-pagetitle {
+  display: none;
+}
+
 .settings-panel--danger {
   border-color: var(--danger-border, #f5c6cb);
 }

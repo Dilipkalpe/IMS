@@ -1,0 +1,55 @@
+<UserControl x:Class="IMS.Views.Controls.StatCounterCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             MinWidth="0"
+             MinHeight="64"
+             Margin="0"
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch"
+             Cursor="Hand">
+    <Border>
+        <Border.Style>
+            <Style TargetType="Border" BasedOn="{StaticResource SoListStatCard}">
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="BorderBrush"
+                        Value="{Binding AccentColor, Converter={StaticResource HexToBrushConverter}}" />
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background"
+                                Value="{Binding AccentColor, Converter={StaticResource HexToLightBrushConverter}}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="4" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0" CornerRadius="3" Margin="0,2,8,2"
+                    Background="{Binding AccentColor, Converter={StaticResource HexToBrushConverter}}" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Text="{Binding Label}"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           FontSize="11"
+                           TextTrimming="CharacterEllipsis" />
+                <TextBlock Text="{Binding Value}"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           Foreground="{Binding AccentColor, Converter={StaticResource HexToBrushConverter}}"
+                           Margin="0,2,0,0"
+                           TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+            <Border Grid.Column="2">
+                <Border.Style>
+                    <Style TargetType="Border" BasedOn="{StaticResource SoListStatIconHost}">
+                        <Setter Property="Background"
+                                Value="{Binding AccentColor, Converter={StaticResource HexToBrushConverter}}" />
+                    </Style>
+                </Border.Style>
+                <TextBlock Style="{StaticResource SoListStatIconGlyph}" />
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

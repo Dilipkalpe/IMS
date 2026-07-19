@@ -19,7 +19,7 @@ export function TransactionListPagination({
   onPageChange,
   onPageSizeChange,
 }: TransactionListPaginationProps) {
-  const pageInfo = `Page ${page} of ${totalPages} · ${totalRecords.toLocaleString()} total · ${pageSize} per page`;
+  const pageInfo = `Page ${page} of ${totalPages} · ${(totalRecords ?? 0).toLocaleString('en-IN')} total · ${pageSize} per page`;
 
   return (
     <div className="si-list-pagination si-list-pagination--paged">

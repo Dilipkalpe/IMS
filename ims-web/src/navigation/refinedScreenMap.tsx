@@ -5,6 +5,7 @@ import { GrnListRouteScreen, GrnWorkspaceRouteScreen } from '../grn/routes';
 import { PurchaseOrderListRouteScreen, PurchaseOrderWorkspaceRouteScreen } from '../purchase-order/routes';
 import { QuotationListRouteScreen, QuotationWorkspaceRouteScreen } from '../quotation/routes';
 import { DeliveryChallanListRouteScreen, DeliveryChallanWorkspaceRouteScreen } from '../delivery-challan/routes';
+import { hubRouteScreens } from '../hub/routes';
 import { SalesOrderListRouteScreen, SalesOrderWorkspaceRouteScreen } from '../sales-order/routes';
 import { SalesReturnListRouteScreen, SalesReturnWorkspaceRouteScreen } from '../sales-return/routes';
 import { SalesInvoiceListRouteScreen, SalesInvoiceWorkspaceRouteScreen } from '../sales-invoice/routes';
@@ -22,7 +23,6 @@ import {
   MainGroupsListRouteScreen,
   PayrollEmployeesListRouteScreen,
   PayrollRunsListRouteScreen,
-  ProductionOrdersListRouteScreen,
   ProductTypesListRouteScreen,
   ProductsListRouteScreen,
   PurchaseUomListRouteScreen,
@@ -32,6 +32,10 @@ import {
   SuppliersListRouteScreen,
   WarehousesListRouteScreen,
 } from '../masters/routes';
+import {
+  WorkOrderEntryRouteScreen,
+  WorkOrderListRouteScreen,
+} from '../work-order/routes';
 import {
   RoleFormRouteScreen,
   RoleMasterListRouteScreen,
@@ -137,6 +141,9 @@ export const refinedScreenMap: Record<string, ComponentType> = {
   [NavKeys.PurchaseInvoiceRegister]: PurchaseInvoiceRegisterRouteScreen,
   [NavKeys.PurchaseReturnRegister]: PurchaseReturnRegisterRouteScreen,
 
+  // Module hubs — tabbed landing pages
+  ...hubRouteScreens,
+
   // Sales Invoice — production workflow (list → workspace → entry)
   [NavKeys.SalesInvoice]: SalesInvoiceListRouteScreen,
   [NavKeys.PurchaseInvoice]: PurchaseInvoiceListRouteScreen,
@@ -177,7 +184,7 @@ export const refinedScreenMap: Record<string, ComponentType> = {
 
   // Operations & payroll
   [NavKeys.StockTransfer]: StockTransferListRouteScreen,
-  [NavKeys.ProductionOrders]: ProductionOrdersListRouteScreen,
+  [NavKeys.ProductionOrders]: WorkOrderListRouteScreen,
   [NavKeys.Bom]: BomListRouteScreen,
   [NavKeys.PayrollEmployees]: PayrollEmployeesListRouteScreen,
   [NavKeys.Attendance]: AttendanceListRouteScreen,
@@ -201,6 +208,7 @@ export const refinedScreenMap: Record<string, ComponentType> = {
   'grn-entry': GrnWorkspaceRouteScreen,
   'purchase-invoice-entry': PurchaseInvoiceWorkspaceRouteScreen,
   'purchase-return-entry': PurchaseReturnWorkspaceRouteScreen,
+  'work-order-entry': WorkOrderEntryRouteScreen,
 
   // Master form sub-pages
   'account-master-form': AccountMasterFormRouteScreen,

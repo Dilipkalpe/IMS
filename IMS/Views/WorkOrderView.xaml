@@ -1,0 +1,388 @@
+<UserControl x:Class="IMS.Views.WorkOrderView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:IMS.Converters"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:IMS.Views.Controls"
+             mc:Ignorable="d"
+             d:DesignHeight="720" d:DesignWidth="1200"
+             VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+             Background="{StaticResource TransactionPageBackgroundBrush}">
+    <UserControl.Resources>
+        <conv:BoolToBrushConverter x:Key="ShortStockBrush" TrueBrush="Red" FalseBrush="Black" />
+        <Style x:Key="WoGridAmountCell" TargetType="TextBlock">
+            <Setter Property="TextAlignment" Value="Right" />
+        </Style>
+        <Style x:Key="WoGridStageCell" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="ToolTip" Value="{Binding StageHistoryToolTip}" />
+        </Style>
+        <Style x:Key="WoGridLastEventCell" TargetType="TextBlock">
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            <Setter Property="ToolTip" Value="{Binding StageHistoryToolTip}" />
+        </Style>
+        <Style x:Key="WoSectionTitleBar" TargetType="Border" BasedOn="{StaticResource TransactionTitleBar}">
+            <Setter Property="Padding" Value="8,4" />
+        </Style>
+        <Style x:Key="WoStretchLineGrid" TargetType="DataGrid" BasedOn="{StaticResource TransactionLineGrid}">
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+        <Style x:Key="WoCompactInput" TargetType="TextBox" BasedOn="{StaticResource SubPageFormInput}">
+            <Setter Property="Height" Value="24" />
+            <Setter Property="MinWidth" Value="48" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="WoLookupButton" TargetType="Button" BasedOn="{StaticResource SalesSideButtonSecondary}">
+            <Setter Property="Width" Value="72" />
+            <Setter Property="MinWidth" Value="72" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="Padding" Value="6,2" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="BorderBrush" Value="{StaticResource TransactionGridBorderBrush}" />
+            <Setter Property="Background" Value="White" />
+        </Style>
+    </UserControl.Resources>
+
+    <controls:TransactionEntryShell Title="{Binding PageTitle}"
+                                    ContentMargin="4"
+                                    VerticalAlignment="Stretch"
+                                    HorizontalAlignment="Stretch">
+        <controls:TransactionEntryShell.TitleRightHeader>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Final qty" Style="{StaticResource TransactionInlineFieldLabel}" Margin="0,0,6,0" />
+                <Border BorderBrush="{StaticResource TransactionGridBorderBrush}" BorderThickness="1"
+                        Background="White" Padding="8,2" MinWidth="64">
+                    <TextBlock Text="{Binding FinalQty}" FontSize="12" FontWeight="Bold" TextAlignment="Right" />
+                </Border>
+            </StackPanel>
+        </controls:TransactionEntryShell.TitleRightHeader>
+
+        <Grid VerticalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Compact header — two columns, inline labels -->
+            <Border Grid.Row="0" Style="{StaticResource TransactionSectionBorder}" Padding="8,6" Margin="0,0,0,4" ClipToBounds="False">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" MinWidth="320" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition Width="*" MinWidth="320" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left column -->
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0" Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="72" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="130" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Job Work No" Style="{StaticResource TransactionInlineFieldLabel}" Margin="0,0,6,0" />
+                            <TextBox Grid.Column="1" Text="{Binding ProductionId, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource WoCompactInput}" IsReadOnly="True" Background="#F5F5F5" Margin="0,0,12,0" />
+                            <TextBlock Grid.Column="2" Text="Date" Style="{StaticResource TransactionInlineFieldLabel}" Margin="0,0,6,0" />
+                            <DatePicker Grid.Column="3" SelectedDate="{Binding ProductionDate, Mode=TwoWay}" Height="24" />
+                        </Grid>
+                        <Grid Grid.Row="1" Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="56" />
+                                <ColumnDefinition Width="76" />
+                                <ColumnDefinition Width="76" />
+                                <ColumnDefinition Width="*" MinWidth="60" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Item" Style="{StaticResource TransactionInlineFieldLabel}"
+                                       VerticalAlignment="Center" Margin="0,0,4,0" />
+                            <TextBox Grid.Column="1" Text="{Binding ManufacturingItemId, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource WoCompactInput}" Margin="0,0,4,0" />
+                            <Button Grid.Column="2" Content="Look up" Command="{Binding LookupManufacturingItemCommand}"
+                                    Style="{StaticResource WoLookupButton}" Margin="0,0,4,0"
+                                    ToolTip="Select or resolve manufacturing item" />
+                            <TextBox Grid.Column="3" Text="{Binding ManufacturingItemName, Mode=OneWay}"
+                                     Style="{StaticResource WoCompactInput}" IsReadOnly="True" Background="#F5F5F5" />
+                        </Grid>
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="56" />
+                                <ColumnDefinition Width="76" />
+                                <ColumnDefinition Width="76" />
+                                <ColumnDefinition Width="*" MinWidth="60" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Machine" Style="{StaticResource TransactionInlineFieldLabel}"
+                                       VerticalAlignment="Center" Margin="0,0,4,0" />
+                            <TextBox Grid.Column="1" Text="{Binding MachineCode, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource WoCompactInput}" Margin="0,0,4,0" />
+                            <Button Grid.Column="2" Content="Look up" Command="{Binding LookupMachineCommand}"
+                                    Style="{StaticResource WoLookupButton}" Margin="0,0,4,0"
+                                    ToolTip="Select or resolve machine" />
+                            <TextBox Grid.Column="3" Text="{Binding MachineName, Mode=OneWay}"
+                                     Style="{StaticResource WoCompactInput}" IsReadOnly="True" Background="#F5F5F5" />
+                        </Grid>
+                    </Grid>
+
+                    <!-- Right column -->
+                    <Grid Grid.Column="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0" Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="56" />
+                                <ColumnDefinition Width="76" />
+                                <ColumnDefinition Width="76" />
+                                <ColumnDefinition Width="*" MinWidth="60" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Operator" Style="{StaticResource TransactionInlineFieldLabel}"
+                                       VerticalAlignment="Center" Margin="0,0,4,0" />
+                            <TextBox Grid.Column="1" Text="{Binding OperatorId, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource WoCompactInput}" Margin="0,0,4,0" />
+                            <Button Grid.Column="2" Content="Look up" Command="{Binding LookupOperatorCommand}"
+                                    Style="{StaticResource WoLookupButton}" Margin="0,0,4,0"
+                                    ToolTip="Select or resolve operator (user)" />
+                            <TextBox Grid.Column="3" Text="{Binding OperatorName, Mode=OneWay}"
+                                     Style="{StaticResource WoCompactInput}" IsReadOnly="True" Background="#F5F5F5" />
+                        </Grid>
+                        <Grid Grid.Row="1" Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" MinWidth="60" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" MinWidth="60" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="56" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Start" Style="{StaticResource TransactionInlineFieldLabel}" Margin="0,0,6,0" />
+                            <TextBox Grid.Column="1" Text="{Binding StartTimeText, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource WoCompactInput}" Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="2" Text="End" Style="{StaticResource TransactionInlineFieldLabel}" Margin="0,0,6,0" />
+                            <TextBox Grid.Column="3" Text="{Binding EndTimeText, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource WoCompactInput}" Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="4" Text="Min" Style="{StaticResource TransactionInlineFieldLabel}" Margin="0,0,6,0" />
+                            <TextBox Grid.Column="5" Text="{Binding TotalDurationMinutes, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource WoCompactInput}" TextAlignment="Right" />
+                        </Grid>
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="56" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="56" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Produce" Style="{StaticResource TransactionInlineFieldLabel}" Margin="0,0,6,0" />
+                            <TextBox Grid.Column="1" Text="{Binding ProduceQty, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource WoCompactInput}" TextAlignment="Right" Margin="0,0,12,0" />
+                            <TextBlock Grid.Column="2" Text="Rejected" Style="{StaticResource TransactionInlineFieldLabel}" Margin="0,0,6,0" />
+                            <TextBox Grid.Column="3" Text="{Binding RejectedQty, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource WoCompactInput}" TextAlignment="Right" />
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Godown & BOM -->
+            <Border Grid.Row="1" Style="{StaticResource TransactionScanBar}" Padding="8,4" Margin="0,0,0,4">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="130" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="From godown" Style="{StaticResource SalesFieldLabel}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                    <ComboBox Grid.Column="1" ItemsSource="{Binding Godowns}" SelectedItem="{Binding FromGodown, Mode=TwoWay}"
+                              Style="{StaticResource SubPageFormCombo}" Height="24" VerticalAlignment="Center" />
+                    <Button Grid.Column="2" Content="Generate from BOM" Command="{Binding GenerateItemsCommand}"
+                            Style="{StaticResource WoLookupButton}" MinWidth="128" Width="Auto" Height="24"
+                            Margin="12,0,6,0" VerticalAlignment="Center"
+                            ToolTip="Load raw materials and consumables from BOM" />
+                    <Button Grid.Column="3" Content="Open BOM" Command="{Binding OpenBomCommand}"
+                            Style="{StaticResource WoLookupButton}" MinWidth="88" Width="Auto" Height="24"
+                            VerticalAlignment="Center" ToolTip="Open BOM designer for selected item" />
+                </Grid>
+            </Border>
+
+            <!-- Grids fill remaining height; scroll inside grid only -->
+            <Grid Grid.Row="2" VerticalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" MinWidth="200" />
+                    <ColumnDefinition Width="6" />
+                    <ColumnDefinition Width="*" MinWidth="180" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource TransactionShellBorder}" VerticalAlignment="Stretch">
+                    <Grid VerticalAlignment="Stretch">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Border Grid.Row="0" Style="{StaticResource WoSectionTitleBar}">
+                            <TextBlock Text="1. Raw materials" Style="{StaticResource TransactionTitleText}" FontSize="12" />
+                        </Border>
+                        <Border Grid.Row="1" Padding="0" VerticalAlignment="Stretch"
+                                BorderBrush="{StaticResource TransactionGridBorderBrush}" BorderThickness="1" Background="White">
+                            <DataGrid Style="{StaticResource WoStretchLineGrid}" ItemsSource="{Binding RawMaterials}"
+                                      SelectionUnit="Cell" SelectionMode="Single">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource TransactionLineGridColumnHeader}" />
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.CellStyle>
+                                    <Style TargetType="DataGridCell" BasedOn="{StaticResource TransactionLineGridCell}" />
+                                </DataGrid.CellStyle>
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow" BasedOn="{StaticResource TransactionLineGridRow}" />
+                                </DataGrid.RowStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Sr" Binding="{Binding SrNo}" Width="40" IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Item ID" Binding="{Binding ItemId}" Width="70" IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Item name" Binding="{Binding ItemName}" Width="*" MinWidth="48" IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Stage" Binding="{Binding StageDisplay}" Width="72" IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource WoGridStageCell}" />
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Last event" Binding="{Binding LastEventSummary}" Width="140" MinWidth="72" IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource WoGridLastEventCell}" />
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Src" Binding="{Binding AssignmentDisplay}" Width="44" IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Unit" Binding="{Binding Unit}" Width="40" IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Req" Binding="{Binding ReqQty, StringFormat=N0}" Width="56" IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource WoGridAmountCell}" />
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Avail" Binding="{Binding AvailableQty, StringFormat=N0}" Width="56" IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource WoGridAmountCell}">
+                                                <Setter Property="FontWeight" Value="Bold" />
+                                                <Setter Property="Foreground" Value="{Binding IsAvailableShort, Converter={StaticResource ShortStockBrush}}" />
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Rate" Binding="{Binding Rate, StringFormat=N0}" Width="60" IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource WoGridAmountCell}" />
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat=N0}" Width="68" IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource WoGridAmountCell}" />
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource TransactionShellBorder}" VerticalAlignment="Stretch">
+                    <Grid VerticalAlignment="Stretch">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Border Grid.Row="0" Style="{StaticResource WoSectionTitleBar}">
+                            <TextBlock Text="2. Consumables" Style="{StaticResource TransactionTitleText}" FontSize="12" />
+                        </Border>
+                        <Border Grid.Row="1" Padding="0" VerticalAlignment="Stretch"
+                                BorderBrush="{StaticResource TransactionGridBorderBrush}" BorderThickness="1" Background="White">
+                            <DataGrid Style="{StaticResource WoStretchLineGrid}" ItemsSource="{Binding Consumables}"
+                                      SelectionUnit="Cell" SelectionMode="Single">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource TransactionLineGridColumnHeader}" />
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.CellStyle>
+                                    <Style TargetType="DataGridCell" BasedOn="{StaticResource TransactionLineGridCell}" />
+                                </DataGrid.CellStyle>
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow" BasedOn="{StaticResource TransactionLineGridRow}" />
+                                </DataGrid.RowStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Sr" Binding="{Binding SrNo}" Width="40" IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Material" Binding="{Binding Material}" Width="*" MinWidth="48" IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Stage" Binding="{Binding StageDisplay}" Width="72" IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource WoGridStageCell}" />
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Last event" Binding="{Binding LastEventSummary}" Width="140" MinWidth="72" IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource WoGridLastEventCell}" />
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Src" Binding="{Binding AssignmentDisplay}" Width="44" IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Qty" Binding="{Binding Qty, StringFormat=N0}" Width="48" IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource WoGridAmountCell}" />
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Rate" Binding="{Binding Rate, StringFormat=N0}" Width="60" IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource WoGridAmountCell}" />
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat=N0}" Width="68" IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource WoGridAmountCell}" />
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Footer: totals + actions in one row -->
+            <Grid Grid.Row="3" Margin="0,4,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Raw:" Style="{StaticResource TransactionInlineFieldLabel}" FontWeight="SemiBold" Margin="0,0,4,0" />
+                    <Border BorderBrush="{StaticResource TransactionGridBorderBrush}" BorderThickness="1" Background="White"
+                            Padding="8,2" MinWidth="88" Margin="0,0,12,0">
+                        <TextBlock Text="{Binding RawMaterialAmount}" TextAlignment="Right" FontWeight="SemiBold" FontSize="12" />
+                    </Border>
+                    <TextBlock Text="Consumable:" Style="{StaticResource TransactionInlineFieldLabel}" FontWeight="SemiBold" Margin="0,0,4,0" />
+                    <Border BorderBrush="{StaticResource TransactionGridBorderBrush}" BorderThickness="1" Background="White"
+                            Padding="8,2" MinWidth="88" Margin="0,0,12,0">
+                        <TextBlock Text="{Binding ConsumableAmount}" TextAlignment="Right" FontWeight="SemiBold" FontSize="12" />
+                    </Border>
+                    <TextBlock Text="Total:" Style="{StaticResource TransactionInlineFieldLabel}" FontWeight="Bold" Margin="0,0,4,0" />
+                    <Border BorderBrush="{StaticResource TransactionGridBorderBrush}" BorderThickness="1" Background="White"
+                            Padding="8,2" MinWidth="100">
+                        <TextBlock Text="{Binding ProductionAmount}" TextAlignment="Right" FontWeight="Bold" FontSize="12" />
+                    </Border>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Save" Style="{StaticResource PrimaryButton}" Command="{Binding SaveCommand}"
+                            MinWidth="96" Height="28" Margin="0,0,8,0" FontWeight="SemiBold" FontSize="12" />
+                    <Button Content="Cancel" Style="{StaticResource SalesSideButtonSecondary}" Command="{Binding CancelCommand}"
+                            MinWidth="96" Height="28" FontSize="12" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </controls:TransactionEntryShell>
+</UserControl>

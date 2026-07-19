@@ -1,0 +1,289 @@
+<UserControl x:Class="IMS.Views.Controls.EntryLineItemsPanel"
+
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+
+             xmlns:conv="clr-namespace:IMS.Converters"
+             xmlns:local="clr-namespace:IMS.Views.Controls"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+
+             d:DesignHeight="280" d:DesignWidth="900"
+
+             VerticalAlignment="Stretch">
+
+    <UserControl.Resources>
+
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+
+        <Style x:Key="LineItemCombo" TargetType="ComboBox">
+
+            <Setter Property="IsEditable" Value="True" />
+
+            <Setter Property="Height" Value="22" />
+
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+
+            <Setter Property="FontSize" Value="12" />
+
+        </Style>
+
+    </UserControl.Resources>
+
+
+
+    <Grid>
+
+        <Grid.RowDefinitions>
+
+            <RowDefinition Height="Auto" />
+
+            <RowDefinition Height="*" MinHeight="224" />
+
+        </Grid.RowDefinitions>
+
+
+
+        <local:ProductScanPickerBar x:Name="ProductScanPicker" Grid.Row="0" Margin="0,0,0,4" />
+
+
+
+        <Border Grid.Row="1" Padding="0" VerticalAlignment="Stretch"
+
+                BorderBrush="{StaticResource TransactionGridBorderBrush}" BorderThickness="1" Background="White">
+
+            <DataGrid x:Name="LineItemsGrid" Style="{StaticResource TransactionLineGrid}"
+
+                      ItemsSource="{Binding LineItems}"
+
+                      SelectionUnit="Cell"
+
+                      SelectionMode="Single"
+
+                      PreviewMouseLeftButtonDown="LineItemsGrid_OnPreviewMouseLeftButtonDown"
+
+                      PreviewKeyDown="LineItemsGrid_OnPreviewKeyDown">
+
+                <DataGrid.ColumnHeaderStyle>
+
+                    <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource TransactionLineGridColumnHeader}" />
+
+                </DataGrid.ColumnHeaderStyle>
+
+                <DataGrid.CellStyle>
+
+                    <Style TargetType="DataGridCell" BasedOn="{StaticResource TransactionLineGridCell}" />
+
+                </DataGrid.CellStyle>
+
+                <DataGrid.RowStyle>
+
+                    <Style TargetType="DataGridRow" BasedOn="{StaticResource TransactionLineGridRow}" />
+
+                </DataGrid.RowStyle>
+
+                <DataGrid.Columns>
+
+                    <DataGridTemplateColumn Header="" Width="40" IsReadOnly="True">
+
+                        <DataGridTemplateColumn.CellTemplate>
+
+                            <DataTemplate>
+
+                                <Button ToolTip="Delete line" Width="28" Height="24" Padding="0" Margin="2,0"
+
+                                        HorizontalAlignment="Center" VerticalAlignment="Center"
+
+                                        Background="{DynamicResource DangerLightBrush}"
+
+                                        BorderBrush="{DynamicResource DangerBorderBrush}" BorderThickness="1"
+
+                                        Cursor="Hand"
+
+                                        Command="{Binding DataContext.DeleteLineCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+
+                                        CommandParameter="{Binding}">
+
+                                    <TextBlock Text="&#xE74D;" FontFamily="{StaticResource IconFont}" FontSize="13"
+
+                                               Foreground="{DynamicResource DangerBrush}"
+
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                                </Button>
+
+                            </DataTemplate>
+
+                        </DataGridTemplateColumn.CellTemplate>
+
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn Header="Sr." Binding="{Binding Sr}" Width="36" IsReadOnly="True" />
+
+                    <DataGridTextColumn Header="Code" Binding="{Binding ProductRetailCode}" Width="90" IsReadOnly="True" />
+
+                    <DataGridTextColumn Header="Item Description" Binding="{Binding ItemDescription}" Width="*" MinWidth="120" IsReadOnly="True" />
+
+                    <DataGridTextColumn Header="Qty" Width="52" IsReadOnly="False"
+
+                                        Binding="{Binding Qty, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+
+                        <DataGridTextColumn.EditingElementStyle>
+
+                            <Style TargetType="TextBox">
+
+                                <Setter Property="BorderThickness" Value="0" />
+
+                                <Setter Property="Padding" Value="2,0" />
+
+                                <Setter Property="VerticalContentAlignment" Value="Center" />
+
+                                <Setter Property="FontSize" Value="12" />
+
+                            </Style>
+
+                        </DataGridTextColumn.EditingElementStyle>
+
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Header="Rate" Width="72" IsReadOnly="False"
+
+                                        Binding="{Binding Rate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+
+                        <DataGridTextColumn.EditingElementStyle>
+
+                            <Style TargetType="TextBox">
+
+                                <Setter Property="BorderThickness" Value="0" />
+
+                                <Setter Property="Padding" Value="2,0" />
+
+                                <Setter Property="VerticalContentAlignment" Value="Center" />
+
+                                <Setter Property="FontSize" Value="12" />
+
+                            </Style>
+
+                        </DataGridTextColumn.EditingElementStyle>
+
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Header="Disc %" Width="56" IsReadOnly="False"
+
+                                        Binding="{Binding DiscPercent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+
+                        <DataGridTextColumn.EditingElementStyle>
+
+                            <Style TargetType="TextBox">
+
+                                <Setter Property="BorderThickness" Value="0" />
+
+                                <Setter Property="Padding" Value="2,0" />
+
+                                <Setter Property="VerticalContentAlignment" Value="Center" />
+
+                                <Setter Property="FontSize" Value="12" />
+
+                            </Style>
+
+                        </DataGridTextColumn.EditingElementStyle>
+
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Header="Disc Val" Width="64" IsReadOnly="False"
+
+                                        Binding="{Binding DiscValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+
+                        <DataGridTextColumn.EditingElementStyle>
+
+                            <Style TargetType="TextBox">
+
+                                <Setter Property="BorderThickness" Value="0" />
+
+                                <Setter Property="Padding" Value="2,0" />
+
+                                <Setter Property="VerticalContentAlignment" Value="Center" />
+
+                                <Setter Property="FontSize" Value="12" />
+
+                            </Style>
+
+                        </DataGridTextColumn.EditingElementStyle>
+
+                    </DataGridTextColumn>
+
+                    <DataGridComboBoxColumn Header="Tax" Width="72"
+
+                                            SelectedItemBinding="{Binding TaxType, UpdateSourceTrigger=PropertyChanged}">
+
+                        <DataGridComboBoxColumn.ElementStyle>
+
+                            <Style TargetType="ComboBox" BasedOn="{StaticResource LineItemCombo}">
+
+                                <Setter Property="IsEditable" Value="False" />
+
+                                <Setter Property="ItemsSource" Value="{Binding DataContext.LineTaxTypeOptions, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+
+                            </Style>
+
+                        </DataGridComboBoxColumn.ElementStyle>
+
+                        <DataGridComboBoxColumn.EditingElementStyle>
+
+                            <Style TargetType="ComboBox" BasedOn="{StaticResource LineItemCombo}">
+
+                                <Setter Property="IsEditable" Value="False" />
+
+                                <Setter Property="ItemsSource" Value="{Binding DataContext.LineTaxTypeOptions, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+
+                            </Style>
+
+                        </DataGridComboBoxColumn.EditingElementStyle>
+
+                    </DataGridComboBoxColumn>
+
+                    <DataGridComboBoxColumn Header="Tax %" Width="56"
+
+                                            SelectedItemBinding="{Binding TaxPercent, UpdateSourceTrigger=PropertyChanged}">
+
+                        <DataGridComboBoxColumn.ElementStyle>
+
+                            <Style TargetType="ComboBox" BasedOn="{StaticResource LineItemCombo}">
+
+                                <Setter Property="IsEditable" Value="False" />
+
+                                <Setter Property="ItemsSource" Value="{Binding DataContext.LineTaxPercentOptions, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+
+                            </Style>
+
+                        </DataGridComboBoxColumn.ElementStyle>
+
+                        <DataGridComboBoxColumn.EditingElementStyle>
+
+                            <Style TargetType="ComboBox" BasedOn="{StaticResource LineItemCombo}">
+
+                                <Setter Property="IsEditable" Value="False" />
+
+                                <Setter Property="ItemsSource" Value="{Binding DataContext.LineTaxPercentOptions, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+
+                            </Style>
+
+                        </DataGridComboBoxColumn.EditingElementStyle>
+
+                    </DataGridComboBoxColumn>
+
+                    <DataGridTextColumn Header="Amount" Binding="{Binding Amount}" Width="72" IsReadOnly="True" />
+
+                </DataGrid.Columns>
+
+            </DataGrid>
+
+        </Border>
+
+    </Grid>
+
+</UserControl>
+

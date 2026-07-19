@@ -1,0 +1,19 @@
+<UserControl x:Class="IMS.Views.Controls.ListLoadingOverlay"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="120" d:DesignWidth="320"
+             Focusable="False"
+             IsHitTestVisible="False">
+    <Border Style="{StaticResource ListLoadingCard}">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <ProgressBar Style="{StaticResource ListLoadingProgressBar}" />
+            <TextBlock Text="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                       Style="{StaticResource ListLoadingTitle}" />
+            <TextBlock Text="{Binding Subtitle, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                       Style="{StaticResource ListLoadingSubtitle}" />
+        </StackPanel>
+    </Border>
+</UserControl>

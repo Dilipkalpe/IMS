@@ -1,0 +1,100 @@
+<UserControl x:Class="IMS.Views.Controls.SalesInvoiceLineItemsPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:conv="clr-namespace:IMS.Converters"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="900"
+             VerticalAlignment="Stretch">
+    <UserControl.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+        <conv:BoolToVisibilityConverter x:Key="NotBoolToVis" Invert="True" />
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Style="{StaticResource TransactionScanBar}" Margin="0,0,0,6">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="180" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Barcode scan" Style="{StaticResource SalesFieldLabel}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                <TextBox x:Name="BarcodeProductBox" Grid.Column="1"
+                         Text="{Binding BarcodeOrProduct, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource SalesCompactInput}" Height="28"
+                         PreviewKeyDown="BarcodeProductBox_OnPreviewKeyDown" />
+                <ComboBox x:Name="ProductComboBox" Grid.Column="2" Margin="8,0,8,0" Height="28"
+                          ItemsSource="{Binding ProductOptions}"
+                          Text="{Binding ProductSearchText, UpdateSourceTrigger=PropertyChanged}"
+                          SelectedItem="{Binding SelectedProduct, Mode=TwoWay}"
+                          IsEditable="True"
+                          IsTextSearchEnabled="False"
+                          StaysOpenOnEdit="True"
+                          Style="{StaticResource SubPageFormCombo}"
+                          DropDownOpened="ProductComboBox_OnDropDownOpened"
+                          Visibility="{Binding ShowProductPicker, Converter={StaticResource BoolToVis}}" />
+                <Button Grid.Column="3" Content="Browse…" Command="{Binding BrowseProductsCommand}"
+                        Style="{StaticResource SecondaryButton}" MinWidth="76" Height="28" Padding="12,0"
+                        Visibility="{Binding ShowProductPicker, Converter={StaticResource BoolToVis}}" />
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" BorderBrush="{StaticResource TransactionGridBorderBrush}" BorderThickness="1" Background="White">
+            <DataGrid x:Name="LineItemsGrid" Style="{StaticResource TransactionLineGrid}"
+                      ItemsSource="{Binding LineItems}"
+                      PreviewMouseLeftButtonDown="LineItemsGrid_OnPreviewMouseLeftButtonDown"
+                      PreviewKeyDown="LineItemsGrid_OnPreviewKeyDown">
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource TransactionLineGridColumnHeader}" />
+                </DataGrid.ColumnHeaderStyle>
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="" Width="40" IsReadOnly="True">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button ToolTip="Delete line" Width="28" Height="24" Padding="0" Margin="2,0"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center"
+                                        Background="{DynamicResource DangerLightBrush}"
+                                        BorderBrush="{DynamicResource DangerBorderBrush}" BorderThickness="1"
+                                        Cursor="Hand"
+                                        Command="{Binding DataContext.DeleteLineCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding}">
+                                    <TextBlock Text="&#xE74D;" FontFamily="{StaticResource IconFont}" FontSize="13"
+                                               Foreground="{DynamicResource DangerBrush}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Sr" Binding="{Binding Sr}" Width="40" IsReadOnly="True" />
+                    <DataGridTextColumn Header="Code" Binding="{Binding ProductRetailCode}" Width="90" IsReadOnly="True" />
+                    <DataGridTextColumn Header="Ref No" Binding="{Binding SourceDocNoDisplay}" Width="88" IsReadOnly="True" />
+                    <DataGridTextColumn Header="Item Description" Binding="{Binding ItemDescription}" Width="*" MinWidth="160" IsReadOnly="True" />
+                    <DataGridTextColumn Header="Bal Stk" Binding="{Binding BalStkDisplay}" Width="72" IsReadOnly="True" />
+                    <DataGridTextColumn Header="Qty" Binding="{Binding Qty, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="60" />
+                    <DataGridTextColumn Header="Rate" Binding="{Binding Rate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="80" />
+                    <DataGridTextColumn Header="Sale Rate" Binding="{Binding SalesRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="80" />
+                    <DataGridTextColumn Header="Line Disc %" Binding="{Binding DiscPercent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="80" />
+                    <DataGridTextColumn Header="Taxable Value" Binding="{Binding TaxableDisplay}" Width="95" IsReadOnly="True" />
+
+                    <DataGridTextColumn Header="CGST %" Binding="{Binding CgstPercentDisplay}" Width="70" IsReadOnly="True" />
+                    <DataGridTextColumn Header="CGST Amt" Binding="{Binding CgstAmountDisplay}" Width="85" IsReadOnly="True" />
+                    <DataGridTextColumn Header="SGST %" Binding="{Binding SgstPercentDisplay}" Width="70" IsReadOnly="True" />
+                    <DataGridTextColumn Header="SGST Amt" Binding="{Binding SgstAmountDisplay}" Width="85" IsReadOnly="True" />
+
+                    <DataGridTextColumn Header="IGST %" Binding="{Binding IgstPercentDisplay}" Width="70" IsReadOnly="True" />
+                    <DataGridTextColumn Header="IGST Amt" Binding="{Binding IgstAmountDisplay}" Width="85" IsReadOnly="True" />
+
+                    <DataGridTextColumn Header="Line Total" Binding="{Binding LineTotalDisplay}" Width="90" IsReadOnly="True" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</UserControl>

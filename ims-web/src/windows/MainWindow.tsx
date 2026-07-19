@@ -3,6 +3,10 @@
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AppNavigationProvider } from '../context/AppNavigationContext';
+import {
+  useWorkspaceDocumentHeaderOptional,
+  WorkspaceDocumentHeaderProvider,
+} from '../context/WorkspaceDocumentHeaderContext';
 import { EditDeleteGuardProvider } from '../context/EditDeleteGuardContext';
 import { MenuPermissionProvider } from '../context/MenuPermissionContext';
 import { DocumentPrintProvider } from '../document';
@@ -26,20 +30,34 @@ import { InvoiceCommunicationProvider } from '../sales-invoice/context/InvoiceCo
 import { SalesInvoiceNavIntentProvider } from '../sales-invoice/context/SalesInvoiceNavIntent';
 import { ReceiptVoucherNavIntentProvider } from '../receipt-voucher/context/ReceiptVoucherNavIntent';
 import { PaymentVoucherNavIntentProvider } from '../payment-voucher/context/PaymentVoucherNavIntent';
+import { WorkOrderNavIntentProvider } from '../work-order/context/WorkOrderNavIntent';
 import { ProductMasterNavIntentProvider } from '../masters/context/ProductMasterNavIntent';
 import { PayrollEmployeeNavIntentProvider } from '../payroll/context/PayrollEmployeeNavIntent';
 import { RoleNavIntentProvider } from '../security/context/RoleNavIntent';
-import { UserNavIntentProvider } from '../security/context/UserNavIntent';
+import { UserNavIntentProvider, useUserNavIntent } from '../security/context/UserNavIntent';
 import { AccountMasterNavIntentProvider } from '../masters/context/AccountMasterNavIntent';
 import { SalesInvoiceRepositoryProvider } from '../sales-invoice/repository/SalesInvoiceRepositoryContext';
 import { SalesCustomerPickerProvider } from '../components/transaction/SalesCustomerPickerContext';
 import { WorkflowQuickNav } from '../components/WorkflowQuickNav';
-import { buildNavigationSections, navigationCatalog } from '../navigation/navigationCatalog';
+import { buildNavigationSections, navigationCatalog, searchableNavigationCatalog } from '../navigation/navigationCatalog';
 import { NavKeys } from '../navigation/navKeys';
 import { resolveScreenComponent } from '../navigation/resolveScreen';
+import {
+  getHubDefinition,
+  getHubForModuleNavKey,
+  getHubTabTitle,
+  HUB_BY_SECTION,
+  isHubModuleNavKey,
+  isHubNavKey,
+  isNavItemActive,
+  resolveInitialHubTabs,
+  resolveInitialSelectedKey,
+} from '../hub/hubRegistry';
+import { HubNavigationProvider } from '../hub/HubContext';
+import { formatWorkspaceEntryHeaderTitle } from '../navigation/workspaceEntryHeaders';
 import { placeholders } from '../placeholders';
 import { getAuthSession, logout } from '../api/auth';
-import { useTheme } from '../theme/ThemeProvider';
+import { HeaderUserMenu } from '../components/header/HeaderUserMenu';
 import { useCompanyBranding } from '../hooks/useCompanyBranding';
 import './MainWindow.scss';
 
@@ -49,15 +67,27 @@ export interface MainWindowProps {
 }
 
 const MOBILE_NAV_QUERY = '(max-width: 1023px)';
+const SIDEBAR_COLLAPSED_KEY = 'ims.sidebarCollapsed';
 
-export function MainWindow({ initialNavKey = NavKeys.Dashboard, onLogout }: MainWindowProps) {
+function readSidebarCollapsedPreference(): boolean {
+  try {
+    return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+function MainWindowShell({ initialNavKey = NavKeys.Dashboard, onLogout }: MainWindowProps) {
   const authSession = useMemo(() => getAuthSession(), []);
-  const { theme } = useTheme();
+  const { publishOpenIntent } = useUserNavIntent();
   const { branding } = useCompanyBranding({ authenticated: true });
+  const workspaceDocumentLabel = useWorkspaceDocumentHeaderOptional()?.documentLabel;
   const sections = useMemo(() => buildNavigationSections(), []);
-  const [selectedKey, setSelectedKey] = useState(initialNavKey);
+  const [selectedKey, setSelectedKey] = useState(() => resolveInitialSelectedKey(initialNavKey));
+  const [hubTabs, setHubTabs] = useState(() => resolveInitialHubTabs(initialNavKey));
   const [menuSearch, setMenuSearch] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarCollapsedPreference);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(sections.map((s) => [s.name, s.isExpanded])),
   );
@@ -67,15 +97,35 @@ export function MainWindow({ initialNavKey = NavKeys.Dashboard, onLogout }: Main
     [],
   );
 
+  const setHubTab = useCallback((hubNavKey: string, tabNavKey: string) => {
+    setHubTabs((prev) => ({ ...prev, [hubNavKey]: tabNavKey }));
+  }, []);
+
   const selectNavKey = useCallback(
     (key: string) => {
-      setSelectedKey(key);
+      const moduleHub = getHubForModuleNavKey(key);
+      if (moduleHub) {
+        setHubTab(moduleHub.hubNavKey, key);
+        setSelectedKey(moduleHub.hubNavKey);
+      } else if (isHubNavKey(key)) {
+        setSelectedKey(key);
+      } else {
+        setSelectedKey(key);
+      }
       if (isMobileNav()) {
         setSidebarOpen(false);
       }
     },
-    [isMobileNav],
+    [isMobileNav, setHubTab],
   );
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(sidebarCollapsed));
+    } catch {
+      // ignore storage failures
+    }
+  }, [sidebarCollapsed]);
 
   useEffect(() => {
     const mq = window.matchMedia(MOBILE_NAV_QUERY);
@@ -88,21 +138,60 @@ export function MainWindow({ initialNavKey = NavKeys.Dashboard, onLogout }: Main
     return () => mq.removeEventListener('change', onChange);
   }, []);
 
-  const catalogItem = navigationCatalog.find((i) => i.key === selectedKey);
-  const headerTitle = catalogItem?.title ?? 'Dashboard';
+  const headerTitle = useMemo(() => {
+    const workspaceTitle = formatWorkspaceEntryHeaderTitle(
+      selectedKey,
+      workspaceDocumentLabel ?? 'New',
+    );
+    if (workspaceTitle) return workspaceTitle;
+    if (isHubNavKey(selectedKey)) {
+      const hub = getHubDefinition(selectedKey);
+      const tabKey = hubTabs[selectedKey] ?? hub?.defaultTabKey;
+      if (hub && tabKey) {
+        return getHubTabTitle(selectedKey, tabKey) ?? hub.sidebarTitle;
+      }
+    }
+    const catalogItem =
+      navigationCatalog.find((i) => i.key === selectedKey) ??
+      searchableNavigationCatalog.find((i) => i.key === selectedKey);
+    return catalogItem?.title ?? 'Dashboard';
+  }, [selectedKey, hubTabs, workspaceDocumentLabel]);
   const Screen = useMemo(() => resolveScreenComponent(selectedKey), [selectedKey]);
   const showDevTools = import.meta.env.DEV;
 
   const searchTerm = menuSearch.trim().toLowerCase();
   const isSearchActive = searchTerm.length > 0;
   const searchResults = isSearchActive
-    ? navigationCatalog.filter(
+    ? searchableNavigationCatalog.filter(
         (i) =>
           i.title.toLowerCase().includes(searchTerm) ||
           i.section.toLowerCase().includes(searchTerm) ||
           i.key.toLowerCase().includes(searchTerm),
       )
     : [];
+
+  const collapsedNavItems = useMemo(() => {
+    const items: Array<{ key: string; title: string; iconGlyph: string; section: string }> = [];
+    for (const section of sections) {
+      const hub = HUB_BY_SECTION.get(section.name);
+      if (hub) {
+        const hubItem = section.items[0];
+        if (hubItem) items.push(hubItem);
+        continue;
+      }
+      if (section.name === 'Overview') {
+        const overviewItem = section.items[0];
+        if (overviewItem) items.push(overviewItem);
+        continue;
+      }
+      items.push(...section.items);
+    }
+    return items;
+  }, [sections]);
+
+  const handleMobileMenuToggle = useCallback(() => {
+    setSidebarOpen((open) => !open);
+  }, []);
 
   const toggleSection = (name: string) => {
     setExpandedSections((prev) => ({ ...prev, [name]: !prev[name] }));
@@ -114,9 +203,19 @@ export function MainWindow({ initialNavKey = NavKeys.Dashboard, onLogout }: Main
     onLogout?.();
   }, [onLogout]);
 
+  const handleOpenProfile = useCallback(() => {
+    const username = authSession?.user.username?.trim();
+    if (username) {
+      publishOpenIntent({ type: 'edit', username });
+      selectNavKey('user-form');
+      return;
+    }
+    selectNavKey(NavKeys.UserRoles);
+  }, [authSession?.user.username, publishOpenIntent, selectNavKey]);
+
   return (
     <div
-      className={`main-window${sidebarOpen ? ' main-window--sidebar-open' : ''}`}
+      className={`main-window${sidebarOpen ? ' main-window--sidebar-open' : ''}${sidebarCollapsed ? ' main-window--sidebar-collapsed' : ''}`}
       data-wpf-source="MainWindow.xaml"
     >
       {sidebarOpen && (
@@ -135,15 +234,14 @@ export function MainWindow({ initialNavKey = NavKeys.Dashboard, onLogout }: Main
               {branding.hasLogo ? (
                 <img src={branding.logoImage} alt="" className="main-window__sidebar-logo-img" />
               ) : (
-                <span className="icon-text" style={{ fontSize: 20 }}>&#xE7B8;</span>
+                <span className="icon-text main-window__sidebar-logo-fallback" aria-hidden>&#xE7B8;</span>
               )}
             </div>
             <div className="main-window__sidebar-title">
               <h1>{branding.businessName}</h1>
-              <p>{branding.logoText}</p>
+              <p className="main-window__sidebar-tagline">{branding.logoText}</p>
             </div>
           </div>
-          <p className="main-window__sidebar-desc">Inventory Management with Production (BOM)</p>
         </div>
 
         <div className="main-window__search-block">
@@ -163,30 +261,57 @@ export function MainWindow({ initialNavKey = NavKeys.Dashboard, onLogout }: Main
         </div>
 
         <div className="main-window__nav-scroll">
-          {!isSearchActive && (
+          {!isSearchActive && sidebarCollapsed && (
             <>
-              <div className="main-window__nav-tools">
-                <button
-                  type="button"
-                  className="main-window__nav-tool-btn"
-                  title="Expand all menu sections"
-                  onClick={() => setExpandedSections(Object.fromEntries(sections.map((s) => [s.name, true])))}
-                >
-                  <span className="icon-text" style={{ marginRight: 6, fontSize: 11 }}>&#xE70D;</span>
-                  Expand all
-                </button>
-                <button
-                  type="button"
-                  className="main-window__nav-tool-btn"
-                  title="Collapse all menu sections"
-                  onClick={() => setExpandedSections(Object.fromEntries(sections.map((s) => [s.name, false])))}
-                >
-                  <span className="icon-text" style={{ marginRight: 6, fontSize: 11 }}>&#xE76C;</span>
-                  Collapse all
-                </button>
-              </div>
+              {collapsedNavItems.map((item) => (
+                <NavItemRow
+                  key={item.key}
+                  item={item}
+                  active={isNavItemActive(selectedKey, hubTabs, item.key)}
+                  onSelect={() => selectNavKey(item.key)}
+                  collapsed
+                />
+              ))}
+            </>
+          )}
 
-              {sections.map((section) => (
+          {!isSearchActive && !sidebarCollapsed && (
+            <>
+              {sections.map((section) => {
+                const hub = HUB_BY_SECTION.get(section.name);
+                if (hub) {
+                  const hubItem = section.items[0];
+                  if (!hubItem) return null;
+                  const hubActive =
+                    selectedKey === hub.hubNavKey ||
+                    (isHubModuleNavKey(selectedKey) &&
+                      getHubForModuleNavKey(selectedKey)?.hubNavKey === hub.hubNavKey);
+                  return (
+                    <div key={section.name} className="main-window__nav-section">
+                      <NavItemRow
+                        item={hubItem}
+                        active={hubActive}
+                        onSelect={() => selectNavKey(hub.hubNavKey)}
+                      />
+                    </div>
+                  );
+                }
+
+                if (section.name === 'Overview') {
+                  const overviewItem = section.items[0];
+                  if (!overviewItem) return null;
+                  return (
+                    <div key={section.name} className="main-window__nav-section">
+                      <NavItemRow
+                        item={overviewItem}
+                        active={selectedKey === overviewItem.key}
+                        onSelect={() => selectNavKey(overviewItem.key)}
+                      />
+                    </div>
+                  );
+                }
+
+                return (
                 <div key={section.name} className="main-window__nav-section">
                   <button
                     type="button"
@@ -208,7 +333,8 @@ export function MainWindow({ initialNavKey = NavKeys.Dashboard, onLogout }: Main
                       />
                     ))}
                 </div>
-              ))}
+                );
+              })}
             </>
           )}
 
@@ -221,7 +347,7 @@ export function MainWindow({ initialNavKey = NavKeys.Dashboard, onLogout }: Main
                 <NavItemRow
                   key={item.key}
                   item={item}
-                  active={selectedKey === item.key}
+                  active={isNavItemActive(selectedKey, hubTabs, item.key)}
                   onSelect={() => {
                     selectNavKey(item.key);
                     setMenuSearch('');
@@ -233,31 +359,20 @@ export function MainWindow({ initialNavKey = NavKeys.Dashboard, onLogout }: Main
           )}
         </div>
 
-        <footer className="main-window__sidebar-user">
-          <div className="main-window__sidebar-user-avatar">
-            <span className="icon-text" style={{ fontSize: 16 }}>&#xE77B;</span>
-          </div>
-          <div className="main-window__sidebar-user-meta">
-            <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--sidebar-text)' }}>
-              {authSession?.user.fullName ?? 'User'}
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--sidebar-text-muted)' }}>
-              {authSession?.user.role ?? 'Administrator'}
-              {authSession?.financialYear?.financialYearName
-                ? ` · ${authSession.financialYear.financialYearName}`
-                : ''}
-            </div>
-          </div>
+        <div className="main-window__sidebar-collapse-wrap">
           <button
             type="button"
-            className="main-window__logout-btn"
-            title="Sign out"
-            onClick={handleLogout}
+            className="main-window__sidebar-collapse"
+            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            onClick={() => setSidebarCollapsed((collapsed) => !collapsed)}
           >
-            <span className="icon-text" style={{ fontSize: 14 }}>&#xE7E8;</span>
-            <span className="main-window__logout-label">Sign out</span>
+            <span className="icon-text main-window__sidebar-collapse-icon" aria-hidden>
+              {sidebarCollapsed ? '\uE76C' : '\uE76B'}
+            </span>
+            <span className="main-window__sidebar-collapse-label">Collapse</span>
           </button>
-        </footer>
+        </div>
       </aside>
 
       <div className="main-window__content">
@@ -268,7 +383,7 @@ export function MainWindow({ initialNavKey = NavKeys.Dashboard, onLogout }: Main
               className="main-window__menu-toggle"
               aria-label={sidebarOpen ? 'Close navigation menu' : 'Open navigation menu'}
               aria-expanded={sidebarOpen}
-              onClick={() => setSidebarOpen((open) => !open)}
+              onClick={handleMobileMenuToggle}
             >
               <span className="icon-text">&#xE700;</span>
             </button>
@@ -278,18 +393,13 @@ export function MainWindow({ initialNavKey = NavKeys.Dashboard, onLogout }: Main
             <span className="main-window__header-title">{headerTitle}</span>
           </div>
           <div className="main-window__header-actions">
-            <span className="wpf-toolbar-badge main-window__theme-badge">
-              <span style={{ color: 'var(--accent)', fontSize: 11, fontWeight: 700 }}>{theme.badgeText}</span>
-            </span>
             {showDevTools ? <WorkflowQuickNav onSelect={selectNavKey} /> : null}
-            <button
-              type="button"
-              className="main-window__header-logout"
-              title="Sign out"
-              onClick={handleLogout}
-            >
-              <span className="icon-text">&#xE7E8;</span>
-            </button>
+            <HeaderUserMenu
+              authSession={authSession}
+              onNavigate={selectNavKey}
+              onLogout={handleLogout}
+              onOpenProfile={handleOpenProfile}
+            />
           </div>
         </header>
 
@@ -308,9 +418,9 @@ export function MainWindow({ initialNavKey = NavKeys.Dashboard, onLogout }: Main
                             <SalesInvoiceNavIntentProvider>
                               <ReceiptVoucherNavIntentProvider>
                               <PaymentVoucherNavIntentProvider>
+                              <WorkOrderNavIntentProvider>
                               <ProductMasterNavIntentProvider>
                               <PayrollEmployeeNavIntentProvider>
-                              <UserNavIntentProvider>
                               <RoleNavIntentProvider>
                               <AccountMasterNavIntentProvider>
                               <PurchaseInvoiceNavIntentProvider>
@@ -325,7 +435,9 @@ export function MainWindow({ initialNavKey = NavKeys.Dashboard, onLogout }: Main
                                               <EditDeleteGuardProvider>
                                                 <InvoiceCommunicationProvider>
                                                   <AppNavigationProvider navigate={selectNavKey}>
-                                                    <Screen />
+                                                    <HubNavigationProvider hubTabs={hubTabs} setHubTab={setHubTab}>
+                                                      <Screen />
+                                                    </HubNavigationProvider>
                                                   </AppNavigationProvider>
                                                 </InvoiceCommunicationProvider>
                                               </EditDeleteGuardProvider>
@@ -340,9 +452,9 @@ export function MainWindow({ initialNavKey = NavKeys.Dashboard, onLogout }: Main
                               </PurchaseInvoiceNavIntentProvider>
                               </AccountMasterNavIntentProvider>
                               </RoleNavIntentProvider>
-                              </UserNavIntentProvider>
                               </PayrollEmployeeNavIntentProvider>
                               </ProductMasterNavIntentProvider>
+                              </WorkOrderNavIntentProvider>
                               </PaymentVoucherNavIntentProvider>
                               </ReceiptVoucherNavIntentProvider>
                             </SalesInvoiceNavIntentProvider>
@@ -368,31 +480,48 @@ function NavItemRow({
   active,
   onSelect,
   showSection,
+  collapsed,
 }: {
   item: { key: string; title: string; iconGlyph: string; section: string };
   active: boolean;
   onSelect: () => void;
   showSection?: boolean;
+  collapsed?: boolean;
 }) {
   return (
-    <div className="main-window__nav-item-row">
+    <div className={`main-window__nav-item-row${collapsed ? ' main-window__nav-item-row--collapsed' : ''}`}>
       <button
         type="button"
-        className={`main-window__nav-item${active ? ' main-window__nav-item--active' : ''}`}
+        className={`main-window__nav-item${active ? ' main-window__nav-item--active' : ''}${collapsed ? ' main-window__nav-item--collapsed' : ''}`}
         onClick={onSelect}
+        title={collapsed ? item.title : undefined}
       >
-        <span className="icon-text" style={{ fontSize: 16, color: 'var(--sidebar-text-muted)' }}>
+        <span className="icon-text main-window__nav-item-icon" aria-hidden>
           {item.iconGlyph}
         </span>
-        <span>
-          <span className="main-window__nav-item-title">{item.title}</span>
-          {showSection && <span className="main-window__nav-item-section">{item.section}</span>}
-        </span>
+        {!collapsed && (
+          <span>
+            <span className="main-window__nav-item-title">{item.title}</span>
+            {showSection && <span className="main-window__nav-item-section">{item.section}</span>}
+          </span>
+        )}
       </button>
-      <button type="button" className="main-window__nav-pin" title="Pin to favorites" onClick={() => placeholders.noop()}>
-        <span className="icon-text">{'\uE734'}</span>
-      </button>
+      {!collapsed && (
+        <button type="button" className="main-window__nav-pin" title="Pin to favorites" onClick={() => placeholders.noop()}>
+          <span className="icon-text">{'\uE734'}</span>
+        </button>
+      )}
     </div>
+  );
+}
+
+export function MainWindow(props: MainWindowProps) {
+  return (
+    <WorkspaceDocumentHeaderProvider>
+      <UserNavIntentProvider>
+        <MainWindowShell {...props} />
+      </UserNavIntentProvider>
+    </WorkspaceDocumentHeaderProvider>
   );
 }
 

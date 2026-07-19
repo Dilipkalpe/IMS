@@ -1,0 +1,14 @@
+D:\DK\RDERP\IMS\ims-api-net\src\Ims.Domain\bin\Debug\net8.0\Ims.Domain.deps.json
+D:\DK\RDERP\IMS\ims-api-net\src\Ims.Domain\bin\Debug\net8.0\Ims.Domain.dll
+D:\DK\RDERP\IMS\ims-api-net\src\Ims.Domain\bin\Debug\net8.0\Ims.Domain.pdb
+D:\DK\RDERP\IMS\ims-api-net\src\Ims.Domain\obj\Debug\net8.0\Ims.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\DK\RDERP\IMS\ims-api-net\src\Ims.Domain\obj\Debug\net8.0\Ims.Domain.AssemblyInfoInputs.cache
+D:\DK\RDERP\IMS\ims-api-net\src\Ims.Domain\obj\Debug\net8.0\Ims.Domain.AssemblyInfo.cs
+D:\DK\RDERP\IMS\ims-api-net\src\Ims.Domain\obj\Debug\net8.0\Ims.Domain.csproj.CoreCompileInputs.cache
+D:\DK\RDERP\IMS\ims-api-net\src\Ims.Domain\obj\Debug\net8.0\Ims.Domain.dll
+D:\DK\RDERP\IMS\ims-api-net\src\Ims.Domain\obj\Debug\net8.0\refint\Ims.Domain.dll
+D:\DK\RDERP\IMS\ims-api-net\src\Ims.Domain\obj\Debug\net8.0\Ims.Domain.pdb
+D:\DK\RDERP\IMS\ims-api-net\src\Ims.Domain\obj\Debug\net8.0\ref\Ims.Domain.dll
+D:\DK\RDERP\IMS\ims-api-net\artifacts\api-build\Ims.Domain.deps.json
+D:\DK\RDERP\IMS\ims-api-net\artifacts\api-build\Ims.Domain.dll
+D:\DK\RDERP\IMS\ims-api-net\artifacts\api-build\Ims.Domain.pdb

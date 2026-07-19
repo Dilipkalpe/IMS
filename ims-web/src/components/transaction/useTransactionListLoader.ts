@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { formatLocaleNumber } from '../../utils/formatLocaleNumber';
 import {
   columnFiltersToQuery,
   DEFAULT_LIST_PAGE_SIZE,
@@ -102,9 +103,9 @@ export function useTransactionListLoader<TRow extends { id: string }>({
       if (pageClamped !== page) setPage(pageClamped);
 
       setStatusMessage(
-        list.total === 0
+        (list.total ?? 0) === 0
           ? `No ${docLabelPlural} match your filters.`
-          : `${list.total.toLocaleString()} ${docLabelPlural} found · page ${pageClamped} of ${totalListPages(list.total, pageSize)} · ${repository.mode === 'http' ? 'API' : 'local store'}.`,
+          : `${formatLocaleNumber(list.total ?? 0)} ${docLabelPlural} found · page ${pageClamped} of ${totalListPages(list.total ?? 0, pageSize)} · ${repository.mode === 'http' ? 'API' : 'local store'}.`,
       );
     } catch (err) {
       if (generation !== loadGenerationRef.current) return;

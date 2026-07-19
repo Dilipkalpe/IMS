@@ -2,6 +2,7 @@ import { useCallback, useMemo, type KeyboardEvent } from 'react';
 import { useWorkspaceTabShortcuts } from '../keyboard/useWorkspaceTabShortcuts';
 import { useSalesInvoiceRepositoryOptional } from './repository/SalesInvoiceRepositoryContext';
 import { RefinedScreenShell } from '../screens/RefinedScreenShell';
+import { WorkspaceTabBarStatus } from '../components/transaction/WorkspaceDocumentStatusBanner';
 import { SalesInvoiceEntryForm } from './SalesInvoiceEntryForm';
 import { readStressLineCountFromLocation } from './stressLines';
 import { SalesInvoiceWorkspaceProvider, useSalesInvoiceWorkspace } from './workspace/SalesInvoiceWorkspaceProvider';
@@ -72,6 +73,7 @@ function SalesInvoiceWorkspaceInner({ stressLines }: { stressLines?: number }) {
               + New Tab
             </button>
           </div>
+          <WorkspaceTabBarStatus activeTabId={activeTab?.id} documents={ws.documents} />
         </div>
         <div className="si-workspace__content" role="tabpanel">
           {mountedTabs.map((tab) => (

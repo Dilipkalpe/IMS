@@ -1,0 +1,64 @@
+<Window x:Class="IMS.Views.BackupFailureExitWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Database Backup"
+        Height="320" Width="500"
+        WindowStartupLocation="CenterOwner"
+        Style="{StaticResource AppDialogWindow}">
+    <Border Style="{StaticResource AppDialogShell}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Style="{StaticResource AppDialogTitleBar}">
+                <DockPanel LastChildFill="True">
+                    <Border Style="{StaticResource AppDialogIconBadge}" DockPanel.Dock="Left">
+                        <TextBlock Text="&#xE783;"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   FontSize="18"
+                                   Foreground="{DynamicResource AccentBrush}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Backup failed"
+                                   Style="{StaticResource AppDialogTitleText}" />
+                        <TextBlock Text="Exit was not completed"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   Margin="0,2,0,0" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <StackPanel Grid.Row="1" Margin="20,18,20,20">
+                <TextBlock Style="{StaticResource AppDialogBodyText}"
+                           Text="The database backup could not be created. You can close without a backup or stay in the application."
+                           Margin="0,0,0,10" />
+                <Border Background="{DynamicResource PanelMutedBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="1"
+                        Padding="10,8"
+                        Margin="0,0,0,18">
+                    <TextBlock x:Name="ErrorText"
+                               FontSize="12"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextPrimaryBrush}" />
+                </Border>
+
+                <Button Content="Close without backup"
+                        Style="{StaticResource SecondaryButton}"
+                        MinHeight="38"
+                        Margin="0,0,0,8"
+                        Click="CloseWithoutBackup_Click" />
+                <Button Content="Stay in application"
+                        Style="{StaticResource PrimaryButton}"
+                        MinHeight="38"
+                        IsCancel="True"
+                        Click="Stay_Click" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

@@ -3,6 +3,7 @@ import { useWorkspaceTabShortcuts } from '../keyboard/useWorkspaceTabShortcuts';
 import { useGrnRepositoryOptional } from './repository/GrnRepositoryContext';
 import { RefinedScreenShell } from '../screens/RefinedScreenShell';
 import '../sales-invoice/sales-invoice.scss';
+import { WorkspaceTabBarStatus } from '../components/transaction/WorkspaceDocumentStatusBanner';
 import { GrnEntryForm } from './GrnEntryForm';
 import { GrnWorkspaceProvider, useGrnWorkspace } from './workspace/GrnWorkspaceProvider';
 
@@ -64,6 +65,7 @@ function GrnWorkspaceInner({ lineCount = 0 }: { lineCount?: number }) {
               + New Tab
             </button>
           </div>
+          <WorkspaceTabBarStatus activeTabId={activeTab?.id} documents={ws.documents} />
         </div>
         <div className="si-workspace__content" role="tabpanel">
           {mountedTabs.map((tab) => (

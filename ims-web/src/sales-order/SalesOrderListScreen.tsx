@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CorporateDataGrid, type DataGridColumn } from '../components/datagrid/CorporateDataGrid';
+import { CorporateDataGrid, buildGridTemplateColumns, type DataGridColumn } from '../components/datagrid/CorporateDataGrid';
 import { ListGridArea } from '../components/loading';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
 import { TransactionListColumnFilters } from '../components/transaction/TransactionListColumnFilters';
 import {
   SALES_LIST_COLUMN_FILTER_DEFS,
-  SALES_LIST_GRID_TEMPLATE,
   salesOrderSortField,
 } from '../components/transaction/transactionListQuery';
 import { useListNewShortcut } from '../components/transaction/useListNewShortcut';
@@ -16,6 +15,8 @@ import { ListExportMenu } from '../components/transaction/ListExportMenu';
 import { useListExportActions } from '../components/transaction/useListExportActions';
 import { useProtectedSalesListActions } from '../components/transaction/useProtectedSalesListActions';
 import { useTransactionListLoader } from '../components/transaction/useTransactionListLoader';
+import { ListStatsRow } from '../components/transaction/ListStatsRow';
+import { listStat } from '../components/transaction/listStatBuilders';
 import { useListStats } from '../components/transaction/useListStats';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { FormKeyboardScope } from '../keyboard/FormKeyboardScope';
@@ -154,6 +155,11 @@ export function SalesOrderListScreen() {
     ];
   }, [canDelete, canEdit, deleteRow, openWorkspace, printRow]);
 
+  const gridTemplate = useMemo(
+    () => buildGridTemplateColumns(columns as DataGridColumn<unknown>[]),
+    [columns],
+  );
+
   const exportColumns = useMemo(
     () => columns.filter((c) => c.id !== 'actions').map((c) => ({ id: c.id, header: String(c.header) })),
     [columns],
@@ -187,19 +193,14 @@ export function SalesOrderListScreen() {
     <RefinedScreenShell className="sales-invoice-list-screen">
       <TransactionEntryShell title="Sales Orders">
         <FormKeyboardScope className="si-list-layout" autoFocusFieldKey="list-search">
-          <div className="si-list-stats">
-            {[
-              { label: 'Open Orders', value: String(stats.open) },
-              { label: 'To Ship', value: String(stats.toShip) },
-              { label: 'Shipped', value: String(stats.shipped) },
-              { label: 'Cancelled', value: String(stats.cancelled) },
-            ].map((s) => (
-              <div key={s.label} className="si-stat-card">
-                <div className="si-stat-card__value">{s.value}</div>
-                <div className="si-stat-card__label">{s.label}</div>
-              </div>
-            ))}
-          </div>
+          <ListStatsRow
+            stats={[
+              listStat('Open Orders', stats.open, 'open'),
+              listStat('To Ship', stats.toShip, 'toShip'),
+              listStat('Shipped', stats.shipped, 'shipped'),
+              listStat('Cancelled', stats.cancelled, 'cancelled'),
+            ]}
+          />
           <div className="si-list-toolbar">
             <div className="si-list-toolbar__row">
               <button
@@ -253,7 +254,7 @@ export function SalesOrderListScreen() {
             <TransactionListColumnFilters
               columns={SALES_LIST_COLUMN_FILTER_DEFS}
               values={list.columnFilters}
-              gridTemplate={SALES_LIST_GRID_TEMPLATE}
+              gridTemplate={gridTemplate}
               disabled={list.loading}
               onChange={list.setColumnFilter}
             />

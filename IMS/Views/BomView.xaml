@@ -1,0 +1,257 @@
+<UserControl x:Class="IMS.Views.BomView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:IMS.Views.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="1200"
+             VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+             Background="{StaticResource TransactionPageBackgroundBrush}">
+    <UserControl.Resources>
+        <Style x:Key="BomGridAmountCell" TargetType="TextBlock">
+            <Setter Property="TextAlignment" Value="Right" />
+        </Style>
+        <Style x:Key="BomSectionTitleBar" TargetType="Border" BasedOn="{StaticResource TransactionTitleBar}">
+            <Setter Property="Padding" Value="8,5" />
+        </Style>
+    </UserControl.Resources>
+
+    <controls:TransactionEntryShell Title="Bill of Material (BOM)" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <Grid Margin="0" VerticalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" MinHeight="200" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Product header -->
+            <Border Grid.Row="0" Style="{StaticResource TransactionSectionBorder}" Padding="10,8" Margin="0,0,0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" MinWidth="100" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Product ID" Style="{StaticResource TransactionInlineFieldLabel}" Margin="0,0,8,0" />
+                    <TextBox Grid.Column="1" Text="{Binding ProductId, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource SubPageFormInput}" Height="26" Width="110"
+                             IsReadOnly="{Binding IsProductHeaderReadOnly}" Background="#F5F5F5" Margin="0,0,12,0" />
+                    <TextBlock Grid.Column="2" Text="Product Code" Style="{StaticResource TransactionInlineFieldLabel}" Margin="0,0,8,0" />
+                    <TextBox Grid.Column="3" Text="{Binding ProductCode, Mode=OneWay}"
+                             Style="{StaticResource SubPageFormInput}" Height="26" Width="100"
+                             IsReadOnly="True" Background="#F5F5F5" Margin="0,0,12,0" />
+                    <TextBlock Grid.Column="4" Text="Product Name" Style="{StaticResource TransactionInlineFieldLabel}" Margin="0,0,8,0" />
+                    <TextBox Grid.Column="5" Text="{Binding ProductName, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource SubPageFormInput}" Height="26"
+                             IsReadOnly="{Binding IsProductHeaderReadOnly}" Background="#F5F5F5" />
+                </Grid>
+            </Border>
+
+            <!-- Two columns: Raw Material | Consumable -->
+            <Grid Grid.Row="1" VerticalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="8" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Raw Material -->
+                <Border Grid.Column="0" Style="{StaticResource TransactionShellBorder}" VerticalAlignment="Stretch">
+                    <Grid VerticalAlignment="Stretch">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Border Grid.Row="0" Style="{StaticResource BomSectionTitleBar}">
+                            <TextBlock Text="1. Raw Material" Style="{StaticResource TransactionTitleText}" />
+                        </Border>
+                        <controls:ProductScanPickerBar x:Name="RawMaterialProductPicker" Grid.Row="1" IsCompact="True" />
+                        <Border Grid.Row="2" Padding="0" VerticalAlignment="Stretch"
+                                BorderBrush="{StaticResource TransactionGridBorderBrush}" BorderThickness="1" Background="White">
+                            <DataGrid Style="{StaticResource TransactionLineGrid}" ItemsSource="{Binding RawMaterials}"
+                                      SelectionUnit="Cell" SelectionMode="Single">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource TransactionLineGridColumnHeader}" />
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.CellStyle>
+                                    <Style TargetType="DataGridCell" BasedOn="{StaticResource TransactionLineGridCell}" />
+                                </DataGrid.CellStyle>
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow" BasedOn="{StaticResource TransactionLineGridRow}" />
+                                </DataGrid.RowStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Header="" Width="40" IsReadOnly="True">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button ToolTip="Delete line" Width="28" Height="24" Padding="0" Margin="2,0"
+                                                        HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                        Background="{DynamicResource DangerLightBrush}"
+                                                        BorderBrush="{DynamicResource DangerBorderBrush}" BorderThickness="1"
+                                                        Cursor="Hand"
+                                                        Command="{Binding DataContext.DeleteRawLineCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}">
+                                                    <TextBlock Text="&#xE74D;" FontFamily="{StaticResource IconFont}" FontSize="13"
+                                                               Foreground="{DynamicResource DangerBrush}"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Button>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="Sr No" Binding="{Binding SrNo}" Width="50" IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Item Code" Binding="{Binding ItemCode}" Width="90" IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Item Name" Binding="{Binding ItemName}" Width="*" MinWidth="80" IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Unit" Binding="{Binding Unit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="50" />
+                                    <DataGridTextColumn Header="Qty" Binding="{Binding Qty, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="60">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource BomGridAmountCell}" />
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Scrap %" Binding="{Binding ScrapPercent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="60">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource BomGridAmountCell}" />
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Rate" Binding="{Binding Rate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="70">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource BomGridAmountCell}" />
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Amount" Binding="{Binding Amount}" Width="80" IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource BomGridAmountCell}" />
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Consumable Material -->
+                <Border Grid.Column="2" Style="{StaticResource TransactionShellBorder}" VerticalAlignment="Stretch">
+                    <Grid VerticalAlignment="Stretch">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Border Grid.Row="0" Style="{StaticResource BomSectionTitleBar}">
+                            <TextBlock Text="2. Consumable Material" Style="{StaticResource TransactionTitleText}" />
+                        </Border>
+                        <Border Grid.Row="1" Style="{StaticResource TransactionScanBar}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" MinWidth="60" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Material" Style="{StaticResource SalesFieldLabel}" Margin="0,0,8,0" />
+                                <TextBox Grid.Column="1" Text="{Binding ConsumableScan, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource SalesCompactInput}"
+                                         ToolTip="Enter material, press Enter or ADD">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Key="Enter" Command="{Binding AddConsumableLineCommand}" />
+                                    </TextBox.InputBindings>
+                                </TextBox>
+                                <Button Grid.Column="2" Content="ADD" Command="{Binding AddConsumableLineCommand}"
+                                        Style="{StaticResource PrimaryButton}" MinWidth="72" Height="28"
+                                        Margin="8,0,0,0" Padding="14,0" FontWeight="SemiBold" />
+                            </Grid>
+                        </Border>
+                        <Border Grid.Row="2" Padding="0" VerticalAlignment="Stretch"
+                                BorderBrush="{StaticResource TransactionGridBorderBrush}" BorderThickness="1" Background="White">
+                            <DataGrid Style="{StaticResource TransactionLineGrid}" ItemsSource="{Binding Consumables}"
+                                      SelectionUnit="Cell" SelectionMode="Single">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource TransactionLineGridColumnHeader}" />
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.CellStyle>
+                                    <Style TargetType="DataGridCell" BasedOn="{StaticResource TransactionLineGridCell}" />
+                                </DataGrid.CellStyle>
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow" BasedOn="{StaticResource TransactionLineGridRow}" />
+                                </DataGrid.RowStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Header="" Width="40" IsReadOnly="True">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button ToolTip="Delete line" Width="28" Height="24" Padding="0" Margin="2,0"
+                                                        HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                        Background="{DynamicResource DangerLightBrush}"
+                                                        BorderBrush="{DynamicResource DangerBorderBrush}" BorderThickness="1"
+                                                        Cursor="Hand"
+                                                        Command="{Binding DataContext.DeleteConsumableLineCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}">
+                                                    <TextBlock Text="&#xE74D;" FontFamily="{StaticResource IconFont}" FontSize="13"
+                                                               Foreground="{DynamicResource DangerBrush}"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Button>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="Sr No" Binding="{Binding SrNo}" Width="50" IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Material" Binding="{Binding Material, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="*" MinWidth="80" />
+                                    <DataGridTextColumn Header="Qty" Binding="{Binding Qty, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="60">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource BomGridAmountCell}" />
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Rate" Binding="{Binding Rate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="70">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource BomGridAmountCell}" />
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Amount" Binding="{Binding Amount}" Width="80" IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource BomGridAmountCell}" />
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Totals -->
+            <Grid Grid.Row="2" Margin="0,8,0,6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="8" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Style="{StaticResource TransactionSectionBorder}" Padding="10,8">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Raw Material Amount" Style="{StaticResource TransactionInlineFieldLabel}" FontWeight="SemiBold" Margin="0,0,10,0" />
+                        <Border BorderBrush="{StaticResource TransactionGridBorderBrush}" BorderThickness="1" Background="White" Padding="10,4" MinWidth="120">
+                            <TextBlock Text="{Binding RawMaterialAmount}" TextAlignment="Right" FontWeight="SemiBold" FontSize="12" />
+                        </Border>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="2" Style="{StaticResource TransactionSectionBorder}" Padding="10,8">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Production Amount" Style="{StaticResource TransactionInlineFieldLabel}" FontWeight="SemiBold" Margin="0,0,10,0" />
+                        <Border BorderBrush="{StaticResource TransactionGridBorderBrush}" BorderThickness="1" Background="White" Padding="10,4" MinWidth="120">
+                            <TextBlock Text="{Binding ProductionAmount}" TextAlignment="Right" FontWeight="SemiBold" FontSize="12" />
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Footer actions (Stock Transfer style) -->
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,4,0,0">
+                <Button Content="SAVE" Command="{Binding SaveCommand}" FontWeight="Bold" Cursor="Hand"
+                        Padding="30,6" BorderBrush="{StaticResource TransactionGridBorderBrush}" BorderThickness="2"
+                        Background="White" Margin="0,0,8,0" />
+                <Button Content="Cancel" Command="{Binding CancelCommand}" Padding="16,6"
+                        Style="{StaticResource SalesSideButtonSecondary}" />
+            </StackPanel>
+        </Grid>
+    </controls:TransactionEntryShell>
+</UserControl>

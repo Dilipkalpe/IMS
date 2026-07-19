@@ -15,6 +15,8 @@ import { ListExportMenu } from '../components/transaction/ListExportMenu';
 import { useListExportActions } from '../components/transaction/useListExportActions';
 import { useProtectedSalesListActions } from '../components/transaction/useProtectedSalesListActions';
 import { useTransactionListLoader } from '../components/transaction/useTransactionListLoader';
+import { ListStatsRow } from '../components/transaction/ListStatsRow';
+import { buildDataSourceStat, listStat } from '../components/transaction/listStatBuilders';
 import { useListStats } from '../components/transaction/useListStats';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { FormKeyboardScope } from '../keyboard/FormKeyboardScope';
@@ -145,19 +147,14 @@ export function GrnListScreen() {
     <RefinedScreenShell className="sales-invoice-list-screen">
       <TransactionEntryShell title="Goods Receipt Note">
         <FormKeyboardScope className="si-list-layout" autoFocusFieldKey="list-search">
-          <div className="si-list-stats">
-            {[
-              { label: 'Total GRNs', value: String(stats.total) },
-              { label: 'Open', value: String(stats.open) },
-              { label: 'Draft', value: String(stats.draft) },
-              { label: 'Source', value: repoCtx?.mode === 'http' ? 'API' : 'Local' },
-            ].map((s) => (
-              <div key={s.label} className="si-stat-card">
-                <div className="si-stat-card__value">{s.value}</div>
-                <div className="si-stat-card__label">{s.label}</div>
-              </div>
-            ))}
-          </div>
+          <ListStatsRow
+            stats={[
+              listStat('Total GRNs', stats.total, 'total'),
+              listStat('Open', stats.open, 'open'),
+              listStat('Draft', stats.draft, 'draft'),
+              buildDataSourceStat(repoCtx?.mode),
+            ]}
+          />
           <div className="si-list-toolbar">
             <div className="si-list-toolbar__row">
               <button

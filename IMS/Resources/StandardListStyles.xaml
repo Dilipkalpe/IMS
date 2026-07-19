@@ -1,0 +1,460 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+
+
+    <Style x:Key="SoListColumnHeader" TargetType="DataGridColumnHeader">
+
+        <Setter Property="Background" Value="{DynamicResource PanelMutedBrush}" />
+
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+
+        <Setter Property="FontWeight" Value="SemiBold" />
+
+        <Setter Property="FontSize" Value="13" />
+
+        <Setter Property="Padding" Value="10,8" />
+
+        <Setter Property="MinHeight" Value="44" />
+
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+
+        <Setter Property="BorderThickness" Value="0,0,1,1" />
+
+    </Style>
+
+
+
+    <Style x:Key="SoListSortableColumnHeader" TargetType="DataGridColumnHeader" BasedOn="{StaticResource SoListColumnHeader}">
+
+        <Setter Property="Cursor" Value="Hand" />
+
+        <Style.Triggers>
+
+            <Trigger Property="IsMouseOver" Value="True">
+
+                <Setter Property="Background" Value="{DynamicResource AccentLightBrush}" />
+
+            </Trigger>
+
+        </Style.Triggers>
+
+    </Style>
+
+
+
+    <Style x:Key="SoListCell" TargetType="TextBlock">
+
+        <Setter Property="VerticalAlignment" Value="Center" />
+
+        <Setter Property="Padding" Value="10,8" />
+
+        <Setter Property="TextWrapping" Value="Wrap" />
+
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+
+    </Style>
+
+
+
+    <Style x:Key="SoListAmountCell" TargetType="TextBlock" BasedOn="{StaticResource SoListCell}">
+
+        <Setter Property="HorizontalAlignment" Value="Right" />
+
+        <Setter Property="TextWrapping" Value="NoWrap" />
+
+    </Style>
+
+
+
+    <Style x:Key="SoListSortHeader" TargetType="Button">
+
+        <Setter Property="Background" Value="Transparent" />
+
+        <Setter Property="BorderThickness" Value="0" />
+
+        <Setter Property="Padding" Value="4,6" />
+
+        <Setter Property="MinHeight" Value="32" />
+
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+
+        <Setter Property="Cursor" Value="Hand" />
+
+        <Setter Property="FontWeight" Value="SemiBold" />
+
+        <Setter Property="FontSize" Value="13" />
+
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+
+        <Style.Triggers>
+
+            <Trigger Property="IsMouseOver" Value="True">
+
+                <Setter Property="Background" Value="{DynamicResource AccentLightBrush}" />
+
+            </Trigger>
+
+        </Style.Triggers>
+
+    </Style>
+
+
+
+    <Style x:Key="SoListRowStyle" TargetType="DataGridRow">
+
+        <Setter Property="Background" Value="{DynamicResource CardBrush}" />
+
+        <Setter Property="MinHeight" Value="42" />
+
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+
+        <Style.Triggers>
+
+            <Trigger Property="IsMouseOver" Value="True">
+
+                <Setter Property="Background" Value="{DynamicResource AccentLightBrush}" />
+
+            </Trigger>
+
+            <Trigger Property="AlternationIndex" Value="1">
+
+                <Setter Property="Background" Value="{DynamicResource PanelMutedBrush}" />
+
+            </Trigger>
+
+        </Style.Triggers>
+
+    </Style>
+
+
+
+    <Style x:Key="SoListSectionBorder" TargetType="Border">
+
+        <Setter Property="Background" Value="{DynamicResource CardBrush}" />
+
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+
+        <Setter Property="BorderThickness" Value="1" />
+
+        <Setter Property="CornerRadius" Value="8" />
+
+        <Setter Property="ClipToBounds" Value="True" />
+
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+
+    </Style>
+
+
+
+    <Style x:Key="SoListOrdersGrid" TargetType="DataGrid">
+
+        <Setter Property="AutoGenerateColumns" Value="False" />
+
+        <Setter Property="IsReadOnly" Value="True" />
+
+        <Setter Property="CanUserAddRows" Value="False" />
+
+        <Setter Property="CanUserDeleteRows" Value="False" />
+
+        <Setter Property="HeadersVisibility" Value="Column" />
+
+        <Setter Property="MinRowHeight" Value="42" />
+
+        <Setter Property="ColumnHeaderHeight" Value="44" />
+
+        <Setter Property="GridLinesVisibility" Value="All" />
+
+        <Setter Property="BorderThickness" Value="1" />
+
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+
+        <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource AccentBrush}" />
+
+        <Setter Property="VerticalGridLinesBrush" Value="{DynamicResource AccentBrush}" />
+
+        <Setter Property="Background" Value="{DynamicResource CardBrush}" />
+
+        <Setter Property="RowBackground" Value="{DynamicResource CardBrush}" />
+
+        <Setter Property="AlternatingRowBackground" Value="{DynamicResource PanelMutedBrush}" />
+
+        <Setter Property="EnableRowVirtualization" Value="True" />
+
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+
+        <Setter Property="UseLayoutRounding" Value="True" />
+
+    </Style>
+
+
+
+    <Style x:Key="SoListStatCard" TargetType="Border">
+
+        <Setter Property="Background" Value="{DynamicResource CardBrush}" />
+
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+
+        <Setter Property="BorderThickness" Value="1" />
+
+        <Setter Property="CornerRadius" Value="8" />
+
+        <Setter Property="Padding" Value="10,8" />
+
+        <Setter Property="Cursor" Value="Hand" />
+
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+
+    </Style>
+
+
+
+    <Style x:Key="SoListStatIconHost" TargetType="Border">
+
+        <Setter Property="Width" Value="36" />
+
+        <Setter Property="Height" Value="36" />
+
+        <Setter Property="CornerRadius" Value="11" />
+
+        <Setter Property="BorderBrush" Value="#33FFFFFF" />
+
+        <Setter Property="BorderThickness" Value="1" />
+
+        <Setter Property="VerticalAlignment" Value="Center" />
+
+        <Setter Property="HorizontalAlignment" Value="Right" />
+
+        <Setter Property="Effect">
+
+            <Setter.Value>
+
+                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Direction="270" Opacity="0.22"
+
+                                  Color="#88000000" />
+
+            </Setter.Value>
+
+        </Setter>
+
+    </Style>
+
+
+
+    <Style x:Key="SoListStatIconGlyph" TargetType="TextBlock">
+
+        <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+
+        <Setter Property="FontSize" Value="19" />
+
+        <Setter Property="Foreground" Value="White" />
+
+        <Setter Property="HorizontalAlignment" Value="Center" />
+
+        <Setter Property="VerticalAlignment" Value="Center" />
+
+        <Setter Property="Text" Value="{Binding IconGlyph}" />
+
+    </Style>
+
+
+
+    <Style x:Key="SoListDataGridCell" TargetType="DataGridCell">
+
+        <Setter Property="Padding" Value="0" />
+
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+
+        <Setter Property="BorderThickness" Value="0" />
+
+        <Setter Property="ToolTipService.InitialShowDelay" Value="250" />
+
+        <Style.Triggers>
+
+            <Trigger Property="IsSelected" Value="True">
+
+                <Setter Property="Background" Value="{DynamicResource AccentLightBrush}" />
+
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+
+            </Trigger>
+
+        </Style.Triggers>
+
+    </Style>
+
+
+
+    <Style x:Key="SoListGridActionButton" TargetType="Button">
+
+        <Setter Property="Padding" Value="6,4" />
+
+        <Setter Property="MinHeight" Value="32" />
+
+        <Setter Property="MinWidth" Value="32" />
+
+        <Setter Property="Margin" Value="2,0" />
+
+        <Setter Property="BorderThickness" Value="0" />
+
+        <Setter Property="Cursor" Value="Hand" />
+
+        <Setter Property="Template">
+
+            <Setter.Value>
+
+                <ControlTemplate TargetType="Button">
+
+                    <Border Background="{TemplateBinding Background}"
+
+                            BorderBrush="{TemplateBinding BorderBrush}"
+
+                            BorderThickness="{TemplateBinding BorderThickness}"
+
+                            CornerRadius="6" Padding="{TemplateBinding Padding}">
+
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                    </Border>
+
+                </ControlTemplate>
+
+            </Setter.Value>
+
+        </Setter>
+
+    </Style>
+
+
+
+    <Style x:Key="SoListActionPrintButton" TargetType="Button" BasedOn="{StaticResource SoListGridActionButton}">
+
+        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+
+        <Setter Property="Foreground" Value="White" />
+
+        <Style.Triggers>
+
+            <Trigger Property="IsMouseOver" Value="True">
+
+                <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}" />
+
+            </Trigger>
+
+        </Style.Triggers>
+
+    </Style>
+
+
+
+    <Style x:Key="SoListActionEditButton" TargetType="Button" BasedOn="{StaticResource SoListGridActionButton}">
+
+        <Setter Property="Background" Value="{DynamicResource AccentLightBrush}" />
+
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+
+        <Style.Triggers>
+
+            <Trigger Property="IsMouseOver" Value="True">
+
+                <Setter Property="Background" Value="{DynamicResource PanelMutedBrush}" />
+
+            </Trigger>
+
+        </Style.Triggers>
+
+    </Style>
+
+
+
+    <Style x:Key="SoListActionBomButton" TargetType="Button" BasedOn="{StaticResource SoListGridActionButton}">
+
+        <Setter Property="Background" Value="#F3E8FF" />
+
+        <Setter Property="Foreground" Value="#7C3AED" />
+
+        <Setter Property="BorderBrush" Value="#DDD6FE" />
+
+        <Setter Property="BorderThickness" Value="1" />
+
+        <Style.Triggers>
+
+            <Trigger Property="IsMouseOver" Value="True">
+
+                <Setter Property="Background" Value="#EDE9FE" />
+
+            </Trigger>
+
+        </Style.Triggers>
+
+    </Style>
+
+
+
+    <Style x:Key="SoListActionBarcodeButton" TargetType="Button" BasedOn="{StaticResource SoListGridActionButton}">
+
+        <Setter Property="Background" Value="#E0F2FE" />
+
+        <Setter Property="Foreground" Value="#0369A1" />
+
+        <Setter Property="BorderBrush" Value="#BAE6FD" />
+
+        <Setter Property="BorderThickness" Value="1" />
+
+        <Style.Triggers>
+
+            <Trigger Property="IsMouseOver" Value="True">
+
+                <Setter Property="Background" Value="#BAE6FD" />
+
+            </Trigger>
+
+        </Style.Triggers>
+
+    </Style>
+
+
+
+    <Style x:Key="SoListActionDeleteButton" TargetType="Button" BasedOn="{StaticResource SoListGridActionButton}">
+
+        <Setter Property="Background" Value="{DynamicResource DangerLightBrush}" />
+
+        <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
+
+        <Setter Property="BorderBrush" Value="{DynamicResource DangerBorderBrush}" />
+
+        <Setter Property="BorderThickness" Value="1" />
+
+        <Style.Triggers>
+
+            <Trigger Property="IsMouseOver" Value="True">
+
+                <Setter Property="Background" Value="{DynamicResource DangerBorderBrush}" />
+
+            </Trigger>
+
+        </Style.Triggers>
+
+    </Style>
+
+
+
+    <Style x:Key="SoListReportFieldLabel" TargetType="TextBlock">
+
+        <Setter Property="FontSize" Value="12" />
+
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+
+        <Setter Property="Margin" Value="0,0,0,4" />
+
+    </Style>
+
+
+
+</ResourceDictionary>
+
