@@ -189,7 +189,7 @@ export const refinedScreenMap: Record<string, ComponentType> = {
   [NavKeys.Bom]: BomListRouteScreen,
   [NavKeys.PayrollEmployees]: PayrollEmployeesListRouteScreen,
   [NavKeys.Attendance]: AttendanceListRouteScreen,
-  [NavKeys.PayrollRuns]: PayrollRunsListRouteScreen,
+  [NavKeys.PayrollRuns]: PayrollRunsRouteScreen,
   [NavKeys.PayrollReports]: PayrollReportsRouteScreen,
 
   // Workspace entry workflows (list → open document)
