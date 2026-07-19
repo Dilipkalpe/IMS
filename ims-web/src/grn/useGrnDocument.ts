@@ -8,7 +8,7 @@ import {
 } from '../sales-invoice/calculations';
 import type { GrnUiSnapshot } from '../document/mappers/grnPrintMapper';
 import { buildLineDisplayMap } from './lineDisplay';
-import { SAMPLE_BUYERS, SAMPLE_SUPPLIERS, SAMPLE_WAREHOUSES } from './mockData';
+import { SAMPLE_BUYERS, SAMPLE_WAREHOUSES } from './mockData';
 import { grnTaxHeader } from './taxContext';
 import type { FieldError, GrnHeader, GrnLineItem } from './types';
 import { useGrnWorkspace } from './workspace/GrnWorkspaceProvider';
@@ -184,7 +184,6 @@ export function useGrnDocument(tabId: string) {
     displayTotals,
     lineDisplayMap,
     getLineDisplay,
-    suppliers: SAMPLE_SUPPLIERS,
     buyers: SAMPLE_BUYERS,
     warehouses: SAMPLE_WAREHOUSES,
     updateHeader,

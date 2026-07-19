@@ -61,6 +61,7 @@ interface DeliveryChallanWorkspaceContextValue {
   prepareNewBill: (tabId: string, lineCount?: number) => Promise<void>;
   commitPrefix: (tabId: string) => Promise<void>;
   continueWithNextBill: (tabId: string) => Promise<void>;
+  duplicateToNewTab: (sourceTabId: string) => Promise<void>;
   closeTabWithoutConfirm: (tabId: string) => number;
   requestCloseWorkspace: () => boolean;
   focusSeed: number;
@@ -388,6 +389,32 @@ export function DeliveryChallanWorkspaceProvider({ children, lineCount = 0 }: { 
     },
     [closeTabWithoutConfirm, openDocumentInNewTab],
   );
+  const duplicateToNewTab = useCallback(
+    async (sourceTabId: string) => {
+      const source = documents[sourceTabId];
+      if (!source) throw new Error('Nothing to duplicate.');
+      const id = `tab-${tabCounter}`;
+      setTabCounter((c) => c + 1);
+      const prefix = normalizeSoPrefix(source.header.entryDocPrefix);
+      const next = await repository.peekNextNo(prefix);
+      const header = {
+        ...source.header,
+        entryDocPrefix: next.soPrefix,
+        billNo: String(next.docNo),
+      };
+      const lines = source.lines.map((line) => ({ ...line, id: crypto.randomUUID() }));
+      setTabs((prev) => [
+        ...prev.map((t) => ({ ...t, isSelected: false })),
+        newTabUi(id, 'Duplicated challan', true),
+      ]);
+      setDocuments((prev) => ({
+        ...prev,
+        [id]: applyLoadedDocument(createTabDocumentState(lineCount), null, header, lines, 'Duplicated — review and save.'),
+      }));
+      setFocusSeed((s) => s + 1);
+    },
+    [documents, lineCount, repository, tabCounter],
+  );
 
   const defaultNewIntent = useMemo(() => ({ type: 'new' as const }), []);
 
@@ -431,6 +458,7 @@ export function DeliveryChallanWorkspaceProvider({ children, lineCount = 0 }: { 
       prepareNewBill,
       commitPrefix,
       continueWithNextBill,
+      duplicateToNewTab,
       closeTabWithoutConfirm,
       requestCloseWorkspace,
       focusSeed,
@@ -446,6 +474,7 @@ export function DeliveryChallanWorkspaceProvider({ children, lineCount = 0 }: { 
       closeTabWithoutConfirm,
       commitPrefix,
       continueWithNextBill,
+      duplicateToNewTab,
       deleteLine,
       documents,
       focusSeed,

@@ -1,3 +1,4 @@
+@import '../components/form/erp-form.scss';
 @import '../styles/breakpoints';
 
 .wo-list-desc {
@@ -73,10 +74,16 @@
   color: #8b1a1a;
 }
 
-.wo-section {
-  padding: 8px;
-  border: 1px solid var(--ims-border, #d8dce3);
-  border-radius: 6px;
+.wo-section.erp-form-section {
+  padding: 16px 20px;
+}
+
+.wo-scan-bar.erp-form-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  background: #fafafa;
 }
 
 .wo-form-grid {

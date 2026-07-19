@@ -31,18 +31,27 @@ export function createListActionColumn<T extends { id: string }>(handlers: {
   onDelete: (row: T) => void;
   onPrint?: (row: T) => void;
   onBarcodeLabel?: (row: T) => void;
+  onBom?: (row: T) => void;
   rowLabel?: (row: T) => string;
   canEdit?: boolean;
   canDelete?: boolean;
   canPrint?: boolean;
   canBarcodeLabel?: boolean;
+  canBom?: boolean;
+  deleteTitle?: string;
 }): DataGridColumn<T> {
   const canEdit = handlers.canEdit !== false;
   const canDelete = handlers.canDelete !== false;
   const canPrint = handlers.onPrint != null && handlers.canPrint !== false;
   const canBarcodeLabel = handlers.onBarcodeLabel != null && handlers.canBarcodeLabel !== false;
+  const canBom = handlers.onBom != null && handlers.canBom !== false;
+  const deleteTitle = handlers.deleteTitle ?? 'Delete';
   const actionCount =
-    (canBarcodeLabel ? 1 : 0) + (canPrint ? 1 : 0) + (canEdit ? 1 : 0) + (canDelete ? 1 : 0);
+    (canBom ? 1 : 0) +
+    (canBarcodeLabel ? 1 : 0) +
+    (canPrint ? 1 : 0) +
+    (canEdit ? 1 : 0) +
+    (canDelete ? 1 : 0);
   const actionWidth = Math.max(88, actionCount * 32 + (actionCount - 1) * 4);
   return {
     id: 'actions',
@@ -54,6 +63,20 @@ export function createListActionColumn<T extends { id: string }>(handlers: {
       const label = listActionRowLabel(row, handlers.rowLabel);
       return (
       <div className="si-list-row-actions">
+        {canBom ? (
+          <button
+            type="button"
+            className="si-list-row-actions__btn"
+            title="BOM - Bill of Material"
+            aria-label={`BOM ${label}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handlers.onBom?.(row);
+            }}
+          >
+            &#xE8F1;
+          </button>
+        ) : null}
         {canBarcodeLabel ? (
           <button
             type="button"
@@ -100,8 +123,8 @@ export function createListActionColumn<T extends { id: string }>(handlers: {
           <button
             type="button"
             className="si-list-row-actions__btn si-list-row-actions__btn--danger"
-            title="Delete"
-            aria-label={`Delete ${label}`}
+            title={deleteTitle}
+            aria-label={`${deleteTitle} ${label}`}
             onClick={(e) => {
               e.stopPropagation();
               handlers.onDelete(row);

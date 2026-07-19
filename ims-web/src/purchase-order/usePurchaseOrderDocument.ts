@@ -8,7 +8,6 @@ import {
 } from '../sales-invoice/calculations';
 import type { PurchaseOrderUiSnapshot } from '../document/mappers/purchaseOrderPrintMapper';
 import { buildLineDisplayMap } from './lineDisplay';
-import { SAMPLE_SUPPLIERS } from './mockData';
 import { purchaseOrderTaxHeader } from './taxContext';
 import type { FieldError, PurchaseOrderHeader, PurchaseOrderLineItem } from './types';
 import { usePurchaseOrderWorkspace } from './workspace/PurchaseOrderWorkspaceProvider';
@@ -184,7 +183,6 @@ export function usePurchaseOrderDocument(tabId: string) {
     displayTotals,
     lineDisplayMap,
     getLineDisplay,
-    suppliers: SAMPLE_SUPPLIERS,
     updateHeader,
     updateLine,
     deleteLine,

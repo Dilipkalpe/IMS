@@ -1,4 +1,5 @@
 @import '../styles/breakpoints';
+@import '../components/form/erp-form.scss';
 
 .settings-screen {
   padding: 20px 24px;
@@ -323,9 +324,7 @@
 }
 
 .settings-panel {
-  background: var(--card, #fff);
-  border: 1px solid var(--border, #d5dce4);
-  border-radius: 10px;
+  @include erp-form-section-card;
   padding: 16px 18px;
 }
 

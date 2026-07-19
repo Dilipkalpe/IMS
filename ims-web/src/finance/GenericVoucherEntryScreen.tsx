@@ -4,8 +4,11 @@ import { createVoucher, fetchNextVoucherNo } from '../api/financeVouchers';
 import { probeApiHealth } from '../api/client';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
+import { ErpFormGrid, ErpFormNarration, ErpFormSection, ErpSearchableCombobox, ErpStaticSearchableSelect, customerAccountQuickAddConfig, supplierAccountQuickAddConfig } from '../components/form';
 import { parseMoney } from '../sales-invoice/invoicePayment';
 import type { VoucherModuleConfig } from './voucherConfigs';
+import { FinanceVoucherActionRail } from '../components/finance/FinanceVoucherActionRail';
+import { openListPrintPreview } from '../components/transaction/listExport';
 import './finance-voucher.scss';
 
 const CASH_BANK_OPTIONS = ['CASH', 'BANK'] as const;
@@ -72,22 +75,18 @@ export function GenericVoucherEntryScreen({ config }: { config: VoucherModuleCon
     };
   }, [config.accountType, config.apiPath]);
 
-  const lookupAccount = useCallback(() => {
-    const code = accountCode.trim();
-    if (!code) {
-      setErrorMessage('Enter an account code to look up.');
-      return;
-    }
-    const hit = accounts.find((a) => a.code.toUpperCase() === code.toUpperCase());
-    if (!hit) {
-      setErrorMessage(`No ${config.accountType} account found for code "${accountCode}".`);
-      setAccountName('');
-      return;
-    }
-    setErrorMessage(null);
-    setAccountCode(hit.code);
-    setAccountName(hit.name);
-  }, [accountCode, accounts, config.accountType]);
+  const onAccountSelect = useCallback(
+    (code: string) => {
+      const hit = accounts.find((a) => a.code === code);
+      setAccountCode(code);
+      setAccountName(hit?.name ?? '');
+      setErrorMessage(null);
+    },
+    [accounts],
+  );
+
+  const accountQuickAdd =
+    config.accountType === 'customer' ? customerAccountQuickAddConfig : supplierAccountQuickAddConfig;
 
   const goBack = useCallback(() => {
     navigate(config.listNavKey);
@@ -155,6 +154,31 @@ export function GenericVoucherEntryScreen({ config }: { config: VoucherModuleCon
     voucherNo,
   ]);
 
+  const printVoucher = useCallback(() => {
+    openListPrintPreview(
+      config.title,
+      `Voucher ${voucherNo} · ${voucherDate}`,
+      [
+        { id: 'voucherNo', header: 'Voucher No' },
+        { id: 'voucherDate', header: 'Date' },
+        { id: 'cashBank', header: 'Cash/Bank' },
+        { id: 'account', header: 'Account' },
+        { id: 'amount', header: 'Amount' },
+        { id: 'narration', header: 'Narration' },
+      ],
+      [
+        {
+          voucherNo,
+          voucherDate,
+          cashBank,
+          account: accountCode ? `${accountCode} — ${accountName}` : accountName,
+          amount,
+          narration,
+        },
+      ],
+    );
+  }, [accountCode, accountName, amount, cashBank, config.title, narration, voucherDate, voucherNo]);
+
   return (
     <TransactionEntryShell
       title={`Add ${config.title}`}
@@ -167,107 +191,110 @@ export function GenericVoucherEntryScreen({ config }: { config: VoucherModuleCon
       }
     >
       <div className="fv-entry">
-        <div className="fv-entry__section-title">Voucher details</div>
-        <div className="fv-entry__grid">
-          <label className="fv-entry__field">
-            <span className="wpf-subpage-form-label">Voucher No *</span>
-            <input
-              className="wpf-subpage-form-input"
-              value={voucherNo}
-              onChange={(e) => setVoucherNo(e.target.value)}
-            />
-          </label>
-          <label className="fv-entry__field">
-            <span className="wpf-subpage-form-label">Ref. No</span>
-            <input
-              className="wpf-subpage-form-input"
-              value={refNo}
-              onChange={(e) => setRefNo(e.target.value)}
-            />
-          </label>
-          <label className="fv-entry__field">
-            <span className="wpf-subpage-form-label">Date *</span>
-            <input
-              type="date"
-              className="wpf-subpage-form-input"
-              value={voucherDate}
-              onChange={(e) => setVoucherDate(e.target.value)}
-            />
-          </label>
-        </div>
+        <ErpFormSection>
+          <div className="erp-form-section__title">Voucher details</div>
+          <ErpFormGrid>
+            <label className="si-field">
+              <span className="wpf-subpage-form-label">Voucher No *</span>
+              <input
+                className="wpf-subpage-form-input"
+                value={voucherNo}
+                onChange={(e) => setVoucherNo(e.target.value)}
+              />
+            </label>
+            <label className="si-field">
+              <span className="wpf-subpage-form-label">Ref. No</span>
+              <input
+                className="wpf-subpage-form-input"
+                value={refNo}
+                onChange={(e) => setRefNo(e.target.value)}
+              />
+            </label>
+            <label className="si-field">
+              <span className="wpf-subpage-form-label">Date *</span>
+              <input
+                type="date"
+                className="wpf-subpage-form-input"
+                value={voucherDate}
+                onChange={(e) => setVoucherDate(e.target.value)}
+              />
+            </label>
+          </ErpFormGrid>
+        </ErpFormSection>
 
-        <div className="fv-entry__section-title">Payment details</div>
-        <div className="fv-entry__grid">
-          <label className="fv-entry__field">
-            <span className="wpf-subpage-form-label">Cash / Bank *</span>
-            <select
-              className="wpf-subpage-form-combo"
-              value={cashBank}
-              onChange={(e) => setCashBank(e.target.value as 'CASH' | 'BANK')}
-            >
-              {CASH_BANK_OPTIONS.map((o) => (
-                <option key={o} value={o}>
-                  {o}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="fv-entry__field">
-            <span className="wpf-subpage-form-label">Amount *</span>
-            <input
-              className="wpf-subpage-form-input"
-              value={amount}
-              inputMode="decimal"
-              onChange={(e) => setAmount(e.target.value)}
-            />
-          </label>
-        </div>
+        <ErpFormSection>
+          <div className="erp-form-section__title">Payment details</div>
+          <ErpFormGrid columns={2}>
+            <label className="si-field">
+              <span className="wpf-subpage-form-label">Cash / Bank *</span>
+              <ErpStaticSearchableSelect
+                value={cashBank}
+                onChange={(v) => setCashBank(v as 'CASH' | 'BANK')}
+                options={CASH_BANK_OPTIONS}
+                placeholder="Cash or bank…"
+                aria-label="Cash or bank"
+              />
+            </label>
+            <label className="si-field">
+              <span className="wpf-subpage-form-label">Amount *</span>
+              <input
+                className="wpf-subpage-form-input"
+                value={amount}
+                inputMode="decimal"
+                onChange={(e) => setAmount(e.target.value)}
+              />
+            </label>
+          </ErpFormGrid>
+        </ErpFormSection>
 
-        <div className="fv-entry__section-title">{config.accountLabel}</div>
-        <div className="fv-entry__account-row">
-          <label className="fv-entry__field">
-            <span className="wpf-subpage-form-label">Account code</span>
-            <input
-              className="wpf-subpage-form-input"
-              value={accountCode}
-              onChange={(e) => setAccountCode(e.target.value)}
-            />
-          </label>
-          <button type="button" className="wpf-secondary-button" onClick={lookupAccount}>
-            Look up
-          </button>
-          <label className="fv-entry__field">
-            <span className="wpf-subpage-form-label">Account name</span>
-            <input
-              className="wpf-subpage-form-input"
-              value={accountName}
-              onChange={(e) => setAccountName(e.target.value)}
-            />
-          </label>
-        </div>
+        <ErpFormSection>
+          <div className="erp-form-section__title">{config.accountLabel}</div>
+          <ErpFormGrid columns={2}>
+            <label className="si-field erp-form-field--span-2">
+              <span className="wpf-subpage-form-label">Account</span>
+              <ErpSearchableCombobox
+                value={accountCode}
+                onChange={onAccountSelect}
+                options={accounts.map((a) => ({
+                  value: a.code,
+                  label: `${a.code} — ${a.name}`,
+                  searchText: `${a.code} ${a.name}`,
+                }))}
+                placeholder={`Search ${config.accountType} account…`}
+                quickAdd={accountQuickAdd}
+                onQuickAddSuccess={(option) => {
+                  const namePart = option.label.includes(' — ')
+                    ? option.label.split(' — ').slice(1).join(' — ')
+                    : option.label;
+                  setAccounts((prev) => {
+                    if (prev.some((a) => a.code === option.value)) return prev;
+                    return [
+                      ...prev,
+                      {
+                        code: option.value,
+                        name: namePart,
+                        accountType: config.accountType,
+                      },
+                    ];
+                  });
+                  onAccountSelect(option.value);
+                }}
+                aria-label={config.accountLabel}
+              />
+            </label>
+          </ErpFormGrid>
+          <ErpFormNarration value={narration} onChange={(e) => setNarration(e.target.value)} />
+        </ErpFormSection>
 
-        <label className="fv-entry__field">
-          <span className="wpf-subpage-form-label">Narration</span>
-          <input
-            className="wpf-subpage-form-input"
-            value={narration}
-            onChange={(e) => setNarration(e.target.value)}
-          />
-        </label>
-
-        <div className="fv-entry__actions">
-          <button
-            type="button"
-            className="wpf-primary-button"
-            disabled={isSaving || !apiReady}
-            onClick={() => void save()}
-          >
-            {isSaving ? 'Saving…' : 'Save'}
-          </button>
-          <button type="button" className="wpf-secondary-button" disabled={isSaving} onClick={goBack}>
-            Cancel
-          </button>
-        </div>
+        <FinanceVoucherActionRail
+          saving={isSaving}
+          disabled={!apiReady}
+          onNew={() => void resetForm()}
+          onSave={() => void save()}
+          onSaveAndNext={() => void save()}
+          onPrint={printVoucher}
+          onClose={goBack}
+        />
       </div>
     </TransactionEntryShell>
   );

@@ -1,0 +1,139 @@
+.erp-searchable-combobox {
+  position: relative;
+  width: 100%;
+
+  &--disabled {
+    opacity: 0.65;
+  }
+
+  &__control {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  &__input {
+    padding-right: 28px;
+  }
+
+  &__clear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: var(--text-secondary, #5a6b7d);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+
+    &:hover {
+      color: var(--text-primary, #1a2b3c);
+    }
+  }
+
+  &__list {
+    position: absolute;
+    z-index: 40;
+    left: 0;
+    right: 0;
+    top: calc(100% + 4px);
+    margin: 0;
+    padding: 4px 0;
+    list-style: none;
+    max-height: 240px;
+    overflow-y: auto;
+    background: var(--card, #fff);
+    border: 1px solid var(--border, #d5dce4);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--theme-shadow, #0c2340) 12%, transparent);
+  }
+
+  &__option,
+  &__status {
+    padding: 8px 12px;
+    font-size: 13px;
+    line-height: 1.35;
+    color: var(--text-primary, #1a2b3c);
+  }
+
+  &__option {
+    cursor: pointer;
+
+    &--highlight,
+    &:hover {
+      background: color-mix(in srgb, var(--accent, #006b9e) 10%, transparent);
+    }
+
+    &--selected {
+      font-weight: 600;
+    }
+  }
+
+  &__status {
+    color: var(--text-secondary, #5a6b7d);
+  }
+
+  &__add {
+    padding: 4px 8px 8px;
+    border-top: 1px dashed var(--border, #d5dce4);
+  }
+
+  &__add-btn {
+    width: 100%;
+    text-align: left;
+    border: none;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--accent, #006b9e) 8%, transparent);
+    color: var(--accent, #006b9e);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 10px;
+    cursor: pointer;
+
+    &:hover {
+      background: color-mix(in srgb, var(--accent, #006b9e) 14%, transparent);
+    }
+  }
+}
+
+.erp-quick-add-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    border: none;
+    background: color-mix(in srgb, #0c2340 35%, transparent);
+    cursor: pointer;
+  }
+
+  &__panel {
+    position: relative;
+    z-index: 1;
+    width: min(480px, 100%);
+    max-height: min(90vh, 640px);
+    overflow: auto;
+  }
+
+  &__error {
+    margin: 0 0 12px;
+    font-size: 13px;
+    color: var(--danger, #b42318);
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+  }
+}

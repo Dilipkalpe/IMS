@@ -1,0 +1,88 @@
+.fy-screen__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.fy-screen__active {
+  margin: 0;
+  font-size: 13px;
+}
+
+.fy-screen__status {
+  margin: 0;
+  color: var(--erp-accent, #2563eb);
+  font-size: 13px;
+}
+
+.fy-screen__actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.fy-screen__switch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: var(--erp-surface-muted, #f8fafc);
+  border-radius: 6px;
+}
+
+.fy-screen__switch-label {
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.fy-screen__year-btn--active {
+  font-weight: 600;
+}
+
+.fy-screen__delete-btn {
+  margin-left: auto;
+  color: #b91c1c;
+}
+
+.fy-year-end-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.fy-year-end-dialog__panel {
+  width: min(420px, 92vw);
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+
+.fy-year-end-dialog__panel h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.fy-year-end-dialog__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 12px;
+  font-size: 12px;
+}
+
+.fy-year-end-dialog__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}

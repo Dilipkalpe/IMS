@@ -7,6 +7,7 @@ import {
   type ProductMasterRecord,
 } from '../api/products';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
+import { ErpFormGrid, ErpFormSection } from '../components/form';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { useProductMasterNavIntent } from './context/ProductMasterNavIntent';
 import './master-form.scss';
@@ -144,8 +145,9 @@ export function ProductMasterFormScreen() {
       }
     >
       <div className="mf-form">
-        <div className="mf-form__section-title">Identity</div>
-        <div className="mf-form__grid">
+        <ErpFormSection>
+          <div className="erp-form-section__title">Identity</div>
+          <ErpFormGrid>
           <label className="mf-form__field">
             <span className="wpf-subpage-form-label">Code *</span>
             <input
@@ -195,10 +197,10 @@ export function ProductMasterFormScreen() {
             />
             <span>Active</span>
           </label>
-        </div>
+          </ErpFormGrid>
 
-        <div className="mf-form__section-title">Units & classification</div>
-        <div className="mf-form__grid">
+          <div className="erp-form-section__title">Units & classification</div>
+          <ErpFormGrid>
           <label className="mf-form__field">
             <span className="wpf-subpage-form-label">Unit</span>
             <input
@@ -247,10 +249,10 @@ export function ProductMasterFormScreen() {
               onChange={(e) => patch('productSubGroup', e.target.value)}
             />
           </label>
-        </div>
+          </ErpFormGrid>
 
-        <div className="mf-form__section-title">Pricing, tax & stock</div>
-        <div className="mf-form__grid">
+          <div className="erp-form-section__title">Pricing, tax & stock</div>
+          <ErpFormGrid>
           <label className="mf-form__field">
             <span className="wpf-subpage-form-label">Sale price</span>
             <input
@@ -330,9 +332,9 @@ export function ProductMasterFormScreen() {
             />
             <span>GST exempt</span>
           </label>
-        </div>
+          </ErpFormGrid>
 
-        <div className="mf-form__actions">
+          <div className="mf-form__actions">
           <button
             type="button"
             className="wpf-primary-button"
@@ -344,7 +346,8 @@ export function ProductMasterFormScreen() {
           <button type="button" className="wpf-secondary-button" disabled={saving} onClick={goBack}>
             Back to list
           </button>
-        </div>
+          </div>
+        </ErpFormSection>
       </div>
     </TransactionEntryShell>
   );

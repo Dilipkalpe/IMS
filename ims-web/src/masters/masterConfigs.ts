@@ -21,6 +21,8 @@ export interface MasterCrudField {
 
 export interface MasterListConfig {
   title: string;
+  /** WPF EditDeleteGuard / page title — defaults to title. */
+  moduleTitle?: string;
   listNavKey: string;
   formNavKey?: string;
   crudEntity?: MasterCrudEntity;
@@ -34,6 +36,14 @@ export interface MasterListConfig {
   columns: MasterColumnDef[];
   searchPlaceholder: string;
   searchFields?: string[];
+  /** Toolbar primary action label (WPF SubPageActions). Defaults to "New". */
+  addActionLabel?: string;
+  /** WPF StandardListView export popup. */
+  showExport?: boolean;
+  /** Create-only dialog (no edit/delete) — e.g. fiscal years. */
+  createOnly?: boolean;
+  /** Row action: open BOM for product (WPF BomRowCommand). */
+  showBomAction?: boolean;
 }
 
 const CODE_NAME_CRUD: MasterCrudField[] = [
@@ -49,20 +59,25 @@ function codeNameColumns(): MasterColumnDef[] {
 }
 
 export const PRODUCTS_CONFIG: MasterListConfig = {
-  title: 'Product Catalog',
+  title: 'Product / Item Master',
+  moduleTitle: 'Product / Item Master',
   listNavKey: 'products',
   formNavKey: 'product-master-form',
   crudEntity: 'product',
   apiPath: 'products',
   fetchMode: 'paged',
+  addActionLabel: 'Add Product',
+  showExport: true,
+  showBomAction: true,
   columns: [
-    { id: 'code', header: 'Code', width: 120, field: 'code' },
+    { id: 'code', header: 'SKU', width: 120, field: 'code' },
     { id: 'name', header: 'Name', minWidth: 180, field: 'name' },
-    { id: 'salePrice', header: 'Sale Price', width: 110, field: 'salePrice' },
-    { id: 'taxType', header: 'Tax Type', width: 90, field: 'taxType' },
-    { id: 'activeStatus', header: 'Active', width: 80, field: 'activeStatus' },
+    { id: 'category', header: 'Category', width: 140, field: 'category' },
+    { id: 'unit', header: 'Unit', width: 90, field: 'unit' },
+    { id: 'activeStatus', header: 'Status', width: 90, field: 'activeStatus' },
   ],
-  searchPlaceholder: 'Search code, name…',
+  searchPlaceholder: 'Search product / item master…',
+  searchFields: ['code', 'name', 'category', 'unit'],
 };
 
 export const ACCOUNT_LEDGER_CONFIG: MasterListConfig = {
@@ -209,6 +224,7 @@ export const PURCHASE_UOM_CONFIG: MasterListConfig = {
   ...SALE_UOM_CONFIG,
   title: 'Purchase Units',
   listNavKey: 'purchase-uom',
+  apiCrud: true,
 };
 
 export const CUSTOMER_TYPES_CONFIG: MasterListConfig = {
@@ -320,6 +336,16 @@ export const FINANCIAL_YEARS_CONFIG: MasterListConfig = {
   listNavKey: 'financial-years',
   apiPath: 'financial-years',
   fetchMode: 'flat-array',
+  apiCrud: true,
+  crudKeyField: 'id',
+  crudKeyMode: 'by-id',
+  createOnly: true,
+  addActionLabel: 'New Fiscal Year',
+  crudFields: [
+    { key: 'financialYearName', label: 'Year Name', required: true, showOn: 'new' },
+    { key: 'startDate', label: 'Start Date', required: true, showOn: 'new' },
+    { key: 'endDate', label: 'End Date', required: true, showOn: 'new' },
+  ],
   columns: [
     { id: 'financialYearName', header: 'Year', width: 140, field: 'financialYearName' },
     { id: 'startDate', header: 'Start', width: 110, field: 'startDate' },
@@ -357,6 +383,17 @@ export const ATTENDANCE_CONFIG: MasterListConfig = {
   listNavKey: 'attendance',
   apiPath: 'attendance',
   fetchMode: 'paged',
+  apiCrud: true,
+  crudKeyField: '_id',
+  crudKeyMode: 'by-id',
+  addActionLabel: 'Add Attendance',
+  crudFields: [
+    { key: 'employeeCode', label: 'Employee Code', required: true },
+    { key: 'attendanceDate', label: 'Date', required: true },
+    { key: 'status', label: 'Status', required: true },
+    { key: 'hoursWorked', label: 'Hours Worked', type: 'number' },
+    { key: 'remarks', label: 'Remarks' },
+  ],
   columns: [
     { id: 'employeeCode', header: 'Employee', width: 110, field: 'employeeCode' },
     { id: 'attendanceDate', header: 'Date', width: 110, field: 'attendanceDate' },
@@ -364,7 +401,8 @@ export const ATTENDANCE_CONFIG: MasterListConfig = {
     { id: 'hoursWorked', header: 'Hours', width: 80, field: 'hoursWorked' },
     { id: 'remarks', header: 'Remarks', minWidth: 140, field: 'remarks' },
   ],
-  searchPlaceholder: 'Filter via API refresh…',
+  searchPlaceholder: 'Search employee, status…',
+  searchFields: ['employeeCode', 'status', 'remarks'],
 };
 
 export const PAYROLL_RUNS_CONFIG: MasterListConfig = {

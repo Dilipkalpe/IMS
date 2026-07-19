@@ -1,0 +1,528 @@
+@import '../../styles/breakpoints';
+
+/* Shared TMS-style control chrome for inputs inside ERP form contexts */
+@mixin erp-form-control {
+  width: 100%;
+  min-height: 38px;
+  height: 38px;
+  padding: 8px 12px;
+  font-size: 13px;
+  line-height: 1.35;
+  border: 1px solid var(--border, #d5dce4);
+  border-radius: 8px;
+  background: var(--card, #fff);
+  color: var(--text-primary, #1a2b3c);
+  font-family: inherit;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &::placeholder {
+    color: color-mix(in srgb, var(--text-secondary, #5a6b7d) 72%, transparent);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent, #006b9e);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #006b9e) 14%, transparent);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+}
+
+@mixin erp-form-textarea {
+  @include erp-form-control;
+  min-height: 72px;
+  height: auto;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+@mixin erp-form-select {
+  @include erp-form-control;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235a6b7d' d='M1.41 0 6 4.58 10.59 0 12 1.41l-6 6-6-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+  cursor: pointer;
+}
+
+@mixin erp-form-field-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+}
+
+@mixin erp-form-grid-layout($cols: 3) {
+  --erp-form-cols: #{$cols};
+  display: grid;
+  grid-template-columns: repeat(var(--erp-form-cols), minmax(0, 1fr));
+  gap: 14px 16px;
+  margin-bottom: 0;
+}
+
+@mixin erp-form-section-card {
+  background: var(--card, #fff);
+  border: 1px solid var(--border, #d5dce4);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin: 0 var(--transaction-section-gap, 8px) var(--transaction-section-gap, 8px) 0;
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--theme-shadow, #0c2340) 6%, transparent);
+}
+
+/* TMS Booking–style ERP form controls (Sales + Procurement entry headers) */
+
+.erp-form-section {
+  @include erp-form-section-card;
+
+  &__title,
+  .fv-entry__section-title,
+  .rv-entry__section-title,
+  .mf-form__section-title {
+    font-size: 12px;
+    font-weight: 600;
+    margin: 0 0 12px;
+    color: var(--accent, #006b9e);
+
+    &:not(:first-child) {
+      margin-top: 4px;
+    }
+  }
+
+  .si-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .wpf-subpage-form-label,
+  .erp-form-field__label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary, #5a6b7d);
+    line-height: 1.3;
+    margin: 0;
+    display: block;
+  }
+}
+
+.erp-form-grid,
+.erp-form-section .si-header-grid,
+.erp-form-section .si-gst-header-row,
+.erp-form-section .si-eway-header-row {
+  --erp-form-cols: 3;
+  display: grid;
+  grid-template-columns: repeat(var(--erp-form-cols), minmax(0, 1fr));
+  gap: 14px 16px;
+  margin-bottom: 0;
+}
+
+.erp-form-grid {
+  &--gst,
+  &.si-gst-header-row {
+    margin-top: 4px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border, #d5dce4);
+  }
+
+  &--eway,
+  &.si-eway-header-row {
+    margin-top: 4px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border, #d5dce4);
+  }
+}
+
+.erp-form-section .si-gst-header-row,
+.erp-form-section .si-eway-header-row {
+  margin-top: 4px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border, #d5dce4);
+}
+
+.erp-form-field,
+.erp-form-section .si-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+
+  &--full,
+  &--span-3 {
+    grid-column: 1 / -1;
+  }
+
+  &--span-2 {
+    grid-column: span 2;
+  }
+
+  &__label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary, #5a6b7d);
+    line-height: 1.3;
+  }
+
+  &__error,
+  .si-field-error {
+    font-size: 11px;
+    color: var(--danger, #b42318);
+    margin-top: 2px;
+  }
+
+  .wpf-subpage-form-input,
+  .wpf-subpage-form-combo,
+  .wpf-form-input,
+  .wpf-form-combo {
+    width: 100%;
+    min-height: 38px;
+    height: 38px;
+    padding: 8px 12px;
+    font-size: 13px;
+    line-height: 1.35;
+    border: 1px solid var(--border, #d5dce4);
+    border-radius: 8px;
+    background: var(--card, #fff);
+    color: var(--text-primary, #1a2b3c);
+    font-family: inherit;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+
+    &::placeholder {
+      color: color-mix(in srgb, var(--text-secondary, #5a6b7d) 72%, transparent);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--accent, #006b9e);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #006b9e) 14%, transparent);
+    }
+
+    &:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+  }
+
+  input[type='date'].wpf-subpage-form-input,
+  input[type='date'].wpf-form-input {
+    padding-right: 10px;
+    color-scheme: light;
+  }
+
+  input[type='number'].wpf-subpage-form-input,
+  input[inputmode='decimal'].wpf-subpage-form-input {
+    font-variant-numeric: tabular-nums;
+  }
+
+  select.wpf-subpage-form-combo,
+  select.wpf-form-combo {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235a6b7d' d='M1.41 0 6 4.58 10.59 0 12 1.41l-6 6-6-6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+    cursor: pointer;
+  }
+
+  &.si-readonly .wpf-subpage-form-input,
+  .wpf-subpage-form-input.si-readonly,
+  .wpf-subpage-form-input[readonly] {
+    background: var(--panel-muted, #f6f8fa);
+    color: var(--text-secondary, #5a6b7d);
+  }
+
+  .si-input--error {
+    border-color: var(--danger, #b42318) !important;
+    background: color-mix(in srgb, var(--danger, #b42318) 4%, #fff) !important;
+  }
+}
+
+.erp-form-field--with-action,
+.si-field--with-action {
+  .si-field-action-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .si-field-action-row__btn {
+    min-height: 38px;
+    height: 38px;
+    padding: 0 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+}
+
+.erp-form-narration {
+  min-width: 0;
+
+  &__input {
+    width: 100%;
+    min-height: 72px;
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.45;
+    border: 1px solid var(--border, #d5dce4);
+    border-radius: 8px;
+    background: var(--card, #fff);
+    color: var(--text-primary, #1a2b3c);
+    font-family: inherit;
+    resize: vertical;
+
+    &:focus {
+      outline: none;
+      border-color: var(--accent, #006b9e);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #006b9e) 14%, transparent);
+    }
+  }
+}
+
+.si-bottom.erp-form-bottom {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: end;
+  background: var(--card, #fff);
+  border: 1px solid var(--border, #d5dce4);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 0 var(--transaction-section-gap, 8px) 0 0 !important;
+
+  .erp-form-bottom__actions-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary, #5a6b7d);
+    margin: 0 0 8px;
+    display: block;
+  }
+
+  .si-action-rail {
+    gap: 8px;
+  }
+
+  .si-action-btn {
+    width: auto;
+    min-width: 52px;
+    height: 40px;
+    flex-direction: row;
+    padding: 0 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    gap: 4px;
+
+    .icon-text {
+      font-size: 14px;
+      margin-bottom: 0;
+    }
+  }
+}
+
+@include bp-down(transaction) {
+  .erp-form-grid,
+  .erp-form-section .si-header-grid,
+  .erp-form-section .si-gst-header-row,
+  .erp-form-section .si-eway-header-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .erp-form-field--span-2,
+  .erp-form-field--span-3,
+  .erp-form-field--full {
+    grid-column: 1 / -1;
+  }
+}
+
+@include bp-down(sm) {
+  .erp-form-section {
+    padding: 14px 12px;
+    border-radius: 8px;
+  }
+
+  .erp-form-grid,
+  .erp-form-section .si-header-grid,
+  .erp-form-section .si-gst-header-row,
+  .erp-form-section .si-eway-header-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .si-bottom.erp-form-bottom {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+/* Global fallback — rounded controls for any form field in the main shell */
+.main-window {
+  input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='button']):not([type='submit']):not([type='reset']).wpf-subpage-form-input,
+  input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='button']):not([type='submit']):not([type='reset']).wpf-form-input,
+  select.wpf-subpage-form-combo,
+  select.wpf-form-combo,
+  textarea.wpf-subpage-form-input,
+  textarea.wpf-form-input,
+  .settings-input:not([type='checkbox']):not([type='radio']),
+  .settings-select,
+  .settings-textarea {
+    @include erp-form-control;
+  }
+
+  select.wpf-subpage-form-combo,
+  select.wpf-form-combo,
+  .settings-select {
+    @include erp-form-select;
+  }
+
+  textarea.wpf-subpage-form-input,
+  textarea.wpf-form-input,
+  .settings-textarea {
+    @include erp-form-textarea;
+  }
+
+  input[type='date'].wpf-subpage-form-input,
+  input[type='date'].wpf-form-input {
+    padding-right: 10px;
+    color-scheme: light;
+  }
+
+  input[type='number'].wpf-subpage-form-input,
+  input[inputmode='decimal'].wpf-subpage-form-input {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Legacy layout aliases — master, finance, security, work-order entry forms */
+.mf-form__panel,
+.wo-section,
+.security-role-form__header,
+.master-crud-dialog__panel .mf-form__grid {
+  &:not(.erp-form-section) {
+    @include erp-form-section-card;
+  }
+}
+
+.mf-form__grid,
+.fv-entry__grid,
+.rv-entry__grid,
+.wo-form-grid,
+.security-form .mf-form__grid {
+  @include erp-form-grid-layout(3);
+}
+
+.mf-form__grid--2 {
+  --erp-form-cols: 2;
+}
+
+.mf-form__grid--3 {
+  --erp-form-cols: 3;
+}
+
+.mf-form__field,
+.fv-entry__field,
+.rv-entry__field,
+.wo-field,
+.security-role-form__name {
+  @include erp-form-field-cell;
+
+  > span,
+  > .wpf-subpage-form-label,
+  > .wo-field-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary, #5a6b7d);
+    line-height: 1.3;
+  }
+}
+
+.mf-form__field--wide,
+.wo-field--wide {
+  grid-column: 1 / -1;
+}
+
+.standard-report__filters {
+  @include erp-form-grid-layout(4);
+  align-items: end;
+  gap: 12px 16px;
+}
+
+.erp-form-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.standard-report__field {
+  @include erp-form-field-cell;
+
+  label,
+  > label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary, #5a6b7d);
+  }
+}
+
+.settings-form-row__label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary, #5a6b7d);
+}
+
+.settings-input,
+.settings-select,
+.settings-textarea {
+  border-radius: 8px;
+  min-height: 38px;
+}
+
+.settings-textarea {
+  min-height: 72px;
+  height: auto;
+}
+
+.DynamicFormView .wpf-transactionsectionborder {
+  @include erp-form-section-card;
+  padding: 16px 20px;
+}
+
+@include bp-down(transaction) {
+  .mf-form__grid,
+  .fv-entry__grid,
+  .rv-entry__grid,
+  .wo-form-grid,
+  .standard-report__filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@include bp-down(sm) {
+  .mf-form__panel,
+  .wo-section {
+    padding: 14px 12px;
+    border-radius: 8px;
+  }
+
+  .mf-form__grid,
+  .fv-entry__grid,
+  .rv-entry__grid,
+  .wo-form-grid,
+  .standard-report__filters {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}

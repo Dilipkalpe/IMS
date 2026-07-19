@@ -15,19 +15,16 @@ import {
   AccountLedgerListRouteScreen,
   AssemblyTypesListRouteScreen,
   AttendanceListRouteScreen,
-  BomListRouteScreen,
   CompanyRegistrationListRouteScreen,
   CustomerTypesListRouteScreen,
   FinancialYearsListRouteScreen,
   MachinesListRouteScreen,
   MainGroupsListRouteScreen,
   PayrollEmployeesListRouteScreen,
-  PayrollRunsListRouteScreen,
   ProductTypesListRouteScreen,
   ProductsListRouteScreen,
   PurchaseUomListRouteScreen,
   SaleUomListRouteScreen,
-  StockTransferListRouteScreen,
   SubGroupsListRouteScreen,
   SuppliersListRouteScreen,
   WarehousesListRouteScreen,
@@ -42,7 +39,10 @@ import {
   UserFormRouteScreen,
   UserRolesListRouteScreen,
 } from '../security/routes';
-import { PayrollEmployeeFormRouteScreen, PayrollReportsRouteScreen } from '../payroll/routes';
+import { PayrollEmployeeFormRouteScreen, PayrollReportsRouteScreen, PayrollRunsRouteScreen } from '../payroll/routes';
+import { BomEntryRouteScreen, BomListRouteScreen } from '../bom/routes';
+import { StockTransferEntryRouteScreen, StockTransferListRouteScreen } from '../stock-transfer/routes';
+import { StockLevelsRouteScreen } from '../inventory/routes';
 import {
   BillFormatDesignerRouteScreen,
   PaymentAllocationRouteScreen,
@@ -184,6 +184,7 @@ export const refinedScreenMap: Record<string, ComponentType> = {
 
   // Operations & payroll
   [NavKeys.StockTransfer]: StockTransferListRouteScreen,
+  [NavKeys.StockLevels]: StockLevelsRouteScreen,
   [NavKeys.ProductionOrders]: WorkOrderListRouteScreen,
   [NavKeys.Bom]: BomListRouteScreen,
   [NavKeys.PayrollEmployees]: PayrollEmployeesListRouteScreen,
@@ -209,6 +210,8 @@ export const refinedScreenMap: Record<string, ComponentType> = {
   'purchase-invoice-entry': PurchaseInvoiceWorkspaceRouteScreen,
   'purchase-return-entry': PurchaseReturnWorkspaceRouteScreen,
   'work-order-entry': WorkOrderEntryRouteScreen,
+  'bom-entry': BomEntryRouteScreen,
+  'stock-transfer-entry': StockTransferEntryRouteScreen,
 
   // Master form sub-pages
   'account-master-form': AccountMasterFormRouteScreen,

@@ -10,6 +10,7 @@ import {
   type OutstandingPurchaseInvoice,
 } from '../api/paymentVouchers';
 import { CorporateDataGrid, type DataGridColumn } from '../components/datagrid/CorporateDataGrid';
+import { ErpFormGrid, ErpFormNarration, ErpFormSection, ErpSearchableCombobox, ErpStaticSearchableSelect, supplierAccountQuickAddConfig } from '../components/form';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import {
@@ -359,12 +360,13 @@ export function PaymentAllocationScreen() {
             <p className="fv-entry__banner fv-entry__banner--warn">API offline — save is unavailable.</p>
           )}
 
-          <div className="palloc__header mf-form__grid mf-form__grid--3">
-            <label className="mf-form__field">
+          <ErpFormSection className="palloc__header">
+            <ErpFormGrid columns={3}>
+            <label className="si-field">
               <span className="wpf-subpage-form-label">Voucher No</span>
               <input className="wpf-subpage-form-input" value={voucherNo} readOnly />
             </label>
-            <label className="mf-form__field">
+            <label className="si-field">
               <span className="wpf-subpage-form-label">Date</span>
               <input
                 type="date"
@@ -373,7 +375,7 @@ export function PaymentAllocationScreen() {
                 onChange={(e) => setVoucherDate(e.target.value)}
               />
             </label>
-            <label className="mf-form__field">
+            <label className="si-field">
               <span className="wpf-subpage-form-label">Ref. No</span>
               <input
                 className="wpf-subpage-form-input"
@@ -381,37 +383,49 @@ export function PaymentAllocationScreen() {
                 onChange={(e) => setRefNo(e.target.value)}
               />
             </label>
-            <label className="mf-form__field">
+            <label className="si-field">
               <span className="wpf-subpage-form-label">Supplier account</span>
-              <select
-                className="wpf-subpage-form-input"
+              <ErpSearchableCombobox
                 value={accountCode}
-                onChange={(e) => onAccountChange(e.target.value)}
+                onChange={onAccountChange}
+                options={accounts.map((a) => ({
+                  value: a.code,
+                  label: `${a.code} — ${a.name}`,
+                  searchText: `${a.code} ${a.name}`,
+                }))}
+                placeholder="Search supplier account…"
                 disabled={isEditMode}
-              >
-                <option value="">Select supplier…</option>
-                {accounts.map((a) => (
-                  <option key={a.code} value={a.code}>
-                    {a.code} — {a.name}
-                  </option>
-                ))}
-              </select>
+                quickAdd={supplierAccountQuickAddConfig}
+                onQuickAddSuccess={(option) => {
+                  const namePart = option.label.includes(' — ')
+                    ? option.label.split(' — ').slice(1).join(' — ')
+                    : option.label;
+                  setAccounts((prev) => {
+                    if (prev.some((a) => a.code === option.value)) return prev;
+                    return [
+                      ...prev,
+                      {
+                        code: option.value,
+                        name: namePart,
+                        accountType: 'supplier',
+                      },
+                    ];
+                  });
+                }}
+                aria-label="Supplier account"
+              />
             </label>
-            <label className="mf-form__field">
+            <label className="si-field">
               <span className="wpf-subpage-form-label">Cash / Bank</span>
-              <select
-                className="wpf-subpage-form-input"
+              <ErpStaticSearchableSelect
                 value={cashBank}
-                onChange={(e) => setCashBank(e.target.value as 'CASH' | 'BANK')}
-              >
-                {CASH_BANK_OPTIONS.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
+                onChange={(v) => setCashBank(v as 'CASH' | 'BANK')}
+                options={CASH_BANK_OPTIONS}
+                placeholder="Cash or bank…"
+                aria-label="Cash or bank"
+              />
             </label>
-            <label className="mf-form__field">
+            <label className="si-field">
               <span className="wpf-subpage-form-label">Payment amount</span>
               <input
                 className="wpf-subpage-form-input"
@@ -419,7 +433,8 @@ export function PaymentAllocationScreen() {
                 onChange={(e) => setAmount(e.target.value)}
               />
             </label>
-          </div>
+            </ErpFormGrid>
+          </ErpFormSection>
 
           <div className="palloc__summary">
             <span>Allocated: {formatMoney(allocatedTotal)}</span>
@@ -453,15 +468,9 @@ export function PaymentAllocationScreen() {
             </p>
           )}
 
-          <div className="mf-form__actions palloc__actions">
-            <label className="mf-form__field mf-form__field--wide">
-              <span className="wpf-subpage-form-label">Narration</span>
-              <input
-                className="wpf-subpage-form-input"
-                value={narration}
-                onChange={(e) => setNarration(e.target.value)}
-              />
-            </label>
+          <ErpFormSection className="palloc__actions-section">
+            <ErpFormNarration value={narration} onChange={(e) => setNarration(e.target.value)} />
+            <div className="mf-form__actions palloc__actions">
             <button
               type="button"
               className="wpf-primary-button"
@@ -473,7 +482,8 @@ export function PaymentAllocationScreen() {
             <button type="button" className="wpf-secondary-button" onClick={() => navigate(returnNavKey)}>
               Back to list
             </button>
-          </div>
+            </div>
+          </ErpFormSection>
         </div>
       </TransactionEntryShell>
     </RefinedScreenShell>

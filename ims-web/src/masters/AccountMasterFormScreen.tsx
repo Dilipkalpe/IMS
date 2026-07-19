@@ -7,6 +7,7 @@ import {
   type AccountRecord,
 } from '../api/accounts';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
+import { ErpFormGrid, ErpFormSection } from '../components/form';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { useAccountMasterNavIntent } from './context/AccountMasterNavIntent';
 import './master-form.scss';
@@ -150,9 +151,9 @@ export function AccountMasterFormScreen() {
       <div className="mf-form">
         <p className="mf-form__subtitle">{PAGE_DESCRIPTION}</p>
 
-        <section className="mf-form__panel" aria-label="Account master form">
-          <div className="mf-form__section-title">Account &amp; contact</div>
-          <div className="mf-form__grid">
+        <ErpFormSection className="mf-form__panel" aria-label="Account master form">
+          <div className="erp-form-section__title">Account &amp; contact</div>
+          <ErpFormGrid>
             <label className="mf-form__field">
               <span className="wpf-subpage-form-label">Type *</span>
               <select
@@ -198,10 +199,10 @@ export function AccountMasterFormScreen() {
                 onChange={(e) => patch('contactPerson', e.target.value)}
               />
             </label>
-          </div>
+          </ErpFormGrid>
 
-          <div className="mf-form__section-title">Communication</div>
-          <div className="mf-form__grid">
+          <div className="erp-form-section__title">Communication</div>
+          <ErpFormGrid columns={2}>
             <label className="mf-form__field">
               <span className="wpf-subpage-form-label">Email</span>
               <input
@@ -218,10 +219,10 @@ export function AccountMasterFormScreen() {
                 onChange={(e) => patch('mobileNo', e.target.value)}
               />
             </label>
-          </div>
+          </ErpFormGrid>
 
-          <div className="mf-form__section-title">Tax &amp; registration</div>
-          <div className="mf-form__grid">
+          <div className="erp-form-section__title">Tax &amp; registration</div>
+          <ErpFormGrid columns={2}>
             <label className="mf-form__field">
               <span className="wpf-subpage-form-label">GST No</span>
               <input
@@ -238,9 +239,9 @@ export function AccountMasterFormScreen() {
                 onChange={(e) => patch('panNo', e.target.value.toUpperCase())}
               />
             </label>
-          </div>
+          </ErpFormGrid>
 
-          <div className="mf-form__grid mf-form__grid--2 mf-form__checks-row">
+          <ErpFormGrid columns={2} className="mf-form__checks-row">
             <label className="mf-form__field mf-form__field--check">
               <input
                 type="checkbox"
@@ -257,9 +258,9 @@ export function AccountMasterFormScreen() {
               />
               <span>Active</span>
             </label>
-          </div>
+          </ErpFormGrid>
 
-          <div className="mf-form__section-title">Address &amp; location</div>
+          <div className="erp-form-section__title">Address &amp; location</div>
           <label className="mf-form__field mf-form__field--wide mf-form__field--textarea">
             <span className="wpf-subpage-form-label">Address</span>
             <textarea
@@ -269,7 +270,7 @@ export function AccountMasterFormScreen() {
               onChange={(e) => patch('address', e.target.value)}
             />
           </label>
-          <div className="mf-form__grid">
+          <ErpFormGrid>
             <label className="mf-form__field">
               <span className="wpf-subpage-form-label">City</span>
               <input
@@ -294,10 +295,10 @@ export function AccountMasterFormScreen() {
                 onChange={(e) => patch('pincode', e.target.value)}
               />
             </label>
-          </div>
+          </ErpFormGrid>
 
-          <div className="mf-form__section-title">Credit &amp; turnover</div>
-          <div className="mf-form__grid">
+          <div className="erp-form-section__title">Credit &amp; turnover</div>
+          <ErpFormGrid>
             <label className="mf-form__field">
               <span className="wpf-subpage-form-label">Credit limit</span>
               <input
@@ -336,7 +337,7 @@ export function AccountMasterFormScreen() {
                 <option value="credit">Credit</option>
               </select>
             </label>
-          </div>
+          </ErpFormGrid>
 
           <div className="mf-form__actions mf-form__actions--end">
             <button type="button" className="wpf-secondary-button" disabled={saving} onClick={goBack}>
@@ -352,7 +353,7 @@ export function AccountMasterFormScreen() {
             </button>
           </div>
           <p className="mf-form__footer-note">Save returns to the list. Required fields are marked with *.</p>
-        </section>
+        </ErpFormSection>
       </div>
     </TransactionEntryShell>
   );

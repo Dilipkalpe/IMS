@@ -13,8 +13,9 @@ import {
   type ListExportColumn,
 } from '../components/transaction/listExport';
 import { employeeTypeLabel } from './payrollEmployeeTypes';
+import { fetchPayslipByPeriod, openPayslipHtmlPreview } from '../api/payrollReports';
 
-type ReportKind = 'tax-summary' | 'staff-hours';
+type ReportKind = 'tax-summary' | 'staff-hours' | 'payslip';
 
 interface ReportRow {
   id: string;
@@ -67,6 +68,9 @@ const STAFF_HOURS_COLUMNS: ReportGridColumnDef[] = [
 export function PayrollReportsScreen() {
   const [reportKind, setReportKind] = useState<ReportKind>('tax-summary');
   const [periodMonth, setPeriodMonth] = useState(currentPeriodMonth());
+  const [employeeCode, setEmployeeCode] = useState('');
+  const [runNo, setRunNo] = useState('');
+  const [payslipStatus, setPayslipStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState<ReportRow[]>([]);
@@ -91,9 +95,50 @@ export function PayrollReportsScreen() {
   useEffect(() => {
     setRows([]);
     setError(null);
+    setPayslipStatus(null);
   }, [reportKind]);
 
+  const viewPayslip = useCallback(async () => {
+    if (!/^\d{4}-\d{2}$/.test(periodMonth.trim())) {
+      setPayslipStatus('Enter period as YYYY-MM.');
+      return;
+    }
+    if (!employeeCode.trim()) {
+      setPayslipStatus('Enter employee code.');
+      return;
+    }
+    setLoading(true);
+    setPayslipStatus(null);
+    setError(null);
+    try {
+      const parsedRun = runNo.trim() ? parseInt(runNo, 10) : undefined;
+      await fetchPayslipByPeriod({
+        periodMonth: periodMonth.trim(),
+        employeeCode: employeeCode.trim(),
+        runNo: Number.isFinite(parsedRun) ? parsedRun : undefined,
+      });
+      const win = openPayslipHtmlPreview({
+        periodMonth: periodMonth.trim(),
+        employeeCode: employeeCode.trim(),
+        runNo: Number.isFinite(parsedRun) ? parsedRun : undefined,
+      });
+      if (!win) {
+        setPayslipStatus('Popup blocked — allow popups for payslip preview.');
+        return;
+      }
+      setPayslipStatus('Payslip opened — use browser Print for PDF.');
+    } catch (err) {
+      setPayslipStatus(err instanceof Error ? err.message : 'Payslip not found.');
+    } finally {
+      setLoading(false);
+    }
+  }, [employeeCode, periodMonth, runNo]);
+
   const loadReport = useCallback(async () => {
+    if (reportKind === 'payslip') {
+      await viewPayslip();
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -133,14 +178,21 @@ export function PayrollReportsScreen() {
     } finally {
       setLoading(false);
     }
-  }, [columnDefs, periodMonth, reportKind]);
+  }, [columnDefs, periodMonth, reportKind, viewPayslip]);
 
-  const reportTitle = reportKind === 'staff-hours' ? 'Staff Hours Report' : 'Payroll Tax Summary';
+  const reportTitle =
+    reportKind === 'staff-hours'
+      ? 'Staff Hours Report'
+      : reportKind === 'payslip'
+        ? 'Employee Payslip'
+        : 'Payroll Tax Summary';
 
   const summary =
-    rows.length > 0
-      ? `${rows.length} employee(s) · ${periodMonth}`
-      : 'Select a report and period, then click Show.';
+    reportKind === 'payslip'
+      ? payslipStatus ?? 'Enter period and employee code, then View Payslip.'
+      : rows.length > 0
+        ? `${rows.length} employee(s) · ${periodMonth}`
+        : 'Select a report and period, then click Show.';
 
   const printReport = useCallback(() => {
     if (rows.length === 0) return;
@@ -170,6 +222,7 @@ export function PayrollReportsScreen() {
             >
               <option value="tax-summary">Tax summary</option>
               <option value="staff-hours">Staff hours</option>
+              <option value="payslip">Payslip (PDF/HTML)</option>
             </select>
           </div>
           <div className="standard-report__field">
@@ -182,6 +235,30 @@ export function PayrollReportsScreen() {
               onChange={(e) => setPeriodMonth(e.target.value)}
             />
           </div>
+          {reportKind === 'payslip' ? (
+            <>
+              <div className="standard-report__field">
+                <label htmlFor="payroll-employee">Employee code</label>
+                <input
+                  id="payroll-employee"
+                  className="wpf-subpage-form-input"
+                  value={employeeCode}
+                  onChange={(e) => setEmployeeCode(e.target.value.toUpperCase())}
+                  placeholder="EMP001"
+                />
+              </div>
+              <div className="standard-report__field">
+                <label htmlFor="payroll-run-no">Run no (optional)</label>
+                <input
+                  id="payroll-run-no"
+                  className="wpf-subpage-form-input"
+                  value={runNo}
+                  onChange={(e) => setRunNo(e.target.value)}
+                  placeholder="Latest if blank"
+                />
+              </div>
+            </>
+          ) : null}
           <div className="standard-report__actions">
             <button
               type="button"
@@ -189,8 +266,10 @@ export function PayrollReportsScreen() {
               onClick={() => void loadReport()}
               disabled={loading}
             >
-              Show
+              {reportKind === 'payslip' ? 'View Payslip' : 'Show'}
             </button>
+            {reportKind !== 'payslip' ? (
+              <>
             <button
               type="button"
               className="wpf-secondary-button"
@@ -207,16 +286,24 @@ export function PayrollReportsScreen() {
             >
               Export Excel
             </button>
+              </>
+            ) : null}
           </div>
         </>
       }
       grid={
+        reportKind === 'payslip' ? (
+          <p className="standard-report__empty-hint">
+            Payslip opens in a new window with print-to-PDF support (browser Print → Save as PDF).
+          </p>
+        ) : (
         <CorporateDataGrid
           columns={columns}
           data={rows}
           emptyMessage="Select a report and period, then click Show."
           {...REPORT_DATA_GRID_PROPS}
         />
+        )
       }
     />
   );

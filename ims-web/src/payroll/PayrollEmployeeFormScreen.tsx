@@ -8,6 +8,7 @@ import {
   type PayrollEmployeeRecord,
 } from '../api/payrollEmployees';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
+import { ErpFormGrid, ErpFormSection } from '../components/form';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { NavKeys } from '../navigation/navKeys';
 import {
@@ -140,8 +141,9 @@ export function PayrollEmployeeFormScreen() {
       }
     >
       <div className="mf-form">
-        <div className="mf-form__section-title">Employee profile</div>
-        <div className="mf-form__grid mf-form__grid--2">
+        <ErpFormSection>
+          <div className="erp-form-section__title">Employee profile</div>
+          <ErpFormGrid columns={2}>
           <label className="mf-form__field">
             <span className="wpf-subpage-form-label">Employee Code *</span>
             <input
@@ -197,10 +199,10 @@ export function PayrollEmployeeFormScreen() {
               onChange={(e) => patch('panNo', e.target.value.toUpperCase())}
             />
           </label>
-        </div>
+          </ErpFormGrid>
 
-        <div className="mf-form__section-title">Compensation</div>
-        <div className="mf-form__grid mf-form__grid--2">
+          <div className="erp-form-section__title">Compensation</div>
+          <ErpFormGrid columns={2}>
           {showMonthlySalary && (
             <label className="mf-form__field">
               <span className="wpf-subpage-form-label">Monthly Salary *</span>
@@ -291,10 +293,10 @@ export function PayrollEmployeeFormScreen() {
               </label>
             </>
           )}
-        </div>
+          </ErpFormGrid>
 
-        <div className="mf-form__section-title">Statutory &amp; deductions</div>
-        <div className="mf-form__grid mf-form__grid--2">
+          <div className="erp-form-section__title">Statutory &amp; deductions</div>
+          <ErpFormGrid columns={2}>
           <label className="mf-form__field">
             <span className="wpf-subpage-form-label">TDS %</span>
             <input
@@ -347,9 +349,9 @@ export function PayrollEmployeeFormScreen() {
             />
             <span>Active</span>
           </label>
-        </div>
+          </ErpFormGrid>
 
-        <div className="mf-form__actions">
+          <div className="mf-form__actions">
           <button type="button" className="wpf-primary-button" disabled={saving || loading} onClick={() => void handleSave()}>
             {saving ? 'Saving…' : 'Save'}
           </button>
@@ -360,7 +362,8 @@ export function PayrollEmployeeFormScreen() {
           >
             Back to list
           </button>
-        </div>
+          </div>
+        </ErpFormSection>
       </div>
     </TransactionEntryShell>
   );

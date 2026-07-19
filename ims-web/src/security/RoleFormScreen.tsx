@@ -8,6 +8,7 @@ import {
   type RoleDto,
 } from '../api/roles';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
+import { ErpFormSection } from '../components/form';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { NavKeys } from '../navigation/navKeys';
 import { RefinedScreenShell } from '../screens/RefinedScreenShell';
@@ -276,9 +277,10 @@ export function RoleFormScreen() {
           {loading ? <p className="mf-form__status">Loading…</p> : null}
           {error ? <p className="mf-form__error">{error}</p> : null}
 
-          <div className="security-role-form__header">
-            <label className="security-role-form__name">
-              <span>Role name</span>
+          <ErpFormSection className="security-role-form__header-card">
+            <div className="security-role-form__header">
+            <label className="security-role-form__name si-field">
+              <span className="erp-form-field__label">Role name</span>
               <input
                 className="wpf-form-input"
                 value={roleName}
@@ -295,42 +297,43 @@ export function RoleFormScreen() {
               />
               <span>Active</span>
             </label>
-          </div>
-
-          <div className="security-role-form__filter-row">
-            <input
-              className="wpf-form-input security-role-form__filter"
-              placeholder="Filter menus by name…"
-              value={menuFilter}
-              onChange={(e) => setMenuFilter(e.target.value)}
-            />
-            <div className="security-role-form__filter-actions">
-              <button
-                type="button"
-                className="wpf-action-button"
-                disabled={!menuFilter.trim()}
-                onClick={() => setMenuFilter('')}
-              >
-                Clear filter
-              </button>
-              <button
-                type="button"
-                className="wpf-action-button"
-                disabled={loading || saving}
-                onClick={() => setPermissionRows((rows) => selectAllView(rows))}
-              >
-                Select all View
-              </button>
-              <button
-                type="button"
-                className="wpf-action-button"
-                disabled={loading || saving}
-                onClick={() => setPermissionRows((rows) => clearAllPermissions(rows))}
-              >
-                Clear all
-              </button>
             </div>
-          </div>
+
+            <div className="security-role-form__filter-row erp-form-filter-row">
+              <input
+                className="wpf-form-input security-role-form__filter"
+                placeholder="Filter menus by name…"
+                value={menuFilter}
+                onChange={(e) => setMenuFilter(e.target.value)}
+              />
+              <div className="security-role-form__filter-actions">
+                <button
+                  type="button"
+                  className="wpf-action-button"
+                  disabled={!menuFilter.trim()}
+                  onClick={() => setMenuFilter('')}
+                >
+                  Clear filter
+                </button>
+                <button
+                  type="button"
+                  className="wpf-action-button"
+                  disabled={loading || saving}
+                  onClick={() => setPermissionRows((rows) => selectAllView(rows))}
+                >
+                  Select all View
+                </button>
+                <button
+                  type="button"
+                  className="wpf-action-button"
+                  disabled={loading || saving}
+                  onClick={() => setPermissionRows((rows) => clearAllPermissions(rows))}
+                >
+                  Clear all
+                </button>
+              </div>
+            </div>
+          </ErpFormSection>
 
           <div className="security-role-form__matrix">
             <PermissionMatrix

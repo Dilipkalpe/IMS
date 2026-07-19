@@ -17,6 +17,7 @@ import { getUserByUsername } from '../api/users';
 import { ProductBrowseDialog } from '../components/transaction/ProductBrowseDialog';
 import type { SalesProductInfo } from '../components/transaction/salesProductPicker';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
+import { ErpFormGrid, ErpFormSection } from '../components/form';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { RefinedScreenShell } from '../screens/RefinedScreenShell';
 import { useWorkOrderNavIntent, type WorkOrderOpenIntent } from './context/WorkOrderNavIntent';
@@ -623,10 +624,10 @@ export function WorkOrderEntryScreen() {
             </p>
           )}
 
-          <div className="wo-section">
-            <div className="wo-form-grid">
-              <label className="wo-field">
-                <span className="wo-field-label">Production ID</span>
+          <ErpFormSection className="wo-section">
+            <ErpFormGrid columns={4}>
+              <label className="si-field">
+                <span className="erp-form-field__label">Production ID</span>
                 <input
                   className="wpf-form-input"
                   value={productionId}
@@ -634,8 +635,8 @@ export function WorkOrderEntryScreen() {
                   disabled={readOnly}
                 />
               </label>
-              <label className="wo-field">
-                <span className="wo-field-label">Date</span>
+              <label className="si-field">
+                <span className="erp-form-field__label">Date</span>
                 <input
                   type="date"
                   className="wpf-form-input"
@@ -644,8 +645,8 @@ export function WorkOrderEntryScreen() {
                   disabled={readOnly}
                 />
               </label>
-              <label className="wo-field wo-field--wide">
-                <span className="wo-field-label">Item</span>
+              <label className="si-field erp-form-field--full wo-field--wide">
+                <span className="erp-form-field__label">Item</span>
                 <div className="wo-inline-lookup">
                   <input
                     className="wpf-form-input"
@@ -668,8 +669,8 @@ export function WorkOrderEntryScreen() {
                   />
                 </div>
               </label>
-              <label className="wo-field wo-field--wide">
-                <span className="wo-field-label">Machine</span>
+              <label className="si-field erp-form-field--full wo-field--wide">
+                <span className="erp-form-field__label">Machine</span>
                 <div className="wo-inline-lookup">
                   <input
                     className="wpf-form-input"
@@ -692,8 +693,8 @@ export function WorkOrderEntryScreen() {
                   />
                 </div>
               </label>
-              <label className="wo-field wo-field--wide">
-                <span className="wo-field-label">Operator</span>
+              <label className="si-field erp-form-field--full wo-field--wide">
+                <span className="erp-form-field__label">Operator</span>
                 <div className="wo-inline-lookup">
                   <input
                     className="wpf-form-input"
@@ -716,8 +717,8 @@ export function WorkOrderEntryScreen() {
                   />
                 </div>
               </label>
-              <label className="wo-field">
-                <span className="wo-field-label">Start</span>
+              <label className="si-field">
+                <span className="erp-form-field__label">Start</span>
                 <input
                   className="wpf-form-input"
                   value={startTimeText}
@@ -725,8 +726,8 @@ export function WorkOrderEntryScreen() {
                   disabled={readOnly}
                 />
               </label>
-              <label className="wo-field">
-                <span className="wo-field-label">End</span>
+              <label className="si-field">
+                <span className="erp-form-field__label">End</span>
                 <input
                   className="wpf-form-input"
                   value={endTimeText}
@@ -734,8 +735,8 @@ export function WorkOrderEntryScreen() {
                   disabled={readOnly}
                 />
               </label>
-              <label className="wo-field">
-                <span className="wo-field-label">Min</span>
+              <label className="si-field">
+                <span className="erp-form-field__label">Min</span>
                 <input
                   className="wpf-form-input"
                   value={totalDurationMinutes}
@@ -743,8 +744,8 @@ export function WorkOrderEntryScreen() {
                   disabled={readOnly}
                 />
               </label>
-              <label className="wo-field">
-                <span className="wo-field-label">Produce</span>
+              <label className="si-field">
+                <span className="erp-form-field__label">Produce</span>
                 <input
                   className="wpf-form-input"
                   value={produceQty}
@@ -752,8 +753,8 @@ export function WorkOrderEntryScreen() {
                   disabled={readOnly}
                 />
               </label>
-              <label className="wo-field">
-                <span className="wo-field-label">Rejected</span>
+              <label className="si-field">
+                <span className="erp-form-field__label">Rejected</span>
                 <input
                   className="wpf-form-input"
                   value={rejectedQty}
@@ -761,14 +762,14 @@ export function WorkOrderEntryScreen() {
                   disabled={readOnly}
                 />
               </label>
-            </div>
-          </div>
+            </ErpFormGrid>
+          </ErpFormSection>
 
-          <div className="wo-scan-bar">
-            <label className="wo-field">
-              <span className="wo-field-label">From godown</span>
+          <ErpFormSection className="wo-scan-bar">
+            <label className="si-field">
+              <span className="erp-form-field__label">From godown</span>
               <select
-                className="wpf-form-input"
+                className="wpf-form-combo"
                 value={fromGodown}
                 onChange={(e) => setFromGodown(e.target.value)}
                 disabled={readOnly}
@@ -796,7 +797,7 @@ export function WorkOrderEntryScreen() {
             >
               Open BOM
             </button>
-          </div>
+          </ErpFormSection>
 
           <div className="wo-grids">
             <div className="wo-grid-panel">

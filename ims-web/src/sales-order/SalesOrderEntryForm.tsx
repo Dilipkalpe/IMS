@@ -2,8 +2,17 @@ import { useCallback, useRef } from 'react';
 import { SalesCustomerSelect } from '../components/transaction/SalesCustomerSelect';
 import { LoadingHost } from '../components/loading';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
+import { ErpFormGrid, ErpFormNarration, ErpFormSection } from '../components/form';
 import type { CorporateDataGridHandle } from '../components/datagrid/CorporateDataGrid';
 import { useSalesOrderPrintActions } from '../document/hooks/useSalesOrderPrintActions';
+import {
+  buildDocumentEntryActions,
+  DocumentEntryActionRail,
+} from '../components/transaction/DocumentEntryActionRail';
+import {
+  handleDocumentSecondaryAction,
+  registerPrintPreviousSnapshot,
+} from '../components/transaction/documentSecondaryActions';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { FormKeyboardScope } from '../keyboard/FormKeyboardScope';
 import { FIELD_FOCUS_KEY, focusFirstErrorField } from '../keyboard/formKeyboardNavigation';
@@ -33,7 +42,7 @@ export function SalesOrderEntryForm({
   const { print, savePrintNext } = useSalesOrderPrintActions();
   const scopeRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<CorporateDataGridHandle>(null);
-  const narrationRef = useRef<HTMLInputElement>(null);
+  const narrationRef = useRef<HTMLTextAreaElement>(null);
   const saveButtonRef = useRef<HTMLButtonElement>(null);
 
   const focusValidationError = useCallback((firstField?: string) => {
@@ -55,6 +64,7 @@ export function SalesOrderEntryForm({
       const snapshot = doc.getUiSnapshot();
       if (label === 'Print') {
         const outcome = await print(snapshot, true);
+        if (outcome.ok) registerPrintPreviousSnapshot('sales-order', snapshot);
         doc.setStatus(outcome.message);
         return;
       }
@@ -62,6 +72,7 @@ export function SalesOrderEntryForm({
         const saved = await doc.save();
         return { ok: saved.ok, message: saved.message ?? (saved.ok ? 'Saved.' : 'Save failed.') };
       });
+      if (outcome.ok) registerPrintPreviousSnapshot('sales-order', snapshot);
       doc.setStatus(outcome.message);
       if (outcome.ok) {
         if (doc.isEdit) {
@@ -86,6 +97,23 @@ export function SalesOrderEntryForm({
         await runPrintFlow(label);
         return;
       }
+      const handled = await handleDocumentSecondaryAction(label, {
+        moduleKey: 'sales-order',
+        setStatus: doc.setStatus,
+        getUiSnapshot: doc.getUiSnapshot,
+        printSnapshot: print,
+        openByFormatted: async (formatted) => {
+          await ws.openDocumentInNewTab({ type: 'editFormatted', formatted });
+        },
+        duplicateToNewTab: async () => {
+          await ws.duplicateToNewTab(tabId);
+        },
+        currentFormatted: () => {
+          const h = doc.header;
+          return h.billNo ? `${h.entryDocPrefix}-${h.billNo}` : undefined;
+        },
+      });
+      if (handled) return;
       const result = await doc.tryAction(label);
       if (!result.ok) {
         requestAnimationFrame(() => focusValidationError(result.firstField));
@@ -102,8 +130,13 @@ export function SalesOrderEntryForm({
         requestAnimationFrame(() => focusValidationError('entryDocPrefix'));
       }
     },
-    [doc, focusValidationError, navigate, runPrintFlow, ws],
+    [doc, focusValidationError, navigate, runPrintFlow, tabId, ws],
   );
+
+  const entryActions = buildDocumentEntryActions({
+    saveButtonRef,
+    disabled: doc.isSaving || doc.isLoading,
+  });
 
   useDocumentShortcuts({
     onCancel: () => void runAction('Cancel'),
@@ -130,8 +163,8 @@ export function SalesOrderEntryForm({
               {doc.loadError}
             </div>
           )}
-          <section className="si-section">
-            <div className="si-header-grid">
+          <ErpFormSection>
+            <ErpFormGrid>
               <label className="si-field">
                 <span className="wpf-subpage-form-label">SO Prefix</span>
                 <input
@@ -236,8 +269,8 @@ export function SalesOrderEntryForm({
                   onChange={(e) => doc.updateHeader('shippingAddress', e.target.value)}
                 />
               </label>
-            </div>
-            <div className="si-gst-header-row">
+            </ErpFormGrid>
+            <ErpFormGrid variant="gst">
               <label className="si-field">
                 <span className="wpf-subpage-form-label">Seller GSTIN</span>
                 <input
@@ -272,49 +305,23 @@ export function SalesOrderEntryForm({
                   ))}
                 </select>
               </label>
-            </div>
-          </section>
+            </ErpFormGrid>
+          </ErpFormSection>
 
           <section className="si-section si-section--grow si-section--lines-panel">
             <SalesOrderLineItemsGrid doc={doc} gridRef={gridRef} onExitGridEnd={focusNarration} />
           </section>
 
-          <section className="si-section si-bottom">
-            <div className="si-bottom__narration">
-              <span className="wpf-sales-field-label">Narration</span>
-              <input
-                ref={narrationRef}
-                className="wpf-sales-compact-input"
-                {...{ [FIELD_FOCUS_KEY]: 'narration' }}
-                value={h.narration}
-                onChange={(e) => doc.updateHeader('narration', e.target.value)}
-              />
-            </div>
+          <section className="si-section si-bottom erp-form-bottom">
+            <ErpFormNarration
+              ref={narrationRef}
+              {...{ [FIELD_FOCUS_KEY]: 'narration' }}
+              value={h.narration}
+              onChange={(e) => doc.updateHeader('narration', e.target.value)}
+            />
             <div className="si-bottom__actions">
-              <span className="wpf-section-header">Actions</span>
-              <div className="si-action-rail" role="toolbar" aria-label="Document actions">
-                {[
-                  { icon: '\uE710', label: 'New', action: 'New Bill', variant: 'primary' as const, key: 'action-new' },
-                  { icon: '\uE74E', label: 'Save', action: 'Save', variant: 'primary' as const, key: 'action-save', ref: saveButtonRef },
-                  { icon: '\uE74E', label: 'Next', action: 'Save, Next (F11)', variant: 'secondary' as const, key: 'action-next' },
-                  { icon: '\uE749', label: 'S+P', action: 'Save, Print, Next (F12)', variant: 'primary' as const, key: 'action-sp' },
-                  { icon: '\uE749', label: 'Print', action: 'Print', variant: 'primary' as const, key: 'action-print' },
-                  { icon: '\uE711', label: 'Close', action: 'Close', variant: 'secondary' as const, key: 'action-close' },
-                ].map((btn) => (
-                  <button
-                    key={btn.label}
-                    ref={btn.ref}
-                    type="button"
-                    className={`si-action-btn si-action-btn--${btn.variant}`}
-                    title={`${btn.action}${btn.action === 'Save, Next (F11)' ? ' (F11)' : btn.action === 'Save, Print, Next (F12)' ? ' (F12)' : ''}`}
-                    {...{ [FIELD_FOCUS_KEY]: btn.key }}
-                    onClick={() => void runAction(btn.action)}
-                  >
-                    <span className="icon-text">{btn.icon}</span>
-                    <span>{btn.label}</span>
-                  </button>
-                ))}
-              </div>
+              <span className="erp-form-bottom__actions-label">Actions</span>
+              <DocumentEntryActionRail actions={entryActions} onAction={(action) => void runAction(action)} />
             </div>
           </section>
         </div>

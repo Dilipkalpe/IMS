@@ -47,6 +47,12 @@ export async function fetchCustomerAccountNames(): Promise<string[]> {
   return Array.isArray(names) ? names : [];
 }
 
+/** WPF: ImsApiClient.GetAccountNamesAsync("supplier") → GET /api/accounts/names */
+export async function fetchSupplierAccountNames(): Promise<string[]> {
+  const names = await apiFetch<string[]>('/api/accounts/names?type=supplier');
+  return Array.isArray(names) ? names : [];
+}
+
 export async function fetchAccounts(params?: {
   type?: 'customer' | 'supplier';
   page?: number;

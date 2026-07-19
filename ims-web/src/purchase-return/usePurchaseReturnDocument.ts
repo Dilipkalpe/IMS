@@ -8,7 +8,6 @@ import {
 } from '../sales-invoice/calculations';
 import type { PurchaseReturnUiSnapshot } from '../document/mappers/purchaseReturnPrintMapper';
 import { buildLineDisplayMap } from './lineDisplay';
-import { SAMPLE_SUPPLIERS } from './mockData';
 import { purchaseReturnGstContext } from './taxContext';
 import type { FieldError, PurchaseReturnHeader, PurchaseReturnLineItem } from './types';
 import { usePurchaseReturnWorkspace } from './workspace/PurchaseReturnWorkspaceProvider';
@@ -186,7 +185,6 @@ export function usePurchaseReturnDocument(tabId: string) {
     displayTotals,
     lineDisplayMap,
     getLineDisplay,
-    suppliers: SAMPLE_SUPPLIERS,
     updateHeader,
     updateLine,
     deleteLine,

@@ -31,6 +31,8 @@ import { SalesInvoiceNavIntentProvider } from '../sales-invoice/context/SalesInv
 import { ReceiptVoucherNavIntentProvider } from '../receipt-voucher/context/ReceiptVoucherNavIntent';
 import { PaymentVoucherNavIntentProvider } from '../payment-voucher/context/PaymentVoucherNavIntent';
 import { WorkOrderNavIntentProvider } from '../work-order/context/WorkOrderNavIntent';
+import { BomNavIntentProvider } from '../bom/context/BomNavIntent';
+import { StockTransferNavIntentProvider } from '../stock-transfer/context/StockTransferNavIntent';
 import { ProductMasterNavIntentProvider } from '../masters/context/ProductMasterNavIntent';
 import { PayrollEmployeeNavIntentProvider } from '../payroll/context/PayrollEmployeeNavIntent';
 import { RoleNavIntentProvider } from '../security/context/RoleNavIntent';
@@ -38,6 +40,7 @@ import { UserNavIntentProvider, useUserNavIntent } from '../security/context/Use
 import { AccountMasterNavIntentProvider } from '../masters/context/AccountMasterNavIntent';
 import { SalesInvoiceRepositoryProvider } from '../sales-invoice/repository/SalesInvoiceRepositoryContext';
 import { SalesCustomerPickerProvider } from '../components/transaction/SalesCustomerPickerContext';
+import { PurchaseSupplierPickerProvider } from '../components/transaction/PurchaseSupplierPickerContext';
 import { WorkflowQuickNav } from '../components/WorkflowQuickNav';
 import { buildNavigationSections, navigationCatalog, searchableNavigationCatalog } from '../navigation/navigationCatalog';
 import { NavKeys } from '../navigation/navKeys';
@@ -406,6 +409,7 @@ function MainWindowShell({ initialNavKey = NavKeys.Dashboard, onLogout }: MainWi
         <main className="main-window__content-host">
           <DocumentPrintProvider>
             <SalesCustomerPickerProvider>
+            <PurchaseSupplierPickerProvider>
             <SalesInvoiceRepositoryProvider>
               <PurchaseInvoiceRepositoryProvider>
                 <PurchaseOrderRepositoryProvider>
@@ -419,6 +423,8 @@ function MainWindowShell({ initialNavKey = NavKeys.Dashboard, onLogout }: MainWi
                               <ReceiptVoucherNavIntentProvider>
                               <PaymentVoucherNavIntentProvider>
                               <WorkOrderNavIntentProvider>
+                              <BomNavIntentProvider>
+                              <StockTransferNavIntentProvider>
                               <ProductMasterNavIntentProvider>
                               <PayrollEmployeeNavIntentProvider>
                               <RoleNavIntentProvider>
@@ -454,6 +460,8 @@ function MainWindowShell({ initialNavKey = NavKeys.Dashboard, onLogout }: MainWi
                               </RoleNavIntentProvider>
                               </PayrollEmployeeNavIntentProvider>
                               </ProductMasterNavIntentProvider>
+                              </StockTransferNavIntentProvider>
+                              </BomNavIntentProvider>
                               </WorkOrderNavIntentProvider>
                               </PaymentVoucherNavIntentProvider>
                               </ReceiptVoucherNavIntentProvider>
@@ -467,6 +475,7 @@ function MainWindowShell({ initialNavKey = NavKeys.Dashboard, onLogout }: MainWi
                 </PurchaseOrderRepositoryProvider>
               </PurchaseInvoiceRepositoryProvider>
             </SalesInvoiceRepositoryProvider>
+            </PurchaseSupplierPickerProvider>
             </SalesCustomerPickerProvider>
           </DocumentPrintProvider>
         </main>

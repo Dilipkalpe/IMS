@@ -3,6 +3,7 @@ import { createCashEntry, fetchNextCashEntryNo, type CashEntryLine } from '../ap
 import { probeApiHealth } from '../api/client';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
+import { ErpFormGrid, ErpFormSection } from '../components/form';
 import { parseMoney } from '../sales-invoice/invoicePayment';
 import './finance-voucher.scss';
 
@@ -132,28 +133,31 @@ export function PettyCashEntryScreen() {
       }
     >
       <div className="fv-entry">
-        <div className="fv-entry__grid" style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
-          <label className="fv-entry__field">
-            <span className="wpf-subpage-form-label">Entry No *</span>
-            <input
-              className="wpf-subpage-form-input"
-              value={entryNo}
-              onChange={(e) => setEntryNo(e.target.value)}
-            />
-          </label>
-          <label className="fv-entry__field">
-            <span className="wpf-subpage-form-label">Date *</span>
-            <input
-              type="date"
-              className="wpf-subpage-form-input"
-              value={entryDate}
-              onChange={(e) => setEntryDate(e.target.value)}
-            />
-          </label>
-        </div>
+        <ErpFormSection>
+          <ErpFormGrid columns={2}>
+            <label className="si-field">
+              <span className="wpf-subpage-form-label">Entry No *</span>
+              <input
+                className="wpf-subpage-form-input"
+                value={entryNo}
+                onChange={(e) => setEntryNo(e.target.value)}
+              />
+            </label>
+            <label className="si-field">
+              <span className="wpf-subpage-form-label">Date *</span>
+              <input
+                type="date"
+                className="wpf-subpage-form-input"
+                value={entryDate}
+                onChange={(e) => setEntryDate(e.target.value)}
+              />
+            </label>
+          </ErpFormGrid>
+        </ErpFormSection>
 
-        <div className="fv-entry__section-title">Expense lines</div>
-        <div className="fv-entry__lines">
+        <ErpFormSection>
+          <div className="erp-form-section__title">Expense lines</div>
+          <div className="fv-entry__lines">
           {lines.map((line, index) => (
             <div key={index} className="fv-entry__line-row">
               <span className="wpf-subpage-form-label">{index + 1}</span>
@@ -189,6 +193,7 @@ export function PettyCashEntryScreen() {
         <div className="fv-entry__total">
           Total: {total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </div>
+        </ErpFormSection>
 
         <div className="fv-entry__actions">
           <button

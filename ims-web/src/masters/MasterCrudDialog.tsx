@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { MasterCrudField } from './masterConfigs';
+import { ErpFormGrid, ErpFormSection } from '../components/form';
 import { readImageFileAsDataUri, resolveCompanyLogoUrl, hasCompanyLogoReference } from '../api/companies';
 import './master-form.scss';
 
@@ -63,13 +64,14 @@ export function MasterCrudDialog({
     <div className="master-crud-dialog" role="dialog" aria-modal="true" aria-label={title}>
       <button type="button" className="master-crud-dialog__backdrop" aria-label="Close" onClick={onClose} />
       <form className="master-crud-dialog__panel" onSubmit={handleSubmit}>
-        <div className="mf-form__section-title">{mode === 'new' ? `New ${title}` : `Edit ${title}`}</div>
+        <ErpFormSection>
+        <div className="erp-form-section__title">{mode === 'new' ? `New ${title}` : `Edit ${title}`}</div>
         {error && (
           <p className="fv-entry__status" role="alert">
             {error}
           </p>
         )}
-        <div className="mf-form__grid mf-form__grid--2">
+        <ErpFormGrid columns={2}>
           {fields.map((field) => {
             if (field.type === 'boolean') {
               return (
@@ -144,7 +146,7 @@ export function MasterCrudDialog({
               </label>
             );
           })}
-        </div>
+        </ErpFormGrid>
         <div className="mf-form__actions">
           <button type="submit" className="wpf-primary-button" disabled={saving}>
             {saving ? 'Saving…' : 'Save'}
@@ -153,6 +155,7 @@ export function MasterCrudDialog({
             Cancel
           </button>
         </div>
+        </ErpFormSection>
       </form>
     </div>
   );

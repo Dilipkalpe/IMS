@@ -9,6 +9,18 @@ const LazyPayrollEmployeeForm = lazy(() =>
   import('./PayrollEmployeeFormScreen').then((m) => ({ default: m.PayrollEmployeeFormScreen })),
 );
 
+const LazyPayrollRuns = lazy(() =>
+  import('./PayrollRunsScreen').then((m) => ({ default: m.PayrollRunsScreen })),
+);
+
+export function PayrollRunsRouteScreen() {
+  return (
+    <Suspense fallback={<PageLoadingFallback title="Loading Payroll Runs…" />}>
+      <LazyPayrollRuns />
+    </Suspense>
+  );
+}
+
 export function PayrollReportsRouteScreen() {
   return (
     <Suspense fallback={<PageLoadingFallback title="Loading Payroll Reports…" />}>

@@ -9,7 +9,6 @@ import {
 } from '../sales-invoice/calculations';
 import type { PurchaseInvoiceUiSnapshot } from '../document/mappers/purchaseInvoicePrintMapper';
 import { buildLineDisplayMap } from './lineDisplay';
-import { SAMPLE_SUPPLIERS } from './mockData';
 import { purchaseGstContext } from './taxContext';
 import type { FieldError, PurchaseInvoiceHeader, PurchaseInvoiceLineItem } from './types';
 import { usePurchaseInvoiceWorkspace } from './workspace/PurchaseInvoiceWorkspaceProvider';
@@ -203,7 +202,6 @@ export function usePurchaseInvoiceDocument(tabId: string) {
     displayTotals,
     lineDisplayMap,
     getLineDisplay,
-    suppliers: SAMPLE_SUPPLIERS,
     updateHeader,
     updateLine,
     deleteLine,

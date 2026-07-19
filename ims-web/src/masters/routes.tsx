@@ -1,6 +1,10 @@
 import { lazy, Suspense, type ComponentType } from 'react';
 import { PageLoadingFallback } from '../components/loading';
 
+const LazyFinancialYears = lazy(() =>
+  import('../platform/FinancialYearsScreen').then((m) => ({ default: m.FinancialYearsScreen })),
+);
+
 const LazyProductMasterForm = lazy(() =>
   import('./ProductMasterFormScreen').then((m) => ({ default: m.ProductMasterFormScreen })),
 );
@@ -27,21 +31,18 @@ import {
   ACCOUNT_LEDGER_CONFIG,
   ASSEMBLY_TYPES_CONFIG,
   ATTENDANCE_CONFIG,
-  BOM_CONFIG,
   COMPANY_REGISTRATION_CONFIG,
   CUSTOMER_TYPES_CONFIG,
   FINANCIAL_YEARS_CONFIG,
   MAIN_GROUPS_CONFIG,
   MACHINES_CONFIG,
   PAYROLL_EMPLOYEES_CONFIG,
-  PAYROLL_RUNS_CONFIG,
   PRODUCTION_ORDERS_CONFIG,
   PRODUCTS_CONFIG,
   PRODUCT_TYPES_CONFIG,
   PURCHASE_UOM_CONFIG,
   ROLE_MASTER_CONFIG,
   SALE_UOM_CONFIG,
-  STOCK_TRANSFER_CONFIG,
   SUB_GROUPS_CONFIG,
   SUPPLIERS_CONFIG,
   USERS_CONFIG,
@@ -81,9 +82,12 @@ export const UserRolesListRouteScreen = lazyMasterList(USERS_CONFIG);
 export const RoleMasterListRouteScreen = lazyMasterList(ROLE_MASTER_CONFIG);
 export const CompanyRegistrationListRouteScreen = lazyMasterList(COMPANY_REGISTRATION_CONFIG);
 export const ProductionOrdersListRouteScreen = lazyMasterList(PRODUCTION_ORDERS_CONFIG);
-export const FinancialYearsListRouteScreen = lazyMasterList(FINANCIAL_YEARS_CONFIG);
+export const FinancialYearsListRouteScreen = function FinancialYearsRouteScreen() {
+  return (
+    <Suspense fallback={<PageLoadingFallback title="Loading fiscal years…" />}>
+      <LazyFinancialYears />
+    </Suspense>
+  );
+};
 export const PayrollEmployeesListRouteScreen = lazyMasterList(PAYROLL_EMPLOYEES_CONFIG);
 export const AttendanceListRouteScreen = lazyMasterList(ATTENDANCE_CONFIG);
-export const PayrollRunsListRouteScreen = lazyMasterList(PAYROLL_RUNS_CONFIG);
-export const StockTransferListRouteScreen = lazyMasterList(STOCK_TRANSFER_CONFIG);
-export const BomListRouteScreen = lazyMasterList(BOM_CONFIG);

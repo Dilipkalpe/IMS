@@ -72,6 +72,7 @@ export const HUB_DEFINITIONS: HubDefinition[] = [
     tabs: [
       tab(NavKeys.StockMovements, 'Stock Activity', '\uE8AB', 'Inventory receipts, issues, and adjustments.'),
       tab(NavKeys.StockTransfer, 'Transfers', '\uE8AB', 'Inter-location and warehouse stock transfers.'),
+      tab(NavKeys.StockLevels, 'Stock Levels', '\uE8D1', 'Current on-hand quantities and reorder status by product.'),
     ],
     wpfSource: 'Views/InventoryHubView.xaml',
   },

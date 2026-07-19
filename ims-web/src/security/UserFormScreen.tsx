@@ -9,6 +9,7 @@ import {
   type AppUserRecord,
 } from '../api/users';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
+import { ErpFormGrid, ErpFormSection } from '../components/form';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { useMenuPermissionSession } from '../context/MenuPermissionContext';
 import { NavKeys } from '../navigation/navKeys';
@@ -176,9 +177,10 @@ export function UserFormScreen() {
           {error ? <p className="mf-form__error">{error}</p> : null}
           {status ? <p className="mf-form__status">{status}</p> : null}
 
-          <div className="mf-form__grid mf-form__grid--2">
-            <label className="mf-form__field">
-              <span>Username *</span>
+          <ErpFormSection>
+            <ErpFormGrid columns={2}>
+            <label className="si-field">
+              <span className="erp-form-field__label">Username *</span>
               <input
                 className="wpf-form-input"
                 value={form.username}
@@ -187,8 +189,8 @@ export function UserFormScreen() {
                 onChange={(e) => setForm((prev) => ({ ...prev, username: e.target.value }))}
               />
             </label>
-            <label className="mf-form__field">
-              <span>Full Name *</span>
+            <label className="si-field">
+              <span className="erp-form-field__label">Full Name *</span>
               <input
                 className="wpf-form-input"
                 value={form.fullName}
@@ -196,8 +198,8 @@ export function UserFormScreen() {
                 onChange={(e) => setForm((prev) => ({ ...prev, fullName: e.target.value }))}
               />
             </label>
-            <label className="mf-form__field">
-              <span>{mode === 'new' ? 'Password *' : 'Password'}</span>
+            <label className="si-field">
+              <span className="erp-form-field__label">{mode === 'new' ? 'Password *' : 'Password'}</span>
               <input
                 className="wpf-form-input"
                 type="password"
@@ -206,10 +208,10 @@ export function UserFormScreen() {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </label>
-            <label className="mf-form__field">
-              <span>Role *</span>
+            <label className="si-field">
+              <span className="erp-form-field__label">Role *</span>
               <select
-                className="wpf-form-input"
+                className="wpf-form-combo"
                 value={form.role}
                 onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value }))}
               >
@@ -220,10 +222,10 @@ export function UserFormScreen() {
                 ))}
               </select>
             </label>
-            <label className="mf-form__field">
-              <span>Department</span>
+            <label className="si-field">
+              <span className="erp-form-field__label">Department</span>
               <select
-                className="wpf-form-input"
+                className="wpf-form-combo"
                 value={form.department || 'Administration'}
                 onChange={(e) => setForm((prev) => ({ ...prev, department: e.target.value }))}
               >
@@ -234,8 +236,8 @@ export function UserFormScreen() {
                 ))}
               </select>
             </label>
-            <label className="mf-form__field">
-              <span>Email</span>
+            <label className="si-field">
+              <span className="erp-form-field__label">Email</span>
               <input
                 className="wpf-form-input"
                 type="email"
@@ -244,10 +246,10 @@ export function UserFormScreen() {
                 onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
               />
             </label>
-            <label className="mf-form__field">
-              <span>Status</span>
+            <label className="si-field">
+              <span className="erp-form-field__label">Status</span>
               <select
-                className="wpf-form-input"
+                className="wpf-form-combo"
                 value={statusLabel}
                 onChange={(e) =>
                   setForm((prev) => ({
@@ -273,7 +275,8 @@ export function UserFormScreen() {
               />
               <span>Barcode label printing</span>
             </label>
-          </div>
+            </ErpFormGrid>
+          </ErpFormSection>
 
           <div className="mf-form__actions">
             <button type="button" className="wpf-action-button" disabled={saving} onClick={() => void handleSave()}>

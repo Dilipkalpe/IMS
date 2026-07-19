@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCanManageBom } from '../auth/useCanManageBom';
 import { CorporateDataGrid, type DataGridColumn } from '../components/datagrid/CorporateDataGrid';
 import { ListGridArea } from '../components/loading';
+import { ListExportMenu } from '../components/transaction/ListExportMenu';
 import { createListActionColumn } from '../components/transaction/transactionListCrud';
 import { TransactionListPagination } from '../components/transaction/TransactionListPagination';
 import { LIST_PAGE_SIZES } from '../components/transaction/transactionListQuery';
@@ -29,6 +31,8 @@ import { employeeTypeLabel } from '../payroll/payrollEmployeeTypes';
 import { useProductMasterNavIntent } from './context/ProductMasterNavIntent';
 import { MasterCrudDialog } from './MasterCrudDialog';
 import type { MasterCrudField, MasterListConfig } from './masterConfigs';
+import { useMasterListExportActions } from './useMasterListExportActions';
+import { useProtectedMasterListActions } from './useProtectedMasterListActions';
 import './master-form.scss';
 
 interface MasterListRow {
@@ -61,6 +65,10 @@ function recordToRow(record: Record<string, unknown>, config: MasterListConfig, 
   for (const col of config.columns) {
     let raw = record[col.field];
     if (col.field === 'employeeType') raw = employeeTypeLabel(raw);
+    if (col.field === 'activeStatus' && typeof raw === 'boolean') {
+      row[col.id] = raw ? 'Active' : 'Inactive';
+      continue;
+    }
     if (col.field === 'monthlySalary' || col.field === 'dailyWage') {
       const n = Number(raw);
       raw = n > 0 ? n : '';
@@ -106,6 +114,7 @@ function fieldsForCrudMode(
 
 export function MasterListScreen({ config }: { config: MasterListConfig }) {
   const navigate = useAppNavigation();
+  const canManageBom = useCanManageBom();
   const productNav = useProductMasterNavIntent();
   const accountNav = useAccountMasterNavIntent();
   const payrollEmployeeNav = usePayrollEmployeeNavIntent();
@@ -117,6 +126,7 @@ export function MasterListScreen({ config }: { config: MasterListConfig }) {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState('');
   const [apiReady, setApiReady] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [crudOpen, setCrudOpen] = useState(false);
@@ -129,8 +139,11 @@ export function MasterListScreen({ config }: { config: MasterListConfig }) {
   const isClientPaged = config.fetchMode !== 'paged';
   const hasFormCrud = Boolean(config.formNavKey && config.crudEntity);
   const hasApiCrud = Boolean(config.apiCrud && config.crudFields?.length);
-  const canCreate = hasFormCrud || hasApiCrud;
   const canMutate = hasFormCrud || hasApiCrud;
+  const showEditDelete = canMutate && !config.createOnly;
+  const addActionLabel = config.addActionLabel ?? 'New';
+  const showBomAction = Boolean(config.showBomAction && canManageBom);
+  const showExport = config.showExport === true;
 
   const filteredRecords = useMemo(() => {
     if (!isClientPaged) return allRecords;
@@ -228,6 +241,15 @@ export function MasterListScreen({ config }: { config: MasterListConfig }) {
     setPage(1);
   }, [search, pageSize, config.listNavKey]);
 
+  useEffect(() => {
+    const storageKey = `ims.masterList.initialSearch.${config.listNavKey}`;
+    const initial = sessionStorage.getItem(storageKey)?.trim();
+    if (!initial) return;
+    sessionStorage.removeItem(storageKey);
+    setSearchInput(initial);
+    setSearch(initial);
+  }, [config.listNavKey]);
+
   const openApiCrudNew = useCallback(() => {
     setCrudMode('new');
     setCrudValues({});
@@ -256,7 +278,7 @@ export function MasterListScreen({ config }: { config: MasterListConfig }) {
     setCrudValues({ ...record });
   }, [config]);
 
-  const openNewForm = useCallback(() => {
+  const openNewFormCore = useCallback(() => {
     if (hasApiCrud) {
       openApiCrudNew();
       return;
@@ -285,17 +307,14 @@ export function MasterListScreen({ config }: { config: MasterListConfig }) {
     productNav,
   ]);
 
-  const openEditForm = useCallback(
-    (record?: Record<string, unknown> | null) => {
-      const target = record ?? selectedRecord;
-      if (!target) return;
-
+  const openEditFormCore = useCallback(
+    (record: Record<string, unknown>) => {
       if (hasApiCrud) {
-        openApiCrudEdit(target);
+        openApiCrudEdit(record);
         return;
       }
 
-      const code = formatCellValue(target.code ?? target.employeeCode);
+      const code = formatCellValue(record.code ?? record.employeeCode);
       if (!config.formNavKey || !code || !config.crudEntity) return;
       if (config.crudEntity === 'product') {
         productNav.publishOpenIntent({ type: 'edit', code });
@@ -315,8 +334,23 @@ export function MasterListScreen({ config }: { config: MasterListConfig }) {
       openApiCrudEdit,
       payrollEmployeeNav,
       productNav,
-      selectedRecord,
     ],
+  );
+
+  const protectedActions = useProtectedMasterListActions(config, {
+    setStatusMessage,
+    onOpenNew: openNewFormCore,
+    onOpenEdit: openEditFormCore,
+  });
+
+  const openNewForm = protectedActions.openNew;
+  const openEditForm = useCallback(
+    (record?: Record<string, unknown> | null) => {
+      const target = record ?? selectedRecord;
+      if (!target) return;
+      void protectedActions.openEdit(target);
+    },
+    [protectedActions, selectedRecord],
   );
 
   const handleDelete = useCallback(
@@ -327,7 +361,9 @@ export function MasterListScreen({ config }: { config: MasterListConfig }) {
       const code = formatCellValue(target.code ?? target.username ?? target.employeeCode);
       const label = code || key;
       if (!label) return;
-      if (!window.confirm(`Delete ${label}? This cannot be undone.`)) return;
+
+      const allowed = await protectedActions.authorizeDeleteRecord(target);
+      if (!allowed) return;
 
       try {
         if (config.crudEntity === 'product') {
@@ -342,13 +378,45 @@ export function MasterListScreen({ config }: { config: MasterListConfig }) {
           return;
         }
         setSelectedId(null);
+        const name = formatCellValue(target.name ?? target.fullName ?? target.businessName);
+        setStatusMessage(
+          name
+            ? `${config.moduleTitle ?? config.title}: "${name}" (${label}) was deleted.`
+            : `Deleted ${label}.`,
+        );
         await reload();
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Delete failed.');
       }
     },
-    [config, hasApiCrud, reload, selectedRecord],
+    [config, hasApiCrud, protectedActions, reload, selectedRecord],
   );
+
+  const openBomForRecord = useCallback(
+    (record: Record<string, unknown>) => {
+      if (!showBomAction) {
+        setStatusMessage('You do not have permission to manage BOMs.');
+        return;
+      }
+      const code = formatCellValue(record.code);
+      if (code) {
+        sessionStorage.setItem('ims.masterList.initialSearch.bom', code);
+      }
+      navigate('bom');
+      setStatusMessage(code ? `Opening BOM list for ${code}…` : 'Opening BOM list…');
+    },
+    [navigate, showBomAction],
+  );
+
+  const listExport = useMasterListExportActions({
+    config,
+    canExport: protectedActions.canExport && showExport,
+    search,
+    rows: pageRecords,
+    total,
+    loading,
+    setStatusMessage,
+  });
 
   const columns = useMemo<DataGridColumn<MasterListRow>[]>(() => {
     const dataColumns: DataGridColumn<MasterListRow>[] = config.columns.map((col) => ({
@@ -359,22 +427,49 @@ export function MasterListScreen({ config }: { config: MasterListConfig }) {
       readOnly: true,
       getValue: (row) => row[col.id] ?? '',
     }));
-    if (!canMutate) return dataColumns;
+    if (!canMutate && !showBomAction) return dataColumns;
+    if (!showEditDelete && !showBomAction) return dataColumns;
     return [
       createListActionColumn({
         rowLabel: masterRowLabel,
-        onEdit: (row) => {
-          const rec = recordForRow(row);
-          if (rec) openEditForm(rec);
-        },
-        onDelete: (row) => {
-          const rec = recordForRow(row);
-          if (rec) void handleDelete(rec);
-        },
+        onEdit: showEditDelete
+          ? (row) => {
+              const rec = recordForRow(row);
+              if (rec) openEditForm(rec);
+            }
+          : () => {},
+        onDelete: showEditDelete
+          ? (row) => {
+              const rec = recordForRow(row);
+              if (rec) void handleDelete(rec);
+            }
+          : () => {},
+        onBom: showBomAction
+          ? (row) => {
+              const rec = recordForRow(row);
+              if (rec) openBomForRecord(rec);
+            }
+          : undefined,
+        canEdit: showEditDelete && protectedActions.canEdit,
+        canDelete: showEditDelete && protectedActions.canDelete,
+        canBom: showBomAction,
+        deleteTitle: 'Delete Selected',
       }),
       ...dataColumns,
     ];
-  }, [canMutate, config.columns, handleDelete, masterRowLabel, openEditForm, recordForRow]);
+  }, [
+    canMutate,
+    config.columns,
+    handleDelete,
+    masterRowLabel,
+    openBomForRecord,
+    openEditForm,
+    protectedActions.canDelete,
+    protectedActions.canEdit,
+    recordForRow,
+    showBomAction,
+    showEditDelete,
+  ]);
 
   const handleApiCrudSave = useCallback(
     async (payload: Record<string, unknown>) => {
@@ -407,7 +502,7 @@ export function MasterListScreen({ config }: { config: MasterListConfig }) {
     [config.apiPath, config.crudKeyMode, crudMode, crudOriginalKey, reload],
   );
 
-  useListNewShortcut(canCreate, openNewForm);
+  useListNewShortcut(canMutate && protectedActions.canAdd, openNewForm);
 
   return (
     <RefinedScreenShell className="sales-invoice-list-screen">
@@ -415,11 +510,36 @@ export function MasterListScreen({ config }: { config: MasterListConfig }) {
         <div className="si-list-layout fv-list">
           <div className="si-list-toolbar">
             <div className="fv-list__toolbar si-list-toolbar__row">
-              {canCreate && (
+              {canMutate && protectedActions.canAdd ? (
                 <button type="button" className="wpf-action-button" onClick={openNewForm} title="Ctrl+N">
-                  New
+                  <span className="wpf-icontext" aria-hidden="true">
+                    &#xE710;
+                  </span>{' '}
+                  {addActionLabel}
                 </button>
-              )}
+              ) : null}
+              {showEditDelete ? (
+                <button
+                  type="button"
+                  className="wpf-action-button"
+                  onClick={() => openEditForm()}
+                  disabled={!selectedRecord || !protectedActions.canEdit}
+                  title="Edit"
+                >
+                  Edit
+                </button>
+              ) : null}
+              {showEditDelete ? (
+                <button
+                  type="button"
+                  className="wpf-action-button si-list-toolbar__danger"
+                  onClick={() => void handleDelete()}
+                  disabled={!selectedRecord || !protectedActions.canDelete}
+                  title="Delete Selected"
+                >
+                  Delete Selected
+                </button>
+              ) : null}
               <input
                 className="wpf-form-input si-list-toolbar__search"
                 placeholder={config.searchPlaceholder}
@@ -429,10 +549,17 @@ export function MasterListScreen({ config }: { config: MasterListConfig }) {
               <button type="button" className="wpf-action-button" onClick={() => void reload()} disabled={loading}>
                 Refresh
               </button>
+              {showExport ? (
+                <ListExportMenu
+                  disabled={listExport.exportDisabled}
+                  busy={listExport.exporting}
+                  onExport={(format) => void listExport.runExport(format)}
+                />
+              ) : null}
             </div>
-            {(error || !apiReady) ? (
+            {(error || !apiReady || statusMessage) ? (
               <p className="si-list-toolbar__status" role="status">
-                {error ?? 'API offline'}
+                {error ?? (!apiReady ? 'API offline' : statusMessage)}
               </p>
             ) : null}
           </div>
@@ -449,7 +576,7 @@ export function MasterListScreen({ config }: { config: MasterListConfig }) {
               onRowClick={(row) => setSelectedId(row.id)}
               onRowDoubleClick={(row) => {
                 const record = recordForRow(row);
-                if (record && canMutate) openEditForm(record);
+                if (record && canMutate && protectedActions.canEdit) openEditForm(record);
               }}
             />
           </ListGridArea>

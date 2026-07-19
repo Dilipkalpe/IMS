@@ -64,6 +64,7 @@ interface SalesInvoiceWorkspaceContextValue {
   prepareNewBill: (tabId: string, lineCount?: number) => Promise<void>;
   commitPrefix: (tabId: string) => Promise<void>;
   continueWithNextBill: (tabId: string) => Promise<void>;
+  duplicateToNewTab: (sourceTabId: string) => Promise<void>;
   closeTabWithoutConfirm: (tabId: string) => number;
   requestCloseWorkspace: () => boolean;
   focusSeed: number;
@@ -427,6 +428,32 @@ export function SalesInvoiceWorkspaceProvider({
     },
     [closeTabWithoutConfirm, openDocumentInNewTab],
   );
+  const duplicateToNewTab = useCallback(
+    async (sourceTabId: string) => {
+      const source = documents[sourceTabId];
+      if (!source) throw new Error('Nothing to duplicate.');
+      const id = `tab-${tabCounter}`;
+      setTabCounter((c) => c + 1);
+      const prefix = normalizeDocPrefix(source.header.entryDocPrefix, "INV");
+      const next = await repository.peekNextNo(prefix);
+      const header = {
+        ...source.header,
+        entryDocPrefix: prefixFromPeekNext(next),
+        billNo: String(next.docNo),
+      };
+      const lines = source.lines.map((line) => ({ ...line, id: crypto.randomUUID() }));
+      setTabs((prev) => [
+        ...prev.map((t) => ({ ...t, isSelected: false })),
+        newTabUi(id, 'Duplicated invoice', true),
+      ]);
+      setDocuments((prev) => ({
+        ...prev,
+        [id]: applyLoadedDocument(createTabDocumentState(lineCount), null, header, lines, 'Duplicated — review and save.'),
+      }));
+      setFocusSeed((s) => s + 1);
+    },
+    [documents, lineCount, repository, tabCounter],
+  );
 
   const defaultNewIntent = useMemo(() => ({ type: 'new' as const }), []);
 
@@ -471,6 +498,7 @@ export function SalesInvoiceWorkspaceProvider({
       prepareNewBill,
       commitPrefix,
       continueWithNextBill,
+      duplicateToNewTab,
       closeTabWithoutConfirm,
       requestCloseWorkspace,
       focusSeed,
@@ -486,6 +514,7 @@ export function SalesInvoiceWorkspaceProvider({
       closeTabWithoutConfirm,
       commitPrefix,
       continueWithNextBill,
+      duplicateToNewTab,
       deleteLine,
       documents,
       focusSeed,

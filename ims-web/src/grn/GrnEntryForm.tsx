@@ -1,6 +1,7 @@
 import { useCallback, useRef } from 'react';
 import { LoadingHost } from '../components/loading';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
+import { ErpFormGrid, ErpFormNarration, ErpFormSection } from '../components/form';
 import type { CorporateDataGridHandle } from '../components/datagrid/CorporateDataGrid';
 import { useGrnPrintActions } from '../document/hooks/useGrnPrintActions';
 import { useAppNavigation } from '../context/AppNavigationContext';
@@ -9,6 +10,7 @@ import { FIELD_FOCUS_KEY, focusFirstErrorField } from '../keyboard/formKeyboardN
 import { useDocumentShortcuts } from '../keyboard/useDocumentShortcuts';
 import { NavKeys } from '../navigation/navKeys';
 import { normalizeDocPrefix } from '../components/transaction/docPrefix';
+import { PurchaseSupplierSelect } from '../components/transaction/PurchaseSupplierSelect';
 import { PLACE_OF_SUPPLY } from './mockData';
 import { GrnLineItemsGrid } from './components/GrnLineItemsGrid';
 import { GrnTotalsRail } from './components/GrnTotalsRail';
@@ -31,7 +33,7 @@ export function GrnEntryForm({
   const { print, savePrintNext } = useGrnPrintActions();
   const scopeRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<CorporateDataGridHandle>(null);
-  const narrationRef = useRef<HTMLInputElement>(null);
+  const narrationRef = useRef<HTMLTextAreaElement>(null);
   const saveButtonRef = useRef<HTMLButtonElement>(null);
 
   const focusValidationError = useCallback((firstField?: string) => {
@@ -99,6 +101,11 @@ export function GrnEntryForm({
     [doc, focusValidationError, navigate, runPrintFlow, ws],
   );
 
+  const entryActions = buildDocumentEntryActions({
+    saveButtonRef,
+    disabled: doc.isSaving || doc.isLoading,
+  });
+
   useDocumentShortcuts({
     onCancel: () => void runAction('Cancel'),
     onSaveAndNext: () => void runAction('Save, Next (F11)'),
@@ -123,8 +130,8 @@ export function GrnEntryForm({
               {doc.loadError}
             </div>
           )}
-          <section className="si-section">
-            <div className="si-header-grid">
+          <ErpFormSection>
+            <ErpFormGrid>
               <label className="si-field">
                 <span className="wpf-subpage-form-label">Prefix</span>
                 <input
@@ -167,24 +174,11 @@ export function GrnEntryForm({
               </label>
               <label className="si-field">
                 <span className="wpf-subpage-form-label">Supplier Name</span>
-                <select
-                  className={`wpf-subpage-form-combo${doc.fieldError('supplier') ? ' si-input--error' : ''}`}
-                  {...{ [FIELD_FOCUS_KEY]: 'supplier' }}
+                <PurchaseSupplierSelect
                   value={h.supplier}
-                  onChange={(e) => doc.updateHeader('supplier', e.target.value)}
-                  aria-invalid={!!doc.fieldError('supplier')}
-                >
-                  {doc.suppliers.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-                {doc.fieldError('supplier') && (
-                  <span className="si-field-error" role="alert">
-                    {doc.fieldError('supplier')}
-                  </span>
-                )}
+                  onChange={(v) => doc.updateHeader('supplier', v)}
+                  error={doc.fieldError('supplier')}
+                />
               </label>
               <label className="si-field">
                 <span className="wpf-subpage-form-label">PO Reference</span>
@@ -244,8 +238,8 @@ export function GrnEntryForm({
                   ))}
                 </select>
               </label>
-            </div>
-            <div className="si-gst-header-row">
+            </ErpFormGrid>
+            <ErpFormGrid variant="gst">
               <label className="si-field">
                 <span className="wpf-subpage-form-label">Company GSTIN</span>
                 <input
@@ -280,26 +274,22 @@ export function GrnEntryForm({
                   ))}
                 </select>
               </label>
-            </div>
-          </section>
+            </ErpFormGrid>
+          </ErpFormSection>
 
           <section className="si-section si-section--grow si-section--lines-panel">
             <GrnLineItemsGrid doc={doc} gridRef={gridRef} onExitGridEnd={focusNarration} />
           </section>
 
-          <section className="si-section si-bottom">
-            <div className="si-bottom__narration">
-              <span className="wpf-sales-field-label">Narration</span>
-              <input
-                ref={narrationRef}
-                className="wpf-sales-compact-input"
-                {...{ [FIELD_FOCUS_KEY]: 'narration' }}
-                value={h.narration}
-                onChange={(e) => doc.updateHeader('narration', e.target.value)}
-              />
-            </div>
+          <section className="si-section si-bottom erp-form-bottom">
+            <ErpFormNarration
+              ref={narrationRef}
+              {...{ [FIELD_FOCUS_KEY]: 'narration' }}
+              value={h.narration}
+              onChange={(e) => doc.updateHeader('narration', e.target.value)}
+            />
             <div className="si-bottom__actions">
-              <span className="wpf-section-header">Actions</span>
+              <span className="erp-form-bottom__actions-label">Actions</span>
               <div className="si-action-rail" role="toolbar" aria-label="Document actions">
                 {[
                   { icon: '\uE710', label: 'New', action: 'New Bill', variant: 'primary' as const, key: 'action-new' },
