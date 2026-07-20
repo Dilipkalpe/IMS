@@ -37,6 +37,7 @@ import {
 } from './materialLineDisplay';
 import { WorkOrderActionRail } from './WorkOrderActionRail';
 import { GODOWNS, formatMoney } from './WorkOrderListScreen';
+import { printWorkOrder } from './workOrderPrint';
 import '../sales-invoice/sales-invoice.scss';
 import './work-order.scss';
 
@@ -650,6 +651,62 @@ export function WorkOrderEntryScreen() {
     return null;
   }, [apiReady, errorMessage, readOnly, status, statusMessage]);
 
+  const printJobWork = useCallback(() => {
+    const result = printWorkOrder({
+      productionNo: productionId,
+      productionDate,
+      status,
+      bomRevision,
+      manufacturingItemId,
+      manufacturingItemName,
+      machineCode,
+      machineName,
+      operatorId,
+      operatorName,
+      startTimeText,
+      endTimeText,
+      totalDurationMinutes,
+      produceQty,
+      rejectedQty,
+      finalQty,
+      fromGodown,
+      rawMaterialAmount,
+      consumableAmount,
+      productionAmount,
+      rawMaterials,
+      consumables,
+    });
+    if (!result.ok) {
+      setErrorMessage(result.message);
+    } else {
+      setErrorMessage(null);
+      setStatusMessage(result.message);
+    }
+  }, [
+    bomRevision,
+    consumableAmount,
+    consumables,
+    finalQty,
+    fromGodown,
+    machineCode,
+    machineName,
+    manufacturingItemId,
+    manufacturingItemName,
+    operatorId,
+    operatorName,
+    produceQty,
+    productionAmount,
+    productionDate,
+    productionId,
+    rawMaterialAmount,
+    rawMaterials,
+    rejectedQty,
+    startTimeText,
+    endTimeText,
+    status,
+    totalDurationMinutes,
+  ]);
+
   const rawColumns = useMemo(
     () => ['Sr', 'Item', 'Name', 'Stage', 'Last event', 'Src', 'Unit', 'Req', 'Avail', 'Rate', 'Amount'],
     [],
@@ -659,6 +716,7 @@ export function WorkOrderEntryScreen() {
     <RefinedScreenShell className="work-order-entry-screen">
       <TransactionEntryShell
         title={pageTitle}
+        contentMargin="2px"
         titleRight={
           <div className="wo-entry__title-meta">
             <div className="wo-entry__final-qty-badge" aria-label={`Final quantity ${finalQty}`}>
@@ -676,205 +734,201 @@ export function WorkOrderEntryScreen() {
           </div>
         }
       >
-        <div className="wo-entry wo-entry--wide">
-          <p className="wo-entry__intro">
-            Job work from BOM — material stages, stock issue from godown, and finished goods receipt.
-          </p>
-
-          <ErpFormSection>
-            <div className="erp-form-section__title">Document details</div>
-            <ErpFormGrid columns={4}>
-              <label className="si-field">
-                <span className="wpf-subpage-form-label">Job Work No</span>
-                <input className="wpf-subpage-form-input si-readonly" value={productionId} readOnly />
-              </label>
-              <label className="si-field">
-                <span className="wpf-subpage-form-label">Date</span>
-                <input
-                  type="date"
-                  className="wpf-subpage-form-input"
-                  value={productionDate}
-                  onChange={(e) => setProductionDate(e.target.value)}
-                  disabled={readOnly}
-                />
-              </label>
-              <label className="si-field">
-                <span className="wpf-subpage-form-label">Status</span>
-                <input className="wpf-subpage-form-input si-readonly" value={status} readOnly />
-              </label>
-              <label className="si-field">
-                <span className="wpf-subpage-form-label">BOM revision</span>
-                <input className="wpf-subpage-form-input si-readonly" value={bomRevision} readOnly />
-              </label>
-            </ErpFormGrid>
-          </ErpFormSection>
-
-          <div className="wo-entry__columns">
-            <ErpFormSection>
-              <div className="erp-form-section__title">Manufacturing item & machine</div>
-              <ErpFormGrid columns={1}>
+        <div className="wo-entry wo-entry--wide wo-entry--viewport">
+          <div className="wo-entry__header">
+            <ErpFormSection className="wo-entry__doc-strip">
+              <ErpFormGrid columns={4}>
                 <label className="si-field">
-                  <span className="wpf-subpage-form-label">Manufacturing item *</span>
-                  <div className="wo-field-with-action">
+                  <span className="wpf-subpage-form-label">Job Work No</span>
+                  <input className="wpf-subpage-form-input si-readonly" value={productionId} readOnly />
+                </label>
+                <label className="si-field">
+                  <span className="wpf-subpage-form-label">Date</span>
+                  <input
+                    type="date"
+                    className="wpf-subpage-form-input"
+                    value={productionDate}
+                    onChange={(e) => setProductionDate(e.target.value)}
+                    disabled={readOnly}
+                  />
+                </label>
+                <label className="si-field">
+                  <span className="wpf-subpage-form-label">Status</span>
+                  <input className="wpf-subpage-form-input si-readonly" value={status} readOnly />
+                </label>
+                <label className="si-field">
+                  <span className="wpf-subpage-form-label">BOM revision</span>
+                  <input className="wpf-subpage-form-input si-readonly" value={bomRevision} readOnly />
+                </label>
+              </ErpFormGrid>
+            </ErpFormSection>
+
+            <div className="wo-entry__columns">
+              <ErpFormSection>
+                <div className="erp-form-section__title">Manufacturing item & machine</div>
+                <ErpFormGrid columns={2}>
+                  <label className="si-field erp-form-field--span-2">
+                    <span className="wpf-subpage-form-label">Manufacturing item *</span>
+                    <div className="wo-field-with-action">
+                      <ErpSearchableCombobox
+                        value={manufacturingItemId}
+                        onChange={onManufacturingItemSelect}
+                        options={productOptions}
+                        placeholder="Search product code or name…"
+                        loading={productSearchLoading}
+                        disabled={readOnly}
+                        onSearch={onProductSearch}
+                        quickAdd={productQuickAddConfig}
+                        onQuickAddSuccess={(option) => {
+                          setProductOptions((prev) => {
+                            if (prev.some((row) => row.value === option.value)) return prev;
+                            return [option, ...prev];
+                          });
+                          onManufacturingItemSelect(option.value);
+                        }}
+                        aria-label="Manufacturing item"
+                      />
+                      <button
+                        type="button"
+                        className="wpf-secondary-button wo-field-with-action__btn"
+                        onClick={() => setProductBrowseOpen(true)}
+                        disabled={readOnly}
+                      >
+                        Browse…
+                      </button>
+                    </div>
+                    {manufacturingItemName ? (
+                      <span className="wo-field-hint">{manufacturingItemName}</span>
+                    ) : null}
+                  </label>
+                  <label className="si-field erp-form-field--span-2">
+                    <span className="wpf-subpage-form-label">Machine</span>
                     <ErpSearchableCombobox
-                      value={manufacturingItemId}
-                      onChange={onManufacturingItemSelect}
-                      options={productOptions}
-                      placeholder="Search product code or name…"
-                      loading={productSearchLoading}
+                      value={machineCode}
+                      onChange={onMachineSelect}
+                      options={machineOptions}
+                      placeholder="Search machine…"
                       disabled={readOnly}
-                      onSearch={onProductSearch}
-                      quickAdd={productQuickAddConfig}
+                      quickAdd={machineQuickAddConfig()}
                       onQuickAddSuccess={(option) => {
-                        setProductOptions((prev) => {
+                        setMachineOptions((prev) => {
                           if (prev.some((row) => row.value === option.value)) return prev;
                           return [option, ...prev];
                         });
-                        onManufacturingItemSelect(option.value);
+                        onMachineSelect(option.value);
                       }}
-                      aria-label="Manufacturing item"
+                      aria-label="Machine"
                     />
-                    <button
-                      type="button"
-                      className="wpf-secondary-button wo-field-with-action__btn"
-                      onClick={() => setProductBrowseOpen(true)}
-                      disabled={readOnly}
-                    >
-                      Browse…
-                    </button>
-                  </div>
-                  {manufacturingItemName ? (
-                    <span className="wo-field-hint">{manufacturingItemName}</span>
-                  ) : null}
-                </label>
-                <label className="si-field">
-                  <span className="wpf-subpage-form-label">Machine</span>
-                  <ErpSearchableCombobox
-                    value={machineCode}
-                    onChange={onMachineSelect}
-                    options={machineOptions}
-                    placeholder="Search machine…"
-                    disabled={readOnly}
-                    quickAdd={machineQuickAddConfig()}
-                    onQuickAddSuccess={(option) => {
-                      setMachineOptions((prev) => {
-                        if (prev.some((row) => row.value === option.value)) return prev;
-                        return [option, ...prev];
-                      });
-                      onMachineSelect(option.value);
-                    }}
-                    aria-label="Machine"
-                  />
-                  {machineName ? <span className="wo-field-hint">{machineName}</span> : null}
-                </label>
-              </ErpFormGrid>
-            </ErpFormSection>
+                    {machineName ? <span className="wo-field-hint">{machineName}</span> : null}
+                  </label>
+                </ErpFormGrid>
+              </ErpFormSection>
 
-            <ErpFormSection>
-              <div className="erp-form-section__title">Operator & production run</div>
-              <ErpFormGrid columns={2}>
-                <label className="si-field erp-form-field--span-2">
-                  <span className="wpf-subpage-form-label">Operator</span>
-                  <ErpSearchableCombobox
-                    value={operatorId}
-                    onChange={onOperatorSelect}
-                    options={operatorOptions}
-                    placeholder="Search operator username…"
+              <ErpFormSection>
+                <div className="erp-form-section__title">Operator & production run</div>
+                <ErpFormGrid columns={3}>
+                  <label className="si-field erp-form-field--span-3">
+                    <span className="wpf-subpage-form-label">Operator</span>
+                    <ErpSearchableCombobox
+                      value={operatorId}
+                      onChange={onOperatorSelect}
+                      options={operatorOptions}
+                      placeholder="Search operator username…"
+                      disabled={readOnly}
+                      aria-label="Operator"
+                    />
+                    {operatorName ? <span className="wo-field-hint">{operatorName}</span> : null}
+                  </label>
+                  <label className="si-field">
+                    <span className="wpf-subpage-form-label">Start time</span>
+                    <input
+                      className="wpf-subpage-form-input"
+                      value={startTimeText}
+                      onChange={(e) => setStartTimeText(e.target.value)}
+                      disabled={readOnly}
+                    />
+                  </label>
+                  <label className="si-field">
+                    <span className="wpf-subpage-form-label">End time</span>
+                    <input
+                      className="wpf-subpage-form-input"
+                      value={endTimeText}
+                      onChange={(e) => setEndTimeText(e.target.value)}
+                      disabled={readOnly}
+                    />
+                  </label>
+                  <label className="si-field">
+                    <span className="wpf-subpage-form-label">Duration (min)</span>
+                    <input
+                      className="wpf-subpage-form-input"
+                      value={totalDurationMinutes}
+                      onChange={(e) => setTotalDurationMinutes(e.target.value)}
+                      disabled={readOnly}
+                      inputMode="numeric"
+                    />
+                  </label>
+                  <label className="si-field">
+                    <span className="wpf-subpage-form-label">Produce qty</span>
+                    <input
+                      className="wpf-subpage-form-input"
+                      value={produceQty}
+                      onChange={(e) => handleProduceQtyChange(e.target.value)}
+                      disabled={readOnly}
+                      inputMode="numeric"
+                    />
+                  </label>
+                  <label className="si-field">
+                    <span className="wpf-subpage-form-label">Rejected qty</span>
+                    <input
+                      className="wpf-subpage-form-input"
+                      value={rejectedQty}
+                      onChange={(e) => handleRejectedQtyChange(e.target.value)}
+                      disabled={readOnly}
+                      inputMode="numeric"
+                    />
+                  </label>
+                </ErpFormGrid>
+              </ErpFormSection>
+            </div>
+
+            <ErpFormSection className="wo-scan-bar">
+              <div className="wo-scan-bar__controls">
+                <label className="si-field wo-scan-bar__godown">
+                  <span className="wpf-subpage-form-label">From godown</span>
+                  <ErpStaticSearchableSelect
+                    value={fromGodown}
+                    onChange={setFromGodown}
+                    options={GODOWNS}
+                    placeholder="Select godown…"
                     disabled={readOnly}
-                    aria-label="Operator"
+                    aria-label="From godown"
                   />
-                  {operatorName ? <span className="wo-field-hint">{operatorName}</span> : null}
                 </label>
-                <label className="si-field">
-                  <span className="wpf-subpage-form-label">Start time</span>
-                  <input
-                    className="wpf-subpage-form-input"
-                    value={startTimeText}
-                    onChange={(e) => setStartTimeText(e.target.value)}
+                <div className="wo-scan-bar__actions">
+                  <button
+                    type="button"
+                    className="wpf-action-button"
+                    onClick={() => void generateFromBom()}
                     disabled={readOnly}
-                  />
-                </label>
-                <label className="si-field">
-                  <span className="wpf-subpage-form-label">End time</span>
-                  <input
-                    className="wpf-subpage-form-input"
-                    value={endTimeText}
-                    onChange={(e) => setEndTimeText(e.target.value)}
-                    disabled={readOnly}
-                  />
-                </label>
-                <label className="si-field">
-                  <span className="wpf-subpage-form-label">Duration (min)</span>
-                  <input
-                    className="wpf-subpage-form-input"
-                    value={totalDurationMinutes}
-                    onChange={(e) => setTotalDurationMinutes(e.target.value)}
-                    disabled={readOnly}
-                    inputMode="numeric"
-                  />
-                </label>
-                <label className="si-field">
-                  <span className="wpf-subpage-form-label">Produce qty</span>
-                  <input
-                    className="wpf-subpage-form-input"
-                    value={produceQty}
-                    onChange={(e) => handleProduceQtyChange(e.target.value)}
-                    disabled={readOnly}
-                    inputMode="numeric"
-                  />
-                </label>
-                <label className="si-field">
-                  <span className="wpf-subpage-form-label">Rejected qty</span>
-                  <input
-                    className="wpf-subpage-form-input"
-                    value={rejectedQty}
-                    onChange={(e) => handleRejectedQtyChange(e.target.value)}
-                    disabled={readOnly}
-                    inputMode="numeric"
-                  />
-                </label>
-              </ErpFormGrid>
+                    title="Load raw materials and consumables from BOM"
+                  >
+                    Generate from BOM
+                  </button>
+                  <button
+                    type="button"
+                    className="wpf-secondary-button"
+                    onClick={() => navigate('bom')}
+                    disabled={!manufacturingItemId.trim()}
+                    title="Open BOM designer for selected item"
+                  >
+                    Open BOM
+                  </button>
+                </div>
+              </div>
             </ErpFormSection>
           </div>
 
-          <ErpFormSection className="wo-scan-bar">
-            <div className="erp-form-section__title">Stock issue & BOM</div>
-            <div className="wo-scan-bar__controls">
-              <label className="si-field wo-scan-bar__godown">
-                <span className="wpf-subpage-form-label">From godown</span>
-                <ErpStaticSearchableSelect
-                  value={fromGodown}
-                  onChange={setFromGodown}
-                  options={GODOWNS}
-                  placeholder="Select godown…"
-                  disabled={readOnly}
-                  aria-label="From godown"
-                />
-              </label>
-              <div className="wo-scan-bar__actions">
-                <button
-                  type="button"
-                  className="wpf-action-button"
-                  onClick={() => void generateFromBom()}
-                  disabled={readOnly}
-                  title="Load raw materials and consumables from BOM"
-                >
-                  Generate from BOM
-                </button>
-                <button
-                  type="button"
-                  className="wpf-secondary-button"
-                  onClick={() => navigate('bom')}
-                  disabled={!manufacturingItemId.trim()}
-                  title="Open BOM designer for selected item"
-                >
-                  Open BOM
-                </button>
-              </div>
-            </div>
-          </ErpFormSection>
-
-          <div className="wo-grids">
+          <div className="wo-entry__grids wo-grids">
             <div className="wo-grid-panel">
               <h3 className="wo-grid-panel__title">1. Raw materials</h3>
               <div className="wo-grid-wrap">
@@ -992,6 +1046,7 @@ export function WorkOrderEntryScreen() {
               readOnly={readOnly}
               disabled={!apiReady}
               onSave={() => void save()}
+              onPrint={printJobWork}
               onClose={goBack}
             />
           </div>

@@ -48,11 +48,81 @@
 .wo-entry {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .wo-entry--wide {
   max-width: none;
+}
+
+.wo-entry--viewport {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.work-order-entry-screen {
+  .transaction-entry-shell,
+  .transaction-entry-shell__frame,
+  .transaction-entry-shell__content {
+    min-height: 0;
+  }
+
+  .transaction-entry-shell__content {
+    overflow: hidden;
+  }
+
+  .erp-form-section {
+    padding: 8px 12px;
+    margin: 0 0 0 0;
+  }
+
+  .erp-form-section__title {
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+
+  .erp-form-grid {
+    gap: 8px 10px;
+  }
+
+  .si-field .wpf-subpage-form-label {
+    font-size: 11px;
+  }
+
+  .wpf-subpage-form-input,
+  .erp-searchable-combobox__trigger {
+    min-height: 32px;
+    height: 32px;
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+
+  .wo-field-with-action__btn {
+    min-height: 32px;
+  }
+}
+
+.wo-entry__header {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wo-entry__doc-strip.erp-form-section {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.wo-entry__doc-strip .erp-form-section__title {
+  display: none;
+}
+
+.wo-entry__grids {
+  flex: 1;
+  min-height: 0;
 }
 
 .wo-entry__intro {
@@ -106,7 +176,7 @@
 .wo-entry__columns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 6px;
 }
 
 .wo-field-with-action {
@@ -128,6 +198,8 @@
 
 .wo-scan-bar.erp-form-section {
   background: color-mix(in srgb, var(--accent-light, #e8f4fa) 36%, #fff);
+  padding-top: 6px;
+  padding-bottom: 6px;
 }
 
 .wo-scan-bar__controls {
@@ -151,7 +223,8 @@
 .wo-grids {
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
-  gap: 12px;
+  gap: 8px;
+  min-height: 0;
 }
 
 .wo-grid-panel {
@@ -159,34 +232,39 @@
   border-radius: 10px;
   overflow: hidden;
   min-width: 0;
+  min-height: 0;
   background: #fff;
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 1px 3px color-mix(in srgb, var(--theme-shadow, #0c2340) 6%, transparent);
 }
 
 .wo-grid-panel__title {
   margin: 0;
-  padding: 8px 12px;
-  font-size: 12px;
+  padding: 6px 10px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--accent, #006b9e);
   background: color-mix(in srgb, var(--accent-light, #e8f4fa) 55%, #fff);
   border-bottom: 1px solid var(--ims-border, #d8dce3);
+  flex-shrink: 0;
 }
 
 .wo-grid-wrap {
+  flex: 1;
+  min-height: 0;
   overflow: auto;
-  max-height: 320px;
 }
 
 .wo-grid {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .wo-grid th,
 .wo-grid td {
-  padding: 7px 8px;
+  padding: 5px 6px;
   border-bottom: 1px solid #eceff3;
   text-align: left;
   vertical-align: top;
@@ -232,23 +310,29 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
-  padding-top: 4px;
+  flex-shrink: 0;
+  padding: 6px 4px 2px;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  background: var(--transaction-page-background, #e6ebf1);
+  border-top: 1px solid var(--ims-border, #d8dce3);
 }
 
 .wo-totals {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
 .wo-total-chip {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-width: 108px;
-  padding: 8px 12px;
+  min-width: 96px;
+  padding: 6px 10px;
   border: 1px solid var(--border, #d5dce4);
   border-radius: 8px;
   background: #fff;
@@ -276,14 +360,30 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .work-order-entry-screen {
+    .transaction-entry-shell,
+    .transaction-entry-shell__content {
+      overflow: visible;
+      height: auto;
+    }
+  }
+
+  .wo-entry--viewport {
+    height: auto;
+    overflow: visible;
+  }
+
+  .wo-entry__grids {
+    min-height: 240px;
+  }
+
   .wo-entry__columns,
   .wo-grids {
     grid-template-columns: 1fr;
   }
 
   .wo-grid-wrap {
-    overflow-x: auto;
-    max-height: none;
+    max-height: 280px;
   }
 
   .wo-footer {
@@ -292,8 +392,6 @@
     z-index: 15;
     padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0));
     margin: 0 -8px;
-    background: var(--transaction-page-background, #e6ebf1);
-    border-top: 1px solid var(--ims-border, #d8dce3);
     box-shadow: 0 -4px 12px rgba(15, 23, 42, 0.08);
   }
 
