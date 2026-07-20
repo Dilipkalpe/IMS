@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { probeApiHealth } from '../api/client';
-import { getMachineByCode } from '../api/machines';
+import { fetchMasterPage } from '../api/masters';
 import {
   createProductionOrder,
   expandProductionBom,
@@ -11,16 +11,31 @@ import {
   type ProductionOrderRawLine,
   type ProductionOrderRecord,
 } from '../api/productionOrders';
-import { getProductByCode, lookupProduct } from '../api/products';
+import { fetchProductsPage, searchProducts } from '../api/products';
 import { createStockTransfer, type StockTransferRecord } from '../api/stockTransfers';
-import { getUserByUsername } from '../api/users';
+import { fetchUsersPage } from '../api/users';
 import { ProductBrowseDialog } from '../components/transaction/ProductBrowseDialog';
 import type { SalesProductInfo } from '../components/transaction/salesProductPicker';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
-import { ErpFormGrid, ErpFormSection } from '../components/form';
+import {
+  ErpFormGrid,
+  ErpFormSection,
+  ErpSearchableCombobox,
+  ErpStaticSearchableSelect,
+  machineQuickAddConfig,
+  productQuickAddConfig,
+  type SearchableOption,
+} from '../components/form';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { RefinedScreenShell } from '../screens/RefinedScreenShell';
 import { useWorkOrderNavIntent, type WorkOrderOpenIntent } from './context/WorkOrderNavIntent';
+import {
+  formatLastMaterialEvent,
+  formatMaterialAssignment,
+  formatMaterialHistoryTooltip,
+  formatMaterialStage,
+} from './materialLineDisplay';
+import { WorkOrderActionRail } from './WorkOrderActionRail';
 import { GODOWNS, formatMoney } from './WorkOrderListScreen';
 import '../sales-invoice/sales-invoice.scss';
 import './work-order.scss';
@@ -50,6 +65,14 @@ function recalcFinalQty(produceQty: string, rejectedQty: string): string {
 
 function consumableTotal(lines: ProductionOrderConsumableLine[]): number {
   return lines.reduce((sum, line) => sum + (Number(line.amount) || 0), 0);
+}
+
+function productToOption(product: SalesProductInfo): SearchableOption {
+  return {
+    value: product.code,
+    label: `${product.code} — ${product.name}`,
+    searchText: `${product.code} ${product.name}`,
+  };
 }
 
 export function WorkOrderEntryScreen() {
@@ -84,6 +107,11 @@ export function WorkOrderEntryScreen() {
   const [productionAmount, setProductionAmount] = useState('0.00');
   const [status, setStatus] = useState('Open');
 
+  const [productOptions, setProductOptions] = useState<SearchableOption[]>([]);
+  const [machineOptions, setMachineOptions] = useState<SearchableOption[]>([]);
+  const [operatorOptions, setOperatorOptions] = useState<SearchableOption[]>([]);
+  const [productSearchLoading, setProductSearchLoading] = useState(false);
+
   const [productBrowseOpen, setProductBrowseOpen] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -93,6 +121,56 @@ export function WorkOrderEntryScreen() {
   const returnNavKey = intent.returnNavKey ?? 'production-orders';
   const pageTitle =
     editProductionNo == null ? 'New Job Work' : `Job Work #${editProductionNo}`;
+  const readOnly = isCompleted;
+
+  const loadLookupOptions = useCallback(async () => {
+    try {
+      const [products, machines, users] = await Promise.all([
+        fetchProductsPage({ limit: 200 }),
+        fetchMasterPage('machines', { limit: 200 }),
+        fetchUsersPage({ limit: 200 }),
+      ]);
+
+      setProductOptions((products.items ?? []).map(productToOption));
+      setMachineOptions(
+        (machines.items ?? [])
+          .filter((row) => row.activeStatus !== false)
+          .map((row) => {
+            const code = String(row.code ?? '').trim();
+            const name = String(row.name ?? '').trim();
+            return {
+              value: code,
+              label: name ? `${code} — ${name}` : code,
+              searchText: `${code} ${name}`,
+            };
+          })
+          .filter((option) => option.value),
+      );
+      setOperatorOptions(
+        (users.items ?? [])
+          .filter((user) => user.activeStatus)
+          .map((user) => ({
+            value: user.username,
+            label: user.fullName ? `${user.username} — ${user.fullName}` : user.username,
+            searchText: `${user.username} ${user.fullName}`,
+          })),
+      );
+    } catch {
+      // Lookup lists are optional — manual entry still works.
+    }
+  }, []);
+
+  const onProductSearch = useCallback(async (term: string) => {
+    const q = term.trim();
+    if (q.length < 2) return;
+    setProductSearchLoading(true);
+    try {
+      const result = await searchProducts(q, 40);
+      setProductOptions((result.items ?? []).map(productToOption));
+    } finally {
+      setProductSearchLoading(false);
+    }
+  }, []);
 
   const applyFromDto = useCallback((order: ProductionOrderRecord) => {
     setProductionId(String(order.productionNo));
@@ -152,10 +230,11 @@ export function WorkOrderEntryScreen() {
     if (apiUp) {
       const nextNo = await fetchNextProductionNo();
       setProductionId(nextNo != null ? String(nextNo) : '1');
+      await loadLookupOptions();
     } else {
       setProductionId('1');
     }
-  }, []);
+  }, [loadLookupOptions]);
 
   const applyIntent = useCallback(
     async (next: WorkOrderOpenIntent) => {
@@ -167,6 +246,8 @@ export function WorkOrderEntryScreen() {
       setApiReady(apiUp);
       if (!apiUp) {
         setErrorMessage('API is offline — work order features require the API server.');
+      } else {
+        await loadLookupOptions();
       }
 
       if (next.type === 'edit') {
@@ -185,7 +266,7 @@ export function WorkOrderEntryScreen() {
 
       setIsLoaded(true);
     },
-    [applyFromDto, resetNewDraft],
+    [applyFromDto, loadLookupOptions, resetNewDraft],
   );
 
   useEffect(() => consumeOpenIntent(applyIntent), [applyIntent, consumeOpenIntent]);
@@ -206,96 +287,60 @@ export function WorkOrderEntryScreen() {
     [produceQty],
   );
 
-  const applyManufacturingItem = useCallback((code: string, name: string) => {
-    setManufacturingItemId(code);
-    setManufacturingItemName(name);
-  }, []);
+  const onManufacturingItemSelect = useCallback(
+    (code: string) => {
+      const hit = productOptions.find((option) => option.value === code);
+      const namePart = hit?.label.includes(' — ')
+        ? hit.label.split(' — ').slice(1).join(' — ')
+        : hit?.label ?? '';
+      setManufacturingItemId(code);
+      setManufacturingItemName(namePart);
+      setErrorMessage(null);
+    },
+    [productOptions],
+  );
 
-  const lookupManufacturingItem = useCallback(async () => {
-    const code = manufacturingItemId.trim();
-    if (!code) {
-      setProductBrowseOpen(true);
-      return;
-    }
+  const onMachineSelect = useCallback(
+    (code: string) => {
+      const hit = machineOptions.find((option) => option.value === code);
+      const namePart = hit?.label.includes(' — ')
+        ? hit.label.split(' — ').slice(1).join(' — ')
+        : hit?.label ?? '';
+      setMachineCode(code);
+      setMachineName(namePart);
+      setErrorMessage(null);
+    },
+    [machineOptions],
+  );
 
-    setErrorMessage(null);
-    try {
-      const product = await lookupProduct(code);
-      if (!product) {
-        setErrorMessage(`No product found for "${code}".`);
-        setManufacturingItemName('');
-        return;
-      }
-      applyManufacturingItem(product.code, product.name);
-    } catch {
-      try {
-        const product = await getProductByCode(code);
-        applyManufacturingItem(product.code, product.name);
-      } catch {
-        setErrorMessage(`No product found for "${code}".`);
-        setManufacturingItemName('');
-      }
-    }
-  }, [applyManufacturingItem, manufacturingItemId]);
+  const onOperatorSelect = useCallback(
+    (username: string) => {
+      const hit = operatorOptions.find((option) => option.value === username);
+      const namePart = hit?.label.includes(' — ')
+        ? hit.label.split(' — ').slice(1).join(' — ')
+        : hit?.label ?? '';
+      setOperatorId(username);
+      setOperatorName(namePart);
+      setErrorMessage(null);
+    },
+    [operatorOptions],
+  );
 
   const onProductBrowseConfirm = useCallback(
     (products: SalesProductInfo[]) => {
       const first = products[0];
-      if (first) applyManufacturingItem(first.code, first.name);
+      if (first) {
+        setManufacturingItemId(first.code);
+        setManufacturingItemName(first.name);
+        setProductOptions((prev) => {
+          if (prev.some((option) => option.value === first.code)) return prev;
+          return [productToOption(first), ...prev];
+        });
+      }
       setProductBrowseOpen(false);
     },
-    [applyManufacturingItem],
+    [],
   );
-
-  const lookupOperator = useCallback(async () => {
-    const username = operatorId.trim();
-    if (!username) {
-      setErrorMessage('Enter an operator username to look up.');
-      return;
-    }
-    if (!apiReady) {
-      setErrorMessage('API is not available to look up users.');
-      return;
-    }
-    try {
-      const user = await getUserByUsername(username);
-      if (!user?.activeStatus) {
-        setErrorMessage(`No active user found for "${username}".`);
-        setOperatorName('');
-        return;
-      }
-      setOperatorId(user.username);
-      setOperatorName(user.fullName);
-    } catch {
-      setErrorMessage(`No active user found for "${username}".`);
-      setOperatorName('');
-    }
-  }, [apiReady, operatorId]);
-
-  const lookupMachine = useCallback(async () => {
-    const code = machineCode.trim();
-    if (!code) {
-      setErrorMessage('Enter a machine code to look up.');
-      return;
-    }
-    if (!apiReady) {
-      setErrorMessage('API is not available to look up machines.');
-      return;
-    }
-    try {
-      const machine = await getMachineByCode(code);
-      if (!machine?.activeStatus) {
-        setErrorMessage(`No machine found for "${code}".`);
-        setMachineName('');
-        return;
-      }
-      setMachineCode(machine.code);
-      setMachineName(machine.name);
-    } catch {
-      setErrorMessage(`No machine found for "${code}".`);
-      setMachineName('');
-    }
-  }, [apiReady, machineCode]);
 
   const applyExpandedBom = useCallback(
     (expanded: {
@@ -318,7 +363,7 @@ export function WorkOrderEntryScreen() {
   const generateFromBom = useCallback(async () => {
     const productCode = manufacturingItemId.trim().toUpperCase();
     if (!productCode) {
-      setErrorMessage('Select Manufacturing Item first.');
+      setErrorMessage('Select a manufacturing item first.');
       return;
     }
     if (!apiReady) {
@@ -522,7 +567,7 @@ export function WorkOrderEntryScreen() {
       return;
     }
     if (!manufacturingItemId.trim()) {
-      setErrorMessage('Select Manufacturing Item first.');
+      setErrorMessage('Select a manufacturing item first.');
       return;
     }
     if (rawMaterials.length === 0 && consumables.length === 0) {
@@ -597,206 +642,236 @@ export function WorkOrderEntryScreen() {
     returnNavKey,
   ]);
 
-  const readOnly = isCompleted;
+  const titleStatus = useMemo(() => {
+    if (errorMessage) return errorMessage;
+    if (!apiReady) return 'API offline — save disabled';
+    if (statusMessage) return statusMessage;
+    if (readOnly) return `Status: ${status}`;
+    return null;
+  }, [apiReady, errorMessage, readOnly, status, statusMessage]);
 
   const rawColumns = useMemo(
-    () => ['Sr', 'Item', 'Name', 'Unit', 'Req', 'Avail', 'Rate', 'Amount'],
+    () => ['Sr', 'Item', 'Name', 'Stage', 'Last event', 'Src', 'Unit', 'Req', 'Avail', 'Rate', 'Amount'],
     [],
   );
 
   return (
     <RefinedScreenShell className="work-order-entry-screen">
-      <TransactionEntryShell title={pageTitle}>
-        <div className="wo-entry">
-          <div className="wo-entry__header">
-            <div className="wo-entry__final-qty">
-              <span className="wo-field-label">Final qty</span>
-              <span className="wo-readonly-value">{finalQty}</span>
+      <TransactionEntryShell
+        title={pageTitle}
+        titleRight={
+          <div className="wo-entry__title-meta">
+            <div className="wo-entry__final-qty-badge" aria-label={`Final quantity ${finalQty}`}>
+              <span className="wo-entry__final-qty-label">Final qty</span>
+              <strong>{finalQty}</strong>
             </div>
+            {titleStatus ? (
+              <span
+                className={`wo-entry__title-status${errorMessage || !apiReady ? ' wo-entry__title-status--error' : ''}`}
+                role="status"
+              >
+                {titleStatus}
+              </span>
+            ) : null}
           </div>
+        }
+      >
+        <div className="wo-entry wo-entry--wide">
+          <p className="wo-entry__intro">
+            Job work from BOM — material stages, stock issue from godown, and finished goods receipt.
+          </p>
 
-          {(statusMessage || errorMessage || !apiReady) && (
-            <p
-              className={`wo-entry__status${errorMessage || !apiReady ? ' wo-entry__status--error' : ''}`}
-              role="status"
-            >
-              {errorMessage ?? statusMessage ?? 'API offline'}
-            </p>
-          )}
-
-          <ErpFormSection className="wo-section">
+          <ErpFormSection>
+            <div className="erp-form-section__title">Document details</div>
             <ErpFormGrid columns={4}>
               <label className="si-field">
-                <span className="erp-form-field__label">Production ID</span>
-                <input
-                  className="wpf-form-input"
-                  value={productionId}
-                  readOnly
-                  disabled={readOnly}
-                />
+                <span className="wpf-subpage-form-label">Job Work No</span>
+                <input className="wpf-subpage-form-input si-readonly" value={productionId} readOnly />
               </label>
               <label className="si-field">
-                <span className="erp-form-field__label">Date</span>
+                <span className="wpf-subpage-form-label">Date</span>
                 <input
                   type="date"
-                  className="wpf-form-input"
+                  className="wpf-subpage-form-input"
                   value={productionDate}
                   onChange={(e) => setProductionDate(e.target.value)}
                   disabled={readOnly}
                 />
               </label>
-              <label className="si-field erp-form-field--full wo-field--wide">
-                <span className="erp-form-field__label">Item</span>
-                <div className="wo-inline-lookup">
-                  <input
-                    className="wpf-form-input"
-                    value={manufacturingItemId}
-                    onChange={(e) => setManufacturingItemId(e.target.value)}
-                    disabled={readOnly}
-                  />
-                  <button
-                    type="button"
-                    className="wpf-action-button wo-lookup-btn"
-                    onClick={() => void lookupManufacturingItem()}
-                    disabled={readOnly}
-                  >
-                    Look up
-                  </button>
-                  <input
-                    className="wpf-form-input wo-readonly-input"
-                    value={manufacturingItemName}
-                    readOnly
-                  />
-                </div>
-              </label>
-              <label className="si-field erp-form-field--full wo-field--wide">
-                <span className="erp-form-field__label">Machine</span>
-                <div className="wo-inline-lookup">
-                  <input
-                    className="wpf-form-input"
-                    value={machineCode}
-                    onChange={(e) => setMachineCode(e.target.value)}
-                    disabled={readOnly}
-                  />
-                  <button
-                    type="button"
-                    className="wpf-action-button wo-lookup-btn"
-                    onClick={() => void lookupMachine()}
-                    disabled={readOnly}
-                  >
-                    Look up
-                  </button>
-                  <input
-                    className="wpf-form-input wo-readonly-input"
-                    value={machineName}
-                    readOnly
-                  />
-                </div>
-              </label>
-              <label className="si-field erp-form-field--full wo-field--wide">
-                <span className="erp-form-field__label">Operator</span>
-                <div className="wo-inline-lookup">
-                  <input
-                    className="wpf-form-input"
-                    value={operatorId}
-                    onChange={(e) => setOperatorId(e.target.value)}
-                    disabled={readOnly}
-                  />
-                  <button
-                    type="button"
-                    className="wpf-action-button wo-lookup-btn"
-                    onClick={() => void lookupOperator()}
-                    disabled={readOnly}
-                  >
-                    Look up
-                  </button>
-                  <input
-                    className="wpf-form-input wo-readonly-input"
-                    value={operatorName}
-                    readOnly
-                  />
-                </div>
+              <label className="si-field">
+                <span className="wpf-subpage-form-label">Status</span>
+                <input className="wpf-subpage-form-input si-readonly" value={status} readOnly />
               </label>
               <label className="si-field">
-                <span className="erp-form-field__label">Start</span>
-                <input
-                  className="wpf-form-input"
-                  value={startTimeText}
-                  onChange={(e) => setStartTimeText(e.target.value)}
-                  disabled={readOnly}
-                />
-              </label>
-              <label className="si-field">
-                <span className="erp-form-field__label">End</span>
-                <input
-                  className="wpf-form-input"
-                  value={endTimeText}
-                  onChange={(e) => setEndTimeText(e.target.value)}
-                  disabled={readOnly}
-                />
-              </label>
-              <label className="si-field">
-                <span className="erp-form-field__label">Min</span>
-                <input
-                  className="wpf-form-input"
-                  value={totalDurationMinutes}
-                  onChange={(e) => setTotalDurationMinutes(e.target.value)}
-                  disabled={readOnly}
-                />
-              </label>
-              <label className="si-field">
-                <span className="erp-form-field__label">Produce</span>
-                <input
-                  className="wpf-form-input"
-                  value={produceQty}
-                  onChange={(e) => handleProduceQtyChange(e.target.value)}
-                  disabled={readOnly}
-                />
-              </label>
-              <label className="si-field">
-                <span className="erp-form-field__label">Rejected</span>
-                <input
-                  className="wpf-form-input"
-                  value={rejectedQty}
-                  onChange={(e) => handleRejectedQtyChange(e.target.value)}
-                  disabled={readOnly}
-                />
+                <span className="wpf-subpage-form-label">BOM revision</span>
+                <input className="wpf-subpage-form-input si-readonly" value={bomRevision} readOnly />
               </label>
             </ErpFormGrid>
           </ErpFormSection>
 
+          <div className="wo-entry__columns">
+            <ErpFormSection>
+              <div className="erp-form-section__title">Manufacturing item & machine</div>
+              <ErpFormGrid columns={1}>
+                <label className="si-field">
+                  <span className="wpf-subpage-form-label">Manufacturing item *</span>
+                  <div className="wo-field-with-action">
+                    <ErpSearchableCombobox
+                      value={manufacturingItemId}
+                      onChange={onManufacturingItemSelect}
+                      options={productOptions}
+                      placeholder="Search product code or name…"
+                      loading={productSearchLoading}
+                      disabled={readOnly}
+                      onSearch={onProductSearch}
+                      quickAdd={productQuickAddConfig}
+                      onQuickAddSuccess={(option) => {
+                        setProductOptions((prev) => {
+                          if (prev.some((row) => row.value === option.value)) return prev;
+                          return [option, ...prev];
+                        });
+                        onManufacturingItemSelect(option.value);
+                      }}
+                      aria-label="Manufacturing item"
+                    />
+                    <button
+                      type="button"
+                      className="wpf-secondary-button wo-field-with-action__btn"
+                      onClick={() => setProductBrowseOpen(true)}
+                      disabled={readOnly}
+                    >
+                      Browse…
+                    </button>
+                  </div>
+                  {manufacturingItemName ? (
+                    <span className="wo-field-hint">{manufacturingItemName}</span>
+                  ) : null}
+                </label>
+                <label className="si-field">
+                  <span className="wpf-subpage-form-label">Machine</span>
+                  <ErpSearchableCombobox
+                    value={machineCode}
+                    onChange={onMachineSelect}
+                    options={machineOptions}
+                    placeholder="Search machine…"
+                    disabled={readOnly}
+                    quickAdd={machineQuickAddConfig()}
+                    onQuickAddSuccess={(option) => {
+                      setMachineOptions((prev) => {
+                        if (prev.some((row) => row.value === option.value)) return prev;
+                        return [option, ...prev];
+                      });
+                      onMachineSelect(option.value);
+                    }}
+                    aria-label="Machine"
+                  />
+                  {machineName ? <span className="wo-field-hint">{machineName}</span> : null}
+                </label>
+              </ErpFormGrid>
+            </ErpFormSection>
+
+            <ErpFormSection>
+              <div className="erp-form-section__title">Operator & production run</div>
+              <ErpFormGrid columns={2}>
+                <label className="si-field erp-form-field--span-2">
+                  <span className="wpf-subpage-form-label">Operator</span>
+                  <ErpSearchableCombobox
+                    value={operatorId}
+                    onChange={onOperatorSelect}
+                    options={operatorOptions}
+                    placeholder="Search operator username…"
+                    disabled={readOnly}
+                    aria-label="Operator"
+                  />
+                  {operatorName ? <span className="wo-field-hint">{operatorName}</span> : null}
+                </label>
+                <label className="si-field">
+                  <span className="wpf-subpage-form-label">Start time</span>
+                  <input
+                    className="wpf-subpage-form-input"
+                    value={startTimeText}
+                    onChange={(e) => setStartTimeText(e.target.value)}
+                    disabled={readOnly}
+                  />
+                </label>
+                <label className="si-field">
+                  <span className="wpf-subpage-form-label">End time</span>
+                  <input
+                    className="wpf-subpage-form-input"
+                    value={endTimeText}
+                    onChange={(e) => setEndTimeText(e.target.value)}
+                    disabled={readOnly}
+                  />
+                </label>
+                <label className="si-field">
+                  <span className="wpf-subpage-form-label">Duration (min)</span>
+                  <input
+                    className="wpf-subpage-form-input"
+                    value={totalDurationMinutes}
+                    onChange={(e) => setTotalDurationMinutes(e.target.value)}
+                    disabled={readOnly}
+                    inputMode="numeric"
+                  />
+                </label>
+                <label className="si-field">
+                  <span className="wpf-subpage-form-label">Produce qty</span>
+                  <input
+                    className="wpf-subpage-form-input"
+                    value={produceQty}
+                    onChange={(e) => handleProduceQtyChange(e.target.value)}
+                    disabled={readOnly}
+                    inputMode="numeric"
+                  />
+                </label>
+                <label className="si-field">
+                  <span className="wpf-subpage-form-label">Rejected qty</span>
+                  <input
+                    className="wpf-subpage-form-input"
+                    value={rejectedQty}
+                    onChange={(e) => handleRejectedQtyChange(e.target.value)}
+                    disabled={readOnly}
+                    inputMode="numeric"
+                  />
+                </label>
+              </ErpFormGrid>
+            </ErpFormSection>
+          </div>
+
           <ErpFormSection className="wo-scan-bar">
-            <label className="si-field">
-              <span className="erp-form-field__label">From godown</span>
-              <select
-                className="wpf-form-combo"
-                value={fromGodown}
-                onChange={(e) => setFromGodown(e.target.value)}
-                disabled={readOnly}
-              >
-                {GODOWNS.map((g) => (
-                  <option key={g} value={g}>
-                    {g}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <button
-              type="button"
-              className="wpf-action-button"
-              onClick={() => void generateFromBom()}
-              disabled={readOnly}
-            >
-              Generate from BOM
-            </button>
-            <button
-              type="button"
-              className="wpf-action-button"
-              onClick={() => navigate('bom')}
-              disabled={!manufacturingItemId.trim()}
-            >
-              Open BOM
-            </button>
+            <div className="erp-form-section__title">Stock issue & BOM</div>
+            <div className="wo-scan-bar__controls">
+              <label className="si-field wo-scan-bar__godown">
+                <span className="wpf-subpage-form-label">From godown</span>
+                <ErpStaticSearchableSelect
+                  value={fromGodown}
+                  onChange={setFromGodown}
+                  options={GODOWNS}
+                  placeholder="Select godown…"
+                  disabled={readOnly}
+                  aria-label="From godown"
+                />
+              </label>
+              <div className="wo-scan-bar__actions">
+                <button
+                  type="button"
+                  className="wpf-action-button"
+                  onClick={() => void generateFromBom()}
+                  disabled={readOnly}
+                  title="Load raw materials and consumables from BOM"
+                >
+                  Generate from BOM
+                </button>
+                <button
+                  type="button"
+                  className="wpf-secondary-button"
+                  onClick={() => navigate('bom')}
+                  disabled={!manufacturingItemId.trim()}
+                  title="Open BOM designer for selected item"
+                >
+                  Open BOM
+                </button>
+              </div>
+            </div>
           </ErpFormSection>
 
           <div className="wo-grids">
@@ -815,7 +890,7 @@ export function WorkOrderEntryScreen() {
                     {rawMaterials.length === 0 ? (
                       <tr>
                         <td colSpan={rawColumns.length} className="wo-grid__empty">
-                          Generate from BOM to load raw materials.
+                          Select a manufacturing item, then use Generate from BOM to load materials.
                         </td>
                       </tr>
                     ) : (
@@ -824,13 +899,23 @@ export function WorkOrderEntryScreen() {
                           <td>{line.srNo}</td>
                           <td>{line.itemId}</td>
                           <td>{line.itemName}</td>
+                          <td className="wo-grid__stage">{formatMaterialStage(line.stage)}</td>
+                          <td
+                            className="wo-grid__event"
+                            title={formatMaterialHistoryTooltip(line.stageEvents)}
+                          >
+                            {formatLastMaterialEvent(line.stageEvents)}
+                          </td>
+                          <td>{formatMaterialAssignment(line.assignmentType)}</td>
                           <td>{line.unit}</td>
-                          <td>{line.reqQty}</td>
-                          <td className={line.availableQty < line.reqQty ? 'wo-grid__short' : undefined}>
+                          <td className="wo-grid__num">{line.reqQty}</td>
+                          <td
+                            className={`wo-grid__num${line.availableQty < line.reqQty ? ' wo-grid__short' : ''}`}
+                          >
                             {line.availableQty}
                           </td>
-                          <td>{line.rate}</td>
-                          <td>{line.amount}</td>
+                          <td className="wo-grid__num">{line.rate}</td>
+                          <td className="wo-grid__num">{line.amount}</td>
                         </tr>
                       ))
                     )}
@@ -847,6 +932,9 @@ export function WorkOrderEntryScreen() {
                     <tr>
                       <th>Sr</th>
                       <th>Material</th>
+                      <th>Stage</th>
+                      <th>Last event</th>
+                      <th>Src</th>
                       <th>Qty</th>
                       <th>Rate</th>
                       <th>Amount</th>
@@ -855,7 +943,7 @@ export function WorkOrderEntryScreen() {
                   <tbody>
                     {consumables.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="wo-grid__empty">
+                        <td colSpan={8} className="wo-grid__empty">
                           Generate from BOM to load consumables.
                         </td>
                       </tr>
@@ -864,9 +952,17 @@ export function WorkOrderEntryScreen() {
                         <tr key={line.srNo}>
                           <td>{line.srNo}</td>
                           <td>{line.material}</td>
-                          <td>{line.qty}</td>
-                          <td>{line.rate}</td>
-                          <td>{line.amount}</td>
+                          <td className="wo-grid__stage">{formatMaterialStage(line.stage)}</td>
+                          <td
+                            className="wo-grid__event"
+                            title={formatMaterialHistoryTooltip(line.stageEvents)}
+                          >
+                            {formatLastMaterialEvent(line.stageEvents)}
+                          </td>
+                          <td>{formatMaterialAssignment(line.assignmentType)}</td>
+                          <td className="wo-grid__num">{line.qty}</td>
+                          <td className="wo-grid__num">{line.rate}</td>
+                          <td className="wo-grid__num">{line.amount}</td>
                         </tr>
                       ))
                     )}
@@ -878,31 +974,26 @@ export function WorkOrderEntryScreen() {
 
           <div className="wo-footer">
             <div className="wo-totals">
-              <span>
-                Raw: <strong>{rawMaterialAmount}</strong>
-              </span>
-              <span>
-                Consumable: <strong>{consumableAmount}</strong>
-              </span>
-              <span>
-                Total: <strong>{productionAmount}</strong>
-              </span>
+              <div className="wo-total-chip">
+                <span className="wo-total-chip__label">Raw materials</span>
+                <strong>{rawMaterialAmount}</strong>
+              </div>
+              <div className="wo-total-chip">
+                <span className="wo-total-chip__label">Consumables</span>
+                <strong>{consumableAmount}</strong>
+              </div>
+              <div className="wo-total-chip wo-total-chip--primary">
+                <span className="wo-total-chip__label">Production total</span>
+                <strong>{productionAmount}</strong>
+              </div>
             </div>
-            <div className="wo-actions">
-              {!readOnly && (
-                <button
-                  type="button"
-                  className="wpf-primary-button"
-                  onClick={() => void save()}
-                  disabled={isSaving}
-                >
-                  {isSaving ? 'Saving…' : 'Save'}
-                </button>
-              )}
-              <button type="button" className="wpf-action-button" onClick={goBack}>
-                {readOnly ? 'Back' : 'Cancel'}
-              </button>
-            </div>
+            <WorkOrderActionRail
+              saving={isSaving}
+              readOnly={readOnly}
+              disabled={!apiReady}
+              onSave={() => void save()}
+              onClose={goBack}
+            />
           </div>
         </div>
 

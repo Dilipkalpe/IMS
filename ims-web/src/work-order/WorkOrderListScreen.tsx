@@ -222,7 +222,15 @@ export function WorkOrderListScreen() {
 
           <div className="si-list-toolbar">
             <div className="fv-list__toolbar si-list-toolbar__row">
-              <button type="button" className="wpf-action-button" onClick={openNew} title="Ctrl+N">
+              <button
+                type="button"
+                className="wpf-primary-button wo-list-add-btn"
+                onClick={openNew}
+                title="Create new job work entry (Ctrl+N)"
+              >
+                <span className="wpf-icontext" aria-hidden="true">
+                  &#xE710;
+                </span>
                 Add Job Work
               </button>
               <input
