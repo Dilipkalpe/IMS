@@ -102,7 +102,15 @@ export async function fetchProductionOrdersPage(params?: {
   if (params?.search?.trim()) q.set('search', params.search.trim());
   if (params?.status?.trim()) q.set('status', params.status.trim());
   const qs = q.toString();
-  return apiFetch<ProductionOrdersPagedResult>(`/api/production-orders${qs ? `?${qs}` : ''}`);
+  const result = await apiFetch<ProductionOrdersPagedResult>(
+    `/api/production-orders${qs ? `?${qs}` : ''}`,
+  );
+  return {
+    items: Array.isArray(result.items) ? result.items : [],
+    total: Number(result.total) || 0,
+    page: Number(result.page) || params?.page || 1,
+    limit: Number(result.limit) || params?.limit || 200,
+  };
 }
 
 export async function fetchProductionOrderStats(): Promise<ProductionOrderStats | null> {

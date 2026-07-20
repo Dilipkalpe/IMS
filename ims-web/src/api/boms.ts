@@ -40,7 +40,13 @@ export async function fetchBomsPage(params?: {
   if (params?.limit != null) q.set('limit', String(params.limit));
   if (params?.search?.trim()) q.set('search', params.search.trim());
   const qs = q.toString();
-  return apiFetch<BomPagedResult>(`/api/boms${qs ? `?${qs}` : ''}`);
+  const result = await apiFetch<BomPagedResult>(`/api/boms${qs ? `?${qs}` : ''}`);
+  return {
+    items: Array.isArray(result.items) ? result.items : [],
+    total: Number(result.total) || 0,
+    page: Number(result.page) || params?.page || 1,
+    limit: Number(result.limit) || params?.limit || 200,
+  };
 }
 
 export async function fetchBomByProduct(productCode: string): Promise<BomRecord | null> {

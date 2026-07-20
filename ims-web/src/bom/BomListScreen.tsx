@@ -178,10 +178,14 @@ export function BomListScreen() {
           </div>
           <ListGridArea loading={loading} empty={rows.length === 0 && !loading}>
             <CorporateDataGrid
-              rows={rows}
               columns={columns}
+              data={rows}
+              variant="so-list"
+              rowHeight={42}
+              headerHeight={44}
+              minHeight={280}
               selectedRowId={selectedId}
-              onSelectedRowIdChange={setSelectedId}
+              onRowClick={(row) => setSelectedId(row.id)}
               onRowDoubleClick={(row) => {
                 const rec = recordForRow(row);
                 if (rec) openEdit(rec);
@@ -190,10 +194,10 @@ export function BomListScreen() {
           </ListGridArea>
           <TransactionListPagination
             page={page}
-            totalPages={totalPages}
             pageSize={pageSize}
-            total={total}
-            pageSizes={LIST_PAGE_SIZES}
+            totalPages={totalPages}
+            totalRecords={total}
+            loading={loading}
             onPageChange={setPage}
             onPageSizeChange={setPageSize}
           />
