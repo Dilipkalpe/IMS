@@ -1,5 +1,7 @@
 /** Client-side list/register export (WPF StandardListExportService parity). */
 
+import { openHtmlPrintPreview, type OpenPrintPreviewOptions } from '../../utils/printPreview';
+
 export interface ListExportColumn {
   id: string;
   header: string;
@@ -128,18 +130,19 @@ export function openListPrintPreview(
   subtitle: string,
   columns: ListExportColumn[],
   rows: Record<string, string | number>[],
-  options?: { autoPrint?: boolean },
+  options?: { autoPrint?: boolean; targetWindow?: Window | null },
 ): { ok: boolean; message: string } {
   const html = buildListPrintHtml(title, subtitle, columns, rows);
-  const w = window.open('', '_blank', 'noopener,noreferrer,width=1000,height=700');
-  if (!w) {
-    return { ok: false, message: 'Popup blocked — allow popups for list print preview.' };
+  const previewOptions: OpenPrintPreviewOptions = {
+    autoPrint: options?.autoPrint,
+    title,
+    targetWindow: options?.targetWindow,
+  };
+  const outcome = openHtmlPrintPreview(html, previewOptions);
+  if (!outcome.ok) {
+    return outcome;
   }
-  w.document.write(html);
-  w.document.close();
-  w.focus();
   if (options?.autoPrint) {
-    w.print();
     return { ok: true, message: `Sent ${rows.length} row(s) to printer.` };
   }
   return { ok: true, message: `Preview opened (${rows.length} row(s)). Use Ctrl+P to print.` };

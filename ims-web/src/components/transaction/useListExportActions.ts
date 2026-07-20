@@ -11,6 +11,7 @@ import {
 import { resolveListExportRows } from './resolveListExportRows';
 import type { TransactionListQueryBase } from './transactionListQuery';
 import type { TransactionListFetchRepository } from './useTransactionListLoader';
+import { openDeferredPrintWindow } from '../../utils/printPreview';
 
 export interface UseListExportActionsOptions<TRow> {
   title: string;
@@ -66,9 +67,15 @@ export function useListExportActions<TRow>(options: UseListExportActionsOptions<
       }
 
       setExporting(true);
+      let previewWin: Window | null = null;
       try {
+        if (format === 'pdf' || format === 'print') {
+          previewWin = openDeferredPrintWindow();
+        }
+
         const resolved = await resolveRows();
         if (resolved.length === 0) {
+          previewWin?.close();
           options.setStatusMessage('Export cancelled.');
           return;
         }
@@ -89,7 +96,9 @@ export function useListExportActions<TRow>(options: UseListExportActionsOptions<
         }
 
         if (format === 'pdf') {
-          const outcome = openListPrintPreview(options.title, subtitle, options.columns, records);
+          const outcome = openListPrintPreview(options.title, subtitle, options.columns, records, {
+            targetWindow: previewWin,
+          });
           options.setStatusMessage(outcome.message);
           return;
         }
@@ -97,10 +106,12 @@ export function useListExportActions<TRow>(options: UseListExportActionsOptions<
         if (format === 'print') {
           const outcome = openListPrintPreview(options.title, subtitle, options.columns, records, {
             autoPrint: true,
+            targetWindow: previewWin,
           });
           options.setStatusMessage(outcome.message);
         }
       } catch (err) {
+        previewWin?.close();
         options.setStatusMessage(err instanceof Error ? err.message : 'Export failed.');
       } finally {
         setExporting(false);

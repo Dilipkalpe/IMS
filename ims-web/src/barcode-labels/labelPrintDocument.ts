@@ -1,5 +1,6 @@
 import { renderSymbologyDataUrl } from './renderSymbology';
 import type { BarcodeLabelFormat, BarcodeLabelItem, BarcodeLabelPrintOptions } from './types';
+import { openHtmlPrintPreview } from '../utils/printPreview';
 
 const MM_TO_PX = 96 / 25.4;
 
@@ -121,11 +122,6 @@ export async function buildBarcodeLabelsPrintHtml(
 }
 
 export function openBarcodeLabelsPrintWindow(html: string, title: string): Window | null {
-  const win = window.open('', '_blank', 'noopener,noreferrer,width=920,height=720');
-  if (!win) return null;
-  win.document.open();
-  win.document.write(html);
-  win.document.close();
-  win.document.title = title;
-  return win;
+  const outcome = openHtmlPrintPreview(html, { title });
+  return outcome.window ?? null;
 }

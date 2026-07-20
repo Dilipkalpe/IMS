@@ -1,4 +1,5 @@
-import { fetchDefaultCompany, resolveCompanyLogoUrl } from '../../api/companies';import type { PrintableDocumentV1 } from '../contracts/printableDocument';
+import { fetchDefaultCompany, resolveCompanyLogoUrl } from '../../api/companies';
+import type { PrintableDocumentV1 } from '../contracts/printableDocument';
 
 /** WPF: CompanyProfileService.Current applied before SalesBillFlowDocumentRenderer. */
 export async function enrichPrintableSeller(document: PrintableDocumentV1): Promise<PrintableDocumentV1> {

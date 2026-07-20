@@ -2,6 +2,7 @@ import type {
   ProductionOrderConsumableLine,
   ProductionOrderRawLine,
 } from '../api/productionOrders';
+import { openHtmlPrintPreview } from '../utils/printPreview';
 
 export interface WorkOrderPrintData {
   productionNo: string;
@@ -147,12 +148,11 @@ export function buildWorkOrderPrintHtml(data: WorkOrderPrintData): string {
 
 export function printWorkOrder(data: WorkOrderPrintData): { ok: boolean; message: string } {
   const html = buildWorkOrderPrintHtml(data);
-  const w = window.open('', '_blank', 'noopener,noreferrer,width=1000,height=800');
-  if (!w) {
-    return { ok: false, message: 'Popup blocked — allow popups to print job work.' };
+  const outcome = openHtmlPrintPreview(html, {
+    title: `Job Work #${data.productionNo}`,
+  });
+  if (!outcome.ok) {
+    return outcome;
   }
-  w.document.write(html);
-  w.document.close();
-  w.focus();
   return { ok: true, message: 'Print preview opened — use Ctrl+P to print.' };
 }

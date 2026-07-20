@@ -13,7 +13,7 @@ import {
   type ListExportColumn,
 } from '../components/transaction/listExport';
 import { employeeTypeLabel } from './payrollEmployeeTypes';
-import { fetchPayslipByPeriod, openPayslipHtmlPreview } from '../api/payrollReports';
+import { fetchPayslipByPeriod, openDeferredPrintWindow, openPayslipHtmlPreview } from '../api/payrollReports';
 
 type ReportKind = 'tax-summary' | 'staff-hours' | 'payslip';
 
@@ -107,27 +107,32 @@ export function PayrollReportsScreen() {
       setPayslipStatus('Enter employee code.');
       return;
     }
+
+    const parsedRun = runNo.trim() ? parseInt(runNo, 10) : undefined;
+    const payslipInput = {
+      periodMonth: periodMonth.trim(),
+      employeeCode: employeeCode.trim(),
+      runNo: Number.isFinite(parsedRun) ? parsedRun : undefined,
+    };
+
+    const previewWin = openDeferredPrintWindow();
     setLoading(true);
     setPayslipStatus(null);
     setError(null);
     try {
-      const parsedRun = runNo.trim() ? parseInt(runNo, 10) : undefined;
-      await fetchPayslipByPeriod({
-        periodMonth: periodMonth.trim(),
-        employeeCode: employeeCode.trim(),
-        runNo: Number.isFinite(parsedRun) ? parsedRun : undefined,
+      await fetchPayslipByPeriod(payslipInput);
+      const outcome = openPayslipHtmlPreview({
+        ...payslipInput,
+        targetWindow: previewWin ?? undefined,
       });
-      const win = openPayslipHtmlPreview({
-        periodMonth: periodMonth.trim(),
-        employeeCode: employeeCode.trim(),
-        runNo: Number.isFinite(parsedRun) ? parsedRun : undefined,
-      });
-      if (!win) {
-        setPayslipStatus('Popup blocked — allow popups for payslip preview.');
+      if (!outcome.ok) {
+        previewWin?.close();
+        setPayslipStatus(outcome.message);
         return;
       }
-      setPayslipStatus('Payslip opened — use browser Print for PDF.');
+      setPayslipStatus(outcome.message || 'Payslip opened — use browser Print for PDF.');
     } catch (err) {
+      previewWin?.close();
       setPayslipStatus(err instanceof Error ? err.message : 'Payslip not found.');
     } finally {
       setLoading(false);

@@ -7,6 +7,7 @@ import {
   type ListExportColumn,
   type ListExportFormat,
 } from '../components/transaction/listExport';
+import { openDeferredPrintWindow } from '../utils/printPreview';
 import type { MasterListConfig } from './masterConfigs';
 
 const EXPORT_PAGE_SIZE = 500;
@@ -110,7 +111,12 @@ export function useMasterListExportActions(options: {
       }
 
       setExporting(true);
+      let previewWin: Window | null = null;
       try {
+        if (format === 'pdf' || format === 'print') {
+          previewWin = openDeferredPrintWindow();
+        }
+
         let records = options.rows;
         if (options.total > options.rows.length) {
           options.setStatusMessage('Fetching all matching rows for export…');
@@ -122,6 +128,7 @@ export function useMasterListExportActions(options: {
         }
 
         if (!records.length) {
+          previewWin?.close();
           options.setStatusMessage('Export cancelled.');
           return;
         }
@@ -144,7 +151,9 @@ export function useMasterListExportActions(options: {
         }
 
         if (format === 'pdf') {
-          const outcome = openListPrintPreview(options.config.title, subtitle, columns, exportRows);
+          const outcome = openListPrintPreview(options.config.title, subtitle, columns, exportRows, {
+            targetWindow: previewWin,
+          });
           options.setStatusMessage(outcome.message);
           return;
         }
@@ -152,10 +161,12 @@ export function useMasterListExportActions(options: {
         if (format === 'print') {
           const outcome = openListPrintPreview(options.config.title, subtitle, columns, exportRows, {
             autoPrint: true,
+            targetWindow: previewWin,
           });
           options.setStatusMessage(outcome.message);
         }
       } catch (err) {
+        previewWin?.close();
         options.setStatusMessage(err instanceof Error ? err.message : 'Export failed.');
       } finally {
         setExporting(false);

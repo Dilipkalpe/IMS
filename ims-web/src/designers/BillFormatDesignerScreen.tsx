@@ -13,6 +13,7 @@ import {
   updateBillFormatLayout,
   type BillFormatTemplate,
 } from '../api/billFormats';
+import { openHtmlPrintPreview } from '../utils/printPreview';
 import { probeApiHealth } from '../api/client';
 import type { BillLayoutJson } from '../document/contracts/billLayout';
 import { BillLayoutCanvas } from './BillLayoutCanvas';
@@ -203,14 +204,8 @@ export function BillFormatDesignerScreen() {
 
   const openPrintPreview = useCallback(() => {
     if (!editor) return;
-    const preview = window.open('', '_blank', 'noopener,noreferrer,width=900,height=700');
-    if (!preview) return;
-    preview.document.write(
-      `<html><head><title>${editor.name} preview</title></head><body><h1>${editor.name}</h1><pre>${layoutText.replace(/</g, '&lt;')}</pre></body></html>`,
-    );
-    preview.document.close();
-    preview.focus();
-    preview.print();
+    const html = `<html><head><title>${editor.name} preview</title></head><body><h1>${editor.name}</h1><pre>${layoutText.replace(/</g, '&lt;')}</pre></body></html>`;
+    openHtmlPrintPreview(html, { autoPrint: true, title: `${editor.name} preview` });
   }, [editor, layoutText]);
 
   return (
