@@ -1,8 +1,13 @@
-/** Browser print preview — opens during user gesture; iframe fallback when popups are blocked. */
+/** Browser print preview — in-page iframe on HTTP; popup tab on HTTPS with iframe fallback. */
 
 export const PRINT_WINDOW_FEATURES = 'noopener,noreferrer,width=900,height=700';
 
 const OVERLAY_ID = 'ims-print-preview-overlay';
+
+/** Popups are unreliable on plain HTTP — use the in-page iframe overlay instead. */
+export function preferInPagePrintPreview(): boolean {
+  return typeof window !== 'undefined' && window.location.protocol === 'http:';
+}
 
 export const PRINT_LOADING_HTML =
   '<!DOCTYPE html><html><head><title>Loading…</title></head><body><p style="font-family:Segoe UI,sans-serif;padding:24px;">Loading print preview…</p></body></html>';
@@ -23,6 +28,7 @@ export interface PrintPreviewOutcome {
 
 /** Open during a user click so async loads can still show print preview (avoids popup blockers). */
 export function openDeferredPrintWindow(): Window | null {
+  if (preferInPagePrintPreview()) return null;
   const w = window.open('', '_blank', PRINT_WINDOW_FEATURES);
   if (!w) return null;
   renderPrintPreviewWindow(w, PRINT_LOADING_HTML);
@@ -131,7 +137,7 @@ function openPrintPreviewInOverlay(html: string, options?: OpenPrintPreviewOptio
 
   return {
     ok: true,
-    message: 'Print preview opened in page (popup was blocked). Use Print or Ctrl+P.',
+    message: 'Print preview opened — click Print or Ctrl+P.',
     usedFallback: true,
   };
 }
@@ -193,7 +199,7 @@ function openUrlInOverlay(url: string, options?: { title?: string }): PrintPrevi
 
   return {
     ok: true,
-    message: 'Print preview opened in page (popup was blocked). Use Print or Ctrl+P.',
+    message: 'Print preview opened — click Print or Ctrl+P.',
     usedFallback: true,
   };
 }
@@ -203,6 +209,10 @@ export function openHtmlPrintPreview(
   html: string,
   options?: OpenPrintPreviewOptions,
 ): PrintPreviewOutcome {
+  if (preferInPagePrintPreview()) {
+    return openPrintPreviewInOverlay(html, options);
+  }
+
   const reuse =
     options?.targetWindow && !options.targetWindow.closed ? options.targetWindow : null;
   const w = reuse ?? window.open('', '_blank', PRINT_WINDOW_FEATURES);
@@ -232,6 +242,10 @@ export function openUrlPrintPreview(
   url: string,
   options?: { targetWindow?: Window | null; title?: string },
 ): PrintPreviewOutcome {
+  if (preferInPagePrintPreview()) {
+    return openUrlInOverlay(url, { title: options?.title });
+  }
+
   const reuse =
     options?.targetWindow && !options.targetWindow.closed ? options.targetWindow : null;
 

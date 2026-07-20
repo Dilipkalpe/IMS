@@ -14,6 +14,14 @@ import { apiDocumentPrintProviders } from './apiDocumentPrintProviders';
 
 export const defaultDocumentPrintProviders: DocumentPrintProviders = apiDocumentPrintProviders;
 
+function resolveTargetWindow(options?: { targetWindow?: Window | null }): Window | null {
+  if (options && 'targetWindow' in options) {
+    const w = options.targetWindow;
+    return w && !w.closed ? w : null;
+  }
+  return openDeferredPrintWindow();
+}
+
 export class DocumentPrintService {
   constructor(private readonly providers: DocumentPrintProviders = defaultDocumentPrintProviders) {}
 
@@ -35,17 +43,7 @@ export class DocumentPrintService {
     document: PrintableDocumentV1,
     options?: { showDialog?: boolean; formatKey?: BillFormatKey; targetWindow?: Window | null },
   ): Promise<DocumentActionOutcome> {
-    const ownedWindow =
-      options?.targetWindow && !options.targetWindow.closed
-        ? options.targetWindow
-        : openDeferredPrintWindow();
-    if (!ownedWindow) {
-      return {
-        ok: false,
-        message: 'Popup blocked — allow popups for print preview, or use the in-page preview.',
-        kind: 'print',
-      };
-    }
+    const ownedWindow = resolveTargetWindow(options);
 
     try {
       const enriched = await enrichPrintableSeller(document);
@@ -60,10 +58,10 @@ export class DocumentPrintService {
         },
         format,
       );
-      if (!result.ok) ownedWindow.close();
+      if (!result.ok) ownedWindow?.close();
       return { ok: result.ok, message: result.message, kind: 'print' };
     } catch (err) {
-      ownedWindow.close();
+      ownedWindow?.close();
       return {
         ok: false,
         message: err instanceof Error ? err.message : 'Print failed.',
@@ -78,17 +76,7 @@ export class DocumentPrintService {
     formatKey?: BillFormatKey,
     options?: { targetWindow?: Window | null },
   ): Promise<DocumentActionOutcome> {
-    const ownedWindow =
-      options?.targetWindow && !options.targetWindow.closed
-        ? options.targetWindow
-        : openDeferredPrintWindow();
-    if (!ownedWindow) {
-      return {
-        ok: false,
-        message: 'Popup blocked — allow popups for print preview, or use the in-page preview.',
-        kind: 'preview',
-      };
-    }
+    const ownedWindow = resolveTargetWindow(options);
 
     try {
       const enriched = await enrichPrintableSeller(document);
@@ -97,10 +85,10 @@ export class DocumentPrintService {
         { documentType, document: enriched, formatKey: format.formatKey, targetWindow: ownedWindow },
         format,
       );
-      if (!result.ok) ownedWindow.close();
+      if (!result.ok) ownedWindow?.close();
       return { ok: result.ok, message: result.message, kind: 'preview' };
     } catch (err) {
-      ownedWindow.close();
+      ownedWindow?.close();
       return {
         ok: false,
         message: err instanceof Error ? err.message : 'Preview failed.',
@@ -132,17 +120,10 @@ export class DocumentPrintService {
     onSave: () => Promise<{ ok: boolean; message?: string }>,
   ): Promise<DocumentActionOutcome> {
     const previewWin = openDeferredPrintWindow();
-    if (!previewWin) {
-      return {
-        ok: false,
-        message: 'Popup blocked — allow popups for print preview, or use the in-page preview.',
-        kind: 'save_print_next',
-      };
-    }
 
     const save = await onSave();
     if (!save.ok) {
-      previewWin.close();
+      previewWin?.close();
       return { ok: false, message: save.message ?? 'Save failed.', kind: 'save_print_next' };
     }
 
@@ -160,7 +141,7 @@ export class DocumentPrintService {
         format,
       );
       if (!print.ok) {
-        previewWin.close();
+        previewWin?.close();
         return { ok: false, message: print.message, kind: 'save_print_next' };
       }
       return {
@@ -169,7 +150,7 @@ export class DocumentPrintService {
         kind: 'save_print_next',
       };
     } catch (err) {
-      previewWin.close();
+      previewWin?.close();
       return {
         ok: false,
         message: err instanceof Error ? err.message : 'Print failed.',

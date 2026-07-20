@@ -25,6 +25,9 @@ export const stubPrintProvider: PrintProvider = {
     if (!outcome.ok) {
       return { ok: false, message: outcome.message };
     }
+    if (outcome.usedFallback) {
+      return { ok: true, message: outcome.message };
+    }
     if (!request.showDialog) {
       return { ok: true, message: `Sent to printer (${format.name}).` };
     }

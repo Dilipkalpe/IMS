@@ -6,8 +6,8 @@ import type { PurchaseInvoiceRepository } from '../purchase-invoice/repository/t
 import { generateLabelsFromPurchaseInvoice } from './generator';
 import {
   buildBarcodeLabelsPrintHtml,
-  openBarcodeLabelsPrintWindow,
 } from './labelPrintDocument';
+import { openHtmlPrintPreview } from '../utils/printPreview';
 import type { BarcodeLabelPrintOptions, BarcodeLabelPrintResult } from './types';
 
 function downloadTextFile(fileName: string, content: string, mimeType: string) {
@@ -115,15 +115,13 @@ export function usePurchaseInvoiceBarcodeLabels(repository: PurchaseInvoiceRepos
 
   const handlePrint = useCallback(() => {
     if (!previewHtml) return;
-    const win = openBarcodeLabelsPrintWindow(previewHtml, previewTitle);
-    if (!win) {
-      window.alert('Pop-up blocked. Allow pop-ups to print labels.');
-      return;
-    }
-    win.addEventListener('load', () => {
-      win.focus();
-      win.print();
+    const outcome = openHtmlPrintPreview(previewHtml, {
+      title: previewTitle,
+      autoPrint: true,
     });
+    if (!outcome.ok) {
+      window.alert(outcome.message || 'Print failed.');
+    }
   }, [previewHtml, previewTitle]);
 
   const handleDownload = useCallback(() => {

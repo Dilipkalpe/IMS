@@ -33,10 +33,6 @@ export function useSalesListRowPrint<TRow extends SalesListPrintRow, TRecord>({
     async (row: TRow) => {
       if (!repository) return;
       const previewWin = openDeferredPrintWindow();
-      if (!previewWin) {
-        setStatusMessage('Popup blocked — allow popups for print preview.');
-        return;
-      }
       setStatusMessage(`Loading ${row.billNo} for print…`);
       try {
         const record = await loadRecord(row);
@@ -47,10 +43,10 @@ export function useSalesListRowPrint<TRow extends SalesListPrintRow, TRecord>({
         });
         setStatusMessage(outcome.message ?? `Print preview: ${row.billNo}`);
         if (!outcome.ok) {
-          previewWin.close();
+          previewWin?.close();
         }
       } catch (err) {
-        previewWin.close();
+        previewWin?.close();
         setStatusMessage(err instanceof Error ? err.message : 'Print failed.');
       }
     },
