@@ -69,11 +69,19 @@ function lockBodyScroll(): void {
 
 function unlockBodyScroll(): void {
   document.body.classList.remove(BODY_LOCK_CLASS);
+  document.body.style.removeProperty('overflow');
 }
 
 function removePrintOverlay(): void {
   document.getElementById(OVERLAY_ID)?.remove();
   unlockBodyScroll();
+}
+
+/** Clear stale body lock when overlay is gone (e.g. navigation, hot reload). */
+export function reconcilePrintPreviewBodyLock(): void {
+  if (!document.getElementById(OVERLAY_ID)) {
+    unlockBodyScroll();
+  }
 }
 
 function writeHtmlToIframe(iframe: HTMLIFrameElement, html: string): boolean {

@@ -1,5 +1,21 @@
+@import '../styles/breakpoints';
+
 body.ims-print-preview-active {
   overflow: hidden;
+  touch-action: none;
+}
+
+@include bp-down(lg) {
+  .ims-print-preview-overlay {
+    padding: 12px;
+    align-items: flex-end;
+  }
+
+  .ims-print-preview-panel {
+    width: 100%;
+    max-height: calc(100dvh - 24px);
+    border-radius: 12px 12px 0 0;
+  }
 }
 
 .ims-print-preview-overlay {

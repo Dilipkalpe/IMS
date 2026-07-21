@@ -117,6 +117,21 @@
 }
 
 @include bp-down(lg) {
+  .procurement-hub {
+    height: auto;
+    min-height: 0;
+    flex: none;
+    overflow: visible;
+  }
+
+  .procurement-hub__content,
+  .procurement-hub__panel {
+    height: auto;
+    min-height: 0;
+    flex: none;
+    overflow: visible;
+  }
+
   .procurement-hub__tabbar {
     padding: 8px 10px;
     gap: 8px;

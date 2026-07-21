@@ -51,9 +51,18 @@
   .wpf-root,
   .refined-screen-shell,
   .transaction-entry-shell,
-  .transaction-entry-shell__content {
+  .transaction-entry-shell__content,
+  .transaction-entry-shell__frame {
     max-width: 100%;
     overflow-x: hidden;
+  }
+
+  .transaction-entry-shell,
+  .transaction-entry-shell__content,
+  .transaction-entry-shell__frame {
+    overflow-y: visible;
+    height: auto;
+    min-height: 0;
   }
 
   .wpf-action-button,

@@ -155,6 +155,30 @@
     flex-wrap: wrap;
     width: 100%;
   }
+
+  .si-list-table-scroll {
+    overflow: visible;
+    flex: none;
+    height: auto;
+    min-height: 0;
+  }
+
+  .si-list-grid-wrap,
+  .fv-list__grid-wrap {
+    .corporate-data-grid {
+      overflow: visible;
+      flex: none;
+    }
+  }
+}
+
+@include bp-down(md) {
+  .transaction-list-screen .transaction-entry-shell,
+  .transaction-list-screen .transaction-entry-shell__content {
+    overflow: visible;
+    height: auto;
+    min-height: 0;
+  }
 }
 
 @include bp-down(sm) {

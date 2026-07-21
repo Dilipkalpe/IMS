@@ -55,24 +55,28 @@
   max-width: none;
 }
 
-.wo-entry--viewport {
-  flex: 1;
-  min-height: 0;
-  height: 100%;
-  overflow: hidden;
-}
-
-.work-order-entry-screen {
-  .transaction-entry-shell,
-  .transaction-entry-shell__frame,
-  .transaction-entry-shell__content {
+@include bp-up(lg) {
+  .wo-entry--viewport {
+    flex: 1;
     min-height: 0;
-  }
-
-  .transaction-entry-shell__content {
+    height: 100%;
     overflow: hidden;
   }
 
+  .work-order-entry-screen {
+    .transaction-entry-shell,
+    .transaction-entry-shell__frame,
+    .transaction-entry-shell__content {
+      min-height: 0;
+    }
+
+    .transaction-entry-shell__content {
+      overflow: hidden;
+    }
+  }
+}
+
+.work-order-entry-screen {
   .erp-form-section {
     padding: 8px 12px;
     margin: 0 0 0 0;
@@ -360,17 +364,20 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .wo-entry--viewport {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
   .work-order-entry-screen {
     .transaction-entry-shell,
+    .transaction-entry-shell__frame,
     .transaction-entry-shell__content {
       overflow: visible;
       height: auto;
+      min-height: 0;
     }
-  }
-
-  .wo-entry--viewport {
-    height: auto;
-    overflow: visible;
   }
 
   .wo-entry__grids {

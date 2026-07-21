@@ -6,8 +6,10 @@ import { AppErrorBoundary } from './components/AppErrorBoundary';
 import { ThemeProvider } from './theme/ThemeProvider';
 import { initializeTheme } from './theme/themeService';
 import './styles/global.scss';
+import { reconcilePrintPreviewBodyLock } from './utils/printPreview';
 
 initializeTheme();
+reconcilePrintPreviewBodyLock();
 
 window.addEventListener('unhandledrejection', (event) => {
   console.error('IMS unhandled rejection:', event.reason);

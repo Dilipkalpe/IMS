@@ -425,12 +425,15 @@
     height: auto;
     min-height: 100dvh;
     max-height: none;
+    overflow: visible;
   }
 
   .main-window__content {
     max-height: none;
     min-height: 0;
     height: auto;
+    overflow: visible;
+    grid-template-rows: auto minmax(0, auto);
   }
 
   .main-window__content-host {
@@ -439,6 +442,16 @@
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
     touch-action: pan-y;
+    flex: none;
+    height: auto;
+    min-height: 0;
+
+    > * {
+      flex: none;
+      min-height: auto;
+      height: auto;
+      overflow: visible;
+    }
   }
 
   .main-window__backdrop {

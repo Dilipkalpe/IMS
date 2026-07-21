@@ -60,6 +60,21 @@
 }
 
 @include bp-down(lg) {
+  .sales-hub {
+    height: auto;
+    min-height: 0;
+    flex: none;
+    overflow: visible;
+  }
+
+  .sales-hub__content,
+  .sales-hub__panel {
+    height: auto;
+    min-height: 0;
+    flex: none;
+    overflow: visible;
+  }
+
   .sales-hub__tabbar {
     padding: 8px 10px;
     gap: 8px;
