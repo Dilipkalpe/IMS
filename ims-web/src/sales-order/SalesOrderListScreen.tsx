@@ -11,13 +11,16 @@ import { useListNewShortcut } from '../components/transaction/useListNewShortcut
 import { TransactionListPagination } from '../components/transaction/TransactionListPagination';
 import { SALES_MODULE_CONFIG } from '../components/transaction/salesModuleConfig';
 import { createListActionColumn, useListRowSelection } from '../components/transaction/transactionListCrud';
-import { ListExportMenu } from '../components/transaction/ListExportMenu';
 import { useListExportActions } from '../components/transaction/useListExportActions';
 import { useProtectedSalesListActions } from '../components/transaction/useProtectedSalesListActions';
 import { useTransactionListLoader } from '../components/transaction/useTransactionListLoader';
-import { ListStatsRow } from '../components/transaction/ListStatsRow';
-import { listStat } from '../components/transaction/listStatBuilders';
+import { StatusTabBar } from '../components/transaction/StatusTabBar';
+import {
+  buildSalesOrderStatusTabs,
+  SALES_ORDER_EXTRA_STATUS_FILTERS,
+} from '../components/transaction/salesStatusTabConfigs';
 import { useListStats } from '../components/transaction/useListStats';
+import { ListMoreMenu } from '../components/transaction/ListMoreMenu';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { FormKeyboardScope } from '../keyboard/FormKeyboardScope';
 import { FIELD_FOCUS_KEY } from '../keyboard/formKeyboardNavigation';
@@ -37,8 +40,8 @@ import {
   useSalesOrderListVersion,
   useSalesOrderRepositoryOptional,
 } from './repository/SalesOrderRepositoryContext';
-import { SALES_ORDER_STATUS_FILTERS } from './mockData';
 import { parseFormattedSoNo } from './soDocumentNo';
+import type { SalesOrderListStats } from './repository/types';
 import type { SalesOrderListRow } from './types';
 import type { SalesOrderRecord } from './repository/types';
 
@@ -50,7 +53,16 @@ export function SalesOrderListScreen() {
   const repoCtx = useSalesOrderRepositoryOptional();
   const repository = repoCtx?.repository;
   const listVersion = useSalesOrderListVersion();
-  const [stats, setStats] = useState({ open: 0, toShip: 0, shipped: 0, cancelled: 0 });
+  const [stats, setStats] = useState<SalesOrderListStats>({
+    total: 0,
+    draft: 0,
+    open: 0,
+    confirmed: 0,
+    picking: 0,
+    shipped: 0,
+    cancelled: 0,
+  });
+  const [extraStatusFilter, setExtraStatusFilter] = useState('');
 
   const mapRows = useCallback(
     (items: unknown[], mode: 'http' | 'local') =>
@@ -71,13 +83,8 @@ export function SalesOrderListScreen() {
     supportsColumnFilters: true,
   });
 
-  const onStats = useCallback((listStats: Awaited<ReturnType<NonNullable<typeof repository>['fetchStats']>>) => {
-    setStats({
-      open: listStats.open,
-      toShip: listStats.toShip ?? listStats.confirmed + listStats.draft,
-      shipped: listStats.shipped ?? 0,
-      cancelled: listStats.cancelled ?? 0,
-    });
+  const onStats = useCallback((listStats: SalesOrderListStats) => {
+    setStats(listStats);
   }, []);
 
   useListStats(repository, listVersion, onStats);
@@ -189,60 +196,75 @@ export function SalesOrderListScreen() {
 
   useListNewShortcut(canAdd, () => void openWorkspace());
 
+  const statusTabs = useMemo(() => buildSalesOrderStatusTabs(stats), [stats]);
+
+  const handleStatusTabSelect = useCallback(
+    (filterValue: string) => {
+      setExtraStatusFilter('');
+      list.setStatusFilter(filterValue);
+    },
+    [list],
+  );
+
+  const handleExtraStatusChange = useCallback(
+    (value: string) => {
+      setExtraStatusFilter(value);
+      if (value) list.setStatusFilter(value);
+    },
+    [list],
+  );
+
+  const handleClearFilters = useCallback(() => {
+    setExtraStatusFilter('');
+    list.clearFilters();
+  }, [list]);
+
   return (
-    <RefinedScreenShell className="sales-invoice-list-screen">
+    <RefinedScreenShell className="sales-invoice-list-screen transaction-list-screen">
       <TransactionEntryShell title="Sales Orders">
         <FormKeyboardScope className="si-list-layout" autoFocusFieldKey="list-search">
-          <ListStatsRow
-            stats={[
-              listStat('Open Orders', stats.open, 'open'),
-              listStat('To Ship', stats.toShip, 'toShip'),
-              listStat('Shipped', stats.shipped, 'shipped'),
-              listStat('Cancelled', stats.cancelled, 'cancelled'),
-            ]}
+          <StatusTabBar
+            tabs={statusTabs}
+            activeFilter={list.statusFilter}
+            onTabSelect={handleStatusTabSelect}
           />
           <div className="si-list-toolbar">
             <div className="si-list-toolbar__row">
+              <select
+                className="wpf-form-combo si-list-toolbar__filter-pick"
+                value={extraStatusFilter}
+                onChange={(e) => handleExtraStatusChange(e.target.value)}
+                aria-label="Additional filters"
+              >
+                <option value="">-- Filters --</option>
+                {SALES_ORDER_EXTRA_STATUS_FILTERS.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+              <input
+                className="wpf-form-input si-list-toolbar__search"
+                {...{ [FIELD_FOCUS_KEY]: 'list-search' }}
+                placeholder="Enter Filter Value"
+                value={list.searchInput}
+                onChange={(e) => list.setSearchInput(e.target.value)}
+              />
               <button
                 type="button"
-                className="wpf-action-button"
+                className="wpf-action-button si-list-toolbar__add-new"
                 {...{ [FIELD_FOCUS_KEY]: 'list-new' }}
                 title="New order (Ctrl+N)"
                 onClick={() => void openWorkspace()}
                 disabled={!canAdd}
               >
-                New
+                + Add New
               </button>
-              <input
-                className="wpf-form-input si-list-toolbar__search"
-                {...{ [FIELD_FOCUS_KEY]: 'list-search' }}
-                placeholder="Search order no, customer…"
-                value={list.searchInput}
-                onChange={(e) => list.setSearchInput(e.target.value)}
-              />
-              <select
-                className="wpf-form-combo si-list-toolbar__filter"
-                value={list.statusFilter}
-                onChange={(e) => list.setStatusFilter(e.target.value)}
-              >
-                {SALES_ORDER_STATUS_FILTERS.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-              <button type="button" className="wpf-action-button" onClick={() => void list.reload()} disabled={list.loading}>
-                Refresh
-              </button>
-              <button
-                type="button"
-                className="wpf-action-button"
-                onClick={list.clearFilters}
-                disabled={!list.hasActiveFilters}
-              >
-                Clear filters
-              </button>
-              <ListExportMenu
-                disabled={listExport.exportDisabled}
-                busy={listExport.exporting}
+              <ListMoreMenu
+                disabled={list.loading}
+                exportBusy={listExport.exporting}
+                exportDisabled={listExport.exportDisabled}
+                canClearFilters={list.hasActiveFilters}
+                onRefresh={() => void list.reload()}
+                onClearFilters={handleClearFilters}
                 onExport={(format) => void listExport.runExport(format)}
               />
             </div>

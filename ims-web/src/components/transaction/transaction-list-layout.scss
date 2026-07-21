@@ -34,6 +34,29 @@
   flex: 0 1 140px;
 }
 
+.si-list-toolbar__filter-pick {
+  width: min(140px, 100%);
+  min-width: 120px;
+  min-height: 32px;
+  flex: 0 0 auto;
+}
+
+.si-list-toolbar__add-new {
+  background: #dc2626;
+  border-color: #b91c1c;
+  color: #fff;
+  font-weight: 600;
+
+  &:hover:not(:disabled) {
+    background: #b91c1c;
+    border-color: #991b1b;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+  }
+}
+
 .si-list-toolbar__row {
   .wpf-action-button,
   .wpf-secondary-button {

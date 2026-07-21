@@ -18,13 +18,13 @@ import {
   useDocumentListDelete,
   useListRowSelection,
 } from '../components/transaction/transactionListCrud';
-import { ListExportMenu } from '../components/transaction/ListExportMenu';
 import { useListExportActions } from '../components/transaction/useListExportActions';
 import { useProtectedSalesListActions } from '../components/transaction/useProtectedSalesListActions';
 import { useTransactionListLoader } from '../components/transaction/useTransactionListLoader';
-import { ListStatsRow } from '../components/transaction/ListStatsRow';
-import { buildDataSourceStat, listStat } from '../components/transaction/listStatBuilders';
+import { StatusTabBar } from '../components/transaction/StatusTabBar';
+import { buildSalesInvoiceStatusTabs } from '../components/transaction/salesStatusTabConfigs';
 import { useListStats } from '../components/transaction/useListStats';
+import { ListMoreMenu } from '../components/transaction/ListMoreMenu';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { mapSalesInvoiceToPrintableDocument } from '../document/mappers/salesInvoicePrintMapper';
 import {
@@ -43,7 +43,7 @@ import {
   useSalesInvoiceRepositoryOptional,
 } from './repository/SalesInvoiceRepositoryContext';
 import type { SalesInvoiceListRow } from './types';
-import type { SalesInvoiceRecord } from './repository/types';
+import type { SalesInvoiceListStats, SalesInvoiceRecord } from './repository/types';
 import './sales-invoice.scss';
 
 export function SalesInvoiceListScreen() {
@@ -52,7 +52,7 @@ export function SalesInvoiceListScreen() {
   const repoCtx = useSalesInvoiceRepositoryOptional();
   const repository = repoCtx?.repository;
   const listVersion = useSalesInvoiceListVersion();
-  const [stats, setStats] = useState({ total: 0, draft: 0, posted: 0 });
+  const [stats, setStats] = useState<SalesInvoiceListStats>({ total: 0, draft: 0, posted: 0 });
   const toSortField = useNumberedSalesSortField('invoiceDate');
 
   const mapRows = useCallback(
@@ -74,12 +74,8 @@ export function SalesInvoiceListScreen() {
     docLabelPlural: 'invoice(s)',
   });
 
-  const onStats = useCallback((listStats: Awaited<ReturnType<NonNullable<typeof repository>['fetchStats']>>) => {
-    setStats({
-      total: listStats.total,
-      draft: listStats.draft,
-      posted: listStats.posted,
-    });
+  const onStats = useCallback((listStats: SalesInvoiceListStats) => {
+    setStats(listStats);
   }, []);
 
   useListStats(repository, listVersion, onStats);
@@ -172,30 +168,52 @@ export function SalesInvoiceListScreen() {
 
   useListNewShortcut(canAdd, () => void openWorkspace());
 
+  const statusTabs = useMemo(() => buildSalesInvoiceStatusTabs(stats), [stats]);
+
+  const handleStatusTabSelect = useCallback(
+    (filterValue: string) => {
+      list.setStatusFilter(filterValue);
+    },
+    [list],
+  );
+
   return (
-    <RefinedScreenShell className="sales-invoice-list-screen">
+    <RefinedScreenShell className="sales-invoice-list-screen transaction-list-screen">
       <TransactionEntryShell title="Sales Invoice">
         <FormKeyboardScope className="si-list-layout" autoFocusFieldKey="list-search">
-          <ListStatsRow
-            stats={[
-              listStat('Total invoices', stats.total, 'total'),
-              listStat('Posted', stats.posted, 'posted'),
-              listStat('Draft', stats.draft, 'draft'),
-              buildDataSourceStat(repoCtx?.mode),
-            ]}
+          <StatusTabBar
+            tabs={statusTabs}
+            activeFilter={list.statusFilter}
+            onTabSelect={handleStatusTabSelect}
           />
 
           <div className="si-list-toolbar">
             <div className="si-list-toolbar__row">
+              <select
+                className="wpf-form-combo si-list-toolbar__filter-pick"
+                defaultValue=""
+                aria-label="Additional filters"
+                disabled
+              >
+                <option value="">-- Filters --</option>
+              </select>
+              <input
+                className="wpf-form-input si-list-toolbar__search"
+                {...{ [FIELD_FOCUS_KEY]: 'list-search' }}
+                placeholder="Enter Filter Value"
+                value={list.searchInput}
+                onChange={(e) => list.setSearchInput(e.target.value)}
+                aria-label="Search invoices"
+              />
               <button
                 type="button"
-                className="wpf-action-button"
+                className="wpf-action-button si-list-toolbar__add-new"
                 {...{ [FIELD_FOCUS_KEY]: 'list-new' }}
                 title="New invoice (Ctrl+N)"
                 onClick={() => void openWorkspace()}
                 disabled={!canAdd}
               >
-                New
+                + Add New
               </button>
               <button
                 type="button"
@@ -213,33 +231,13 @@ export function SalesInvoiceListScreen() {
               >
                 Delete
               </button>
-              <input
-                className="wpf-form-input si-list-toolbar__search"
-                {...{ [FIELD_FOCUS_KEY]: 'list-search' }}
-                placeholder="Search bill no, customer…"
-                value={list.searchInput}
-                onChange={(e) => list.setSearchInput(e.target.value)}
-                aria-label="Search invoices"
-              />
-              <select
-                className="wpf-form-combo si-list-toolbar__filter"
-                value={list.statusFilter}
-                onChange={(e) => list.setStatusFilter(e.target.value)}
-                aria-label="Status filter"
-              >
-                {['All', 'Posted', 'Draft'].map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-              <button type="button" className="wpf-action-button" onClick={() => void list.reload()} disabled={list.loading}>
-                Refresh
-              </button>
-              <button type="button" className="wpf-action-button" onClick={list.clearFilters} disabled={!list.hasActiveFilters}>
-                Clear filters
-              </button>
-              <ListExportMenu
-                disabled={listExport.exportDisabled}
-                busy={listExport.exporting}
+              <ListMoreMenu
+                disabled={list.loading}
+                exportBusy={listExport.exporting}
+                exportDisabled={listExport.exportDisabled}
+                canClearFilters={list.hasActiveFilters}
+                onRefresh={() => void list.reload()}
+                onClearFilters={list.clearFilters}
                 onExport={(format) => void listExport.runExport(format)}
               />
             </div>

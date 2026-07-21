@@ -80,6 +80,7 @@ export class HttpSalesOrderRepository implements SalesOrderRepository {
       draft: stats.draft,
       open: stats.open,
       confirmed: stats.confirmed,
+      picking: stats.picking,
       toShip: stats.toShip,
       shipped: stats.shipped,
       cancelled: stats.cancelled,
