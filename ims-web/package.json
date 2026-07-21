@@ -11,7 +11,8 @@
     "generate:ui": "node ../tools/generate-wpf-react-ui.mjs",
     "grid:perf": "node ../tools/grid-perf-benchmark.mjs",
     "test:gst": "vitest run src/sales-invoice/calculations.gst.test.ts",
-    "test:finance": "vitest run src/finance/paymentAllocation.test.ts src/sales-invoice/invoicePayment.test.ts"
+    "test:finance": "vitest run src/finance/paymentAllocation.test.ts src/sales-invoice/invoicePayment.test.ts",
+    "generate:test-cases": "node scripts/generate-test-cases-xlsx.mjs"
   },
   "dependencies": {
     "jsbarcode": "^3.12.3",
@@ -25,6 +26,7 @@
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.5.2",
+    "exceljs": "^4.4.0",
     "sass": "^1.89.2",
     "typescript": "~5.8.3",
     "vite": "^6.3.5",
