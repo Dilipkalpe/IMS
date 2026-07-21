@@ -1,20 +1,24 @@
 @import '../styles/breakpoints';
 
-body.ims-print-preview-active {
-  overflow: hidden;
-  touch-action: none;
+// Desktop only — mobile uses full-screen overlay without body lock (print() can leave touch-action stuck).
+@media (min-width: 1024px) {
+  body.ims-print-preview-active {
+    overflow: hidden;
+    touch-action: none;
+  }
 }
 
 @include bp-down(lg) {
   .ims-print-preview-overlay {
-    padding: 12px;
-    align-items: flex-end;
+    padding: 0;
+    align-items: stretch;
+    touch-action: pan-y;
   }
 
   .ims-print-preview-panel {
     width: 100%;
-    max-height: calc(100dvh - 24px);
-    border-radius: 12px 12px 0 0;
+    max-height: 100dvh;
+    border-radius: 0;
   }
 }
 

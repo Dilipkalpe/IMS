@@ -6,6 +6,8 @@ export const PRINT_WINDOW_FEATURES = 'noopener,noreferrer,width=900,height=700';
 
 const OVERLAY_ID = 'ims-print-preview-overlay';
 const BODY_LOCK_CLASS = 'ims-print-preview-active';
+const HISTORY_STATE_KEY = 'imsPrintPreview';
+const MOBILE_PRINT_MQ = '(max-width: 1023px)';
 
 /** Popups are unreliable on plain HTTP — use the in-page iframe overlay instead. */
 export function preferInPagePrintPreview(): boolean {
@@ -28,6 +30,12 @@ export interface PrintPreviewOutcome {
   window?: Window | null;
   usedFallback?: boolean;
 }
+
+let savedScrollY = 0;
+let historyPushed = false;
+let keyDownHandler: ((event: KeyboardEvent) => void) | null = null;
+let popStateHandler: (() => void) | null = null;
+let afterPrintHandler: (() => void) | null = null;
 
 /** Open during a user click so async loads can still show print preview (avoids popup blockers). */
 export function openDeferredPrintWindow(): Window | null {
@@ -63,24 +71,77 @@ function triggerWindowPrint(win: Window): void {
   }, 250);
 }
 
+function isMobilePrintViewport(): boolean {
+  return typeof window !== 'undefined' && window.matchMedia(MOBILE_PRINT_MQ).matches;
+}
+
+function clearScrollLockStyles(): void {
+  const { documentElement: html, body } = document;
+  for (const el of [html, body]) {
+    el.style.removeProperty('overflow');
+    el.style.removeProperty('touch-action');
+    el.style.removeProperty('position');
+    el.style.removeProperty('top');
+    el.style.removeProperty('width');
+    el.style.removeProperty('height');
+  }
+}
+
 function lockBodyScroll(): void {
+  // Full-screen overlay already blocks background interaction on mobile; body lock
+  // (especially touch-action: none) can stick after iframe.print() on iOS/Android.
+  if (isMobilePrintViewport()) return;
+
+  savedScrollY = window.scrollY;
   document.body.classList.add(BODY_LOCK_CLASS);
 }
 
 function unlockBodyScroll(): void {
   document.body.classList.remove(BODY_LOCK_CLASS);
-  document.body.style.removeProperty('overflow');
+  clearScrollLockStyles();
+  if (savedScrollY > 0) {
+    window.scrollTo(0, savedScrollY);
+    savedScrollY = 0;
+  }
 }
 
-function removePrintOverlay(): void {
+function detachOverlayListeners(): void {
+  if (keyDownHandler) {
+    document.removeEventListener('keydown', keyDownHandler);
+    keyDownHandler = null;
+  }
+  if (popStateHandler) {
+    window.removeEventListener('popstate', popStateHandler);
+    popStateHandler = null;
+  }
+  if (afterPrintHandler) {
+    window.removeEventListener('afterprint', afterPrintHandler);
+    afterPrintHandler = null;
+  }
+}
+
+/** Close overlay, restore scroll, and remove all print-preview listeners. */
+export function closePrintPreview(fromPopState = false): void {
   document.getElementById(OVERLAY_ID)?.remove();
+
+  const shouldHistoryBack =
+    !fromPopState && historyPushed && Boolean(history.state?.[HISTORY_STATE_KEY]);
+  historyPushed = false;
+
+  detachOverlayListeners();
   unlockBodyScroll();
+
+  if (shouldHistoryBack) {
+    history.back();
+  }
 }
 
 /** Clear stale body lock when overlay is gone (e.g. navigation, hot reload). */
 export function reconcilePrintPreviewBodyLock(): void {
   if (!document.getElementById(OVERLAY_ID)) {
+    detachOverlayListeners();
     unlockBodyScroll();
+    historyPushed = false;
   }
 }
 
@@ -98,17 +159,54 @@ function writeHtmlToIframe(iframe: HTMLIFrameElement, html: string): boolean {
   }
 }
 
-function attachOverlayCloseHandlers(overlay: HTMLElement, onClose: () => void): void {
-  const onKeyDown = (event: KeyboardEvent) => {
+function pushPrintPreviewHistory(): void {
+  try {
+    history.pushState({ [HISTORY_STATE_KEY]: true }, '');
+    historyPushed = true;
+  } catch {
+    historyPushed = false;
+  }
+}
+
+function attachOverlayCloseHandlers(overlay: HTMLElement): void {
+  keyDownHandler = (event: KeyboardEvent) => {
     if (event.key === 'Escape') {
-      onClose();
-      document.removeEventListener('keydown', onKeyDown);
+      closePrintPreview();
     }
   };
-  document.addEventListener('keydown', onKeyDown);
+  document.addEventListener('keydown', keyDownHandler);
+
+  popStateHandler = () => {
+    if (document.getElementById(OVERLAY_ID)) {
+      closePrintPreview(true);
+    }
+  };
+  window.addEventListener('popstate', popStateHandler);
+
   overlay.addEventListener('click', (event) => {
-    if (event.target === overlay) onClose();
+    if (event.target === overlay) closePrintPreview();
   });
+}
+
+function attachAfterPrintCleanup(iframe: HTMLIFrameElement): void {
+  const iframeWindow = iframe.contentWindow;
+  if (!iframeWindow) return;
+
+  const onAfterPrint = () => {
+    iframeWindow.removeEventListener('afterprint', onAfterPrint);
+    if (afterPrintHandler) {
+      window.removeEventListener('afterprint', afterPrintHandler);
+      afterPrintHandler = null;
+    }
+    unlockBodyScroll();
+    if (isMobilePrintViewport()) {
+      closePrintPreview();
+    }
+  };
+
+  afterPrintHandler = onAfterPrint;
+  iframeWindow.addEventListener('afterprint', onAfterPrint);
+  window.addEventListener('afterprint', onAfterPrint);
 }
 
 function createPrintOverlayFrame(options?: { title?: string }): {
@@ -152,20 +250,21 @@ function createPrintOverlayFrame(options?: { title?: string }): {
   panel.append(toolbar, iframe);
   overlay.append(panel);
 
-  closeBtn.addEventListener('click', () => removePrintOverlay());
+  closeBtn.addEventListener('click', () => closePrintPreview());
 
   return { overlay, iframe, printBtn };
 }
 
 function openPrintPreviewInOverlay(html: string, options?: OpenPrintPreviewOptions): PrintPreviewOutcome {
-  removePrintOverlay();
+  closePrintPreview();
   lockBodyScroll();
 
   const { overlay, iframe, printBtn } = createPrintOverlayFrame(options);
   document.body.append(overlay);
+  pushPrintPreviewHistory();
 
   if (!writeHtmlToIframe(iframe, html)) {
-    removePrintOverlay();
+    closePrintPreview();
     return {
       ok: false,
       message: 'Could not open print preview. Try again or use Export/Download.',
@@ -173,10 +272,10 @@ function openPrintPreviewInOverlay(html: string, options?: OpenPrintPreviewOptio
     };
   }
 
-  const close = () => removePrintOverlay();
-  attachOverlayCloseHandlers(overlay, close);
+  attachOverlayCloseHandlers(overlay);
 
   printBtn.addEventListener('click', () => {
+    attachAfterPrintCleanup(iframe);
     try {
       iframe.contentWindow?.focus();
       iframe.contentWindow?.print();
