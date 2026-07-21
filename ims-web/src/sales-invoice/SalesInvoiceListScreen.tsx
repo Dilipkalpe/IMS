@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useListNewShortcut } from '../components/transaction/useListNewShortcut';
 import { CorporateDataGrid, buildGridTemplateColumns, type DataGridColumn } from '../components/datagrid/CorporateDataGrid';
 import { ListGridArea } from '../components/loading';
@@ -22,9 +22,6 @@ import { ListExportMenu } from '../components/transaction/ListExportMenu';
 import { useListExportActions } from '../components/transaction/useListExportActions';
 import { useProtectedSalesListActions } from '../components/transaction/useProtectedSalesListActions';
 import { useTransactionListLoader } from '../components/transaction/useTransactionListLoader';
-import { ListStatsRow } from '../components/transaction/ListStatsRow';
-import { buildDataSourceStat, listStat } from '../components/transaction/listStatBuilders';
-import { useListStats } from '../components/transaction/useListStats';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { mapSalesInvoiceToPrintableDocument } from '../document/mappers/salesInvoicePrintMapper';
 import {
@@ -52,7 +49,6 @@ export function SalesInvoiceListScreen() {
   const repoCtx = useSalesInvoiceRepositoryOptional();
   const repository = repoCtx?.repository;
   const listVersion = useSalesInvoiceListVersion();
-  const [stats, setStats] = useState({ total: 0, draft: 0, posted: 0 });
   const toSortField = useNumberedSalesSortField('invoiceDate');
 
   const mapRows = useCallback(
@@ -73,16 +69,6 @@ export function SalesInvoiceListScreen() {
     supportsColumnFilters: true,
     docLabelPlural: 'invoice(s)',
   });
-
-  const onStats = useCallback((listStats: Awaited<ReturnType<NonNullable<typeof repository>['fetchStats']>>) => {
-    setStats({
-      total: listStats.total,
-      draft: listStats.draft,
-      posted: listStats.posted,
-    });
-  }, []);
-
-  useListStats(repository, listVersion, onStats);
 
   const { selectedId, setSelectedId, selectedRow } = useListRowSelection(list.rows);
 
@@ -176,15 +162,6 @@ export function SalesInvoiceListScreen() {
     <RefinedScreenShell className="sales-invoice-list-screen">
       <TransactionEntryShell title="Sales Invoice">
         <FormKeyboardScope className="si-list-layout" autoFocusFieldKey="list-search">
-          <ListStatsRow
-            stats={[
-              listStat('Total invoices', stats.total, 'total'),
-              listStat('Posted', stats.posted, 'posted'),
-              listStat('Draft', stats.draft, 'draft'),
-              buildDataSourceStat(repoCtx?.mode),
-            ]}
-          />
-
           <div className="si-list-toolbar">
             <div className="si-list-toolbar__row">
               <button

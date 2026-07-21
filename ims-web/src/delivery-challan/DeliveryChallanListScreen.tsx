@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { CorporateDataGrid, buildGridTemplateColumns, type DataGridColumn } from '../components/datagrid/CorporateDataGrid';
 import { ListGridArea } from '../components/loading';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
@@ -15,9 +15,6 @@ import { useListExportActions } from '../components/transaction/useListExportAct
 import { useListNewShortcut } from '../components/transaction/useListNewShortcut';
 import { useProtectedSalesListActions } from '../components/transaction/useProtectedSalesListActions';
 import { useTransactionListLoader } from '../components/transaction/useTransactionListLoader';
-import { ListStatsRow } from '../components/transaction/ListStatsRow';
-import { buildDataSourceStat, listStat } from '../components/transaction/listStatBuilders';
-import { useListStats } from '../components/transaction/useListStats';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { mapDeliveryChallanToPrintableDocument } from '../document/mappers/deliveryChallanPrintMapper';
 import {
@@ -44,7 +41,6 @@ export function DeliveryChallanListScreen() {
   const repoCtx = useDeliveryChallanRepositoryOptional();
   const repository = repoCtx?.repository;
   const listVersion = useDeliveryChallanListVersion();
-  const [stats, setStats] = useState({ total: 0, draft: 0, open: 0, posted: 0 });
   const toSortField = useNumberedSalesSortField('dcDate');
 
   const mapRows = useCallback(
@@ -65,17 +61,6 @@ export function DeliveryChallanListScreen() {
     supportsColumnFilters: true,
     docLabelPlural: 'delivery challan(s)',
   });
-
-  const onStats = useCallback((listStats: Awaited<ReturnType<NonNullable<typeof repository>['fetchStats']>>) => {
-    setStats({
-      total: listStats.total,
-      draft: listStats.draft,
-      open: listStats.open,
-      posted: listStats.posted,
-    });
-  }, []);
-
-  useListStats(repository, listVersion, onStats);
 
   const { selectedId, setSelectedId, selectedRow } = useListRowSelection(list.rows);
 
@@ -171,14 +156,6 @@ export function DeliveryChallanListScreen() {
     <RefinedScreenShell className="sales-invoice-list-screen">
       <TransactionEntryShell title="Delivery Challan">
         <FormKeyboardScope className="si-list-layout" autoFocusFieldKey="list-search">
-          <ListStatsRow
-            stats={[
-              listStat('Total DCs', stats.total, 'total'),
-              listStat('Open', stats.open, 'open'),
-              listStat('Draft', stats.draft, 'draft'),
-              buildDataSourceStat(repoCtx?.mode),
-            ]}
-          />
           <div className="si-list-toolbar">
             <div className="si-list-toolbar__row">
               <button

@@ -26,13 +26,15 @@ export function SalesModuleCards({ tabs, activeTab, counts, onSelect }: SalesMod
               title={tab.description}
               onClick={() => onSelect(tab.key)}
             >
+              <span className="sales-module-cards__body">
+                <span className="sales-module-cards__count" aria-label={`${count} records`}>
+                  {count}
+                </span>
+                <span className="sales-module-cards__label">{tab.title}</span>
+              </span>
               <span className="icon-text sales-module-cards__icon" aria-hidden>
                 {tab.iconGlyph}
               </span>
-              <span className="sales-module-cards__count" aria-label={`${count} records`}>
-                {count}
-              </span>
-              <span className="sales-module-cards__label">{tab.title}</span>
             </button>
           );
         })}

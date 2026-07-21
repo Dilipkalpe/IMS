@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { CorporateDataGrid, buildGridTemplateColumns, type DataGridColumn } from '../components/datagrid/CorporateDataGrid';
 import { ListGridArea } from '../components/loading';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
@@ -15,9 +15,6 @@ import { ListExportMenu } from '../components/transaction/ListExportMenu';
 import { useListExportActions } from '../components/transaction/useListExportActions';
 import { useProtectedSalesListActions } from '../components/transaction/useProtectedSalesListActions';
 import { useTransactionListLoader } from '../components/transaction/useTransactionListLoader';
-import { ListStatsRow } from '../components/transaction/ListStatsRow';
-import { listStat } from '../components/transaction/listStatBuilders';
-import { useListStats } from '../components/transaction/useListStats';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { FormKeyboardScope } from '../keyboard/FormKeyboardScope';
 import { FIELD_FOCUS_KEY } from '../keyboard/formKeyboardNavigation';
@@ -50,7 +47,6 @@ export function SalesOrderListScreen() {
   const repoCtx = useSalesOrderRepositoryOptional();
   const repository = repoCtx?.repository;
   const listVersion = useSalesOrderListVersion();
-  const [stats, setStats] = useState({ open: 0, toShip: 0, shipped: 0, cancelled: 0 });
 
   const mapRows = useCallback(
     (items: unknown[], mode: 'http' | 'local') =>
@@ -70,17 +66,6 @@ export function SalesOrderListScreen() {
     docLabelPlural: 'sales order(s)',
     supportsColumnFilters: true,
   });
-
-  const onStats = useCallback((listStats: Awaited<ReturnType<NonNullable<typeof repository>['fetchStats']>>) => {
-    setStats({
-      open: listStats.open,
-      toShip: listStats.toShip ?? listStats.confirmed + listStats.draft,
-      shipped: listStats.shipped ?? 0,
-      cancelled: listStats.cancelled ?? 0,
-    });
-  }, []);
-
-  useListStats(repository, listVersion, onStats);
 
   const { selectedId, setSelectedId, selectedRow } = useListRowSelection(list.rows);
 
@@ -193,14 +178,6 @@ export function SalesOrderListScreen() {
     <RefinedScreenShell className="sales-invoice-list-screen">
       <TransactionEntryShell title="Sales Orders">
         <FormKeyboardScope className="si-list-layout" autoFocusFieldKey="list-search">
-          <ListStatsRow
-            stats={[
-              listStat('Open Orders', stats.open, 'open'),
-              listStat('To Ship', stats.toShip, 'toShip'),
-              listStat('Shipped', stats.shipped, 'shipped'),
-              listStat('Cancelled', stats.cancelled, 'cancelled'),
-            ]}
-          />
           <div className="si-list-toolbar">
             <div className="si-list-toolbar__row">
               <button
