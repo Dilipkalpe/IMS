@@ -51,7 +51,6 @@ export interface SalesOrderListStats {
   draft: number;
   open: number;
   confirmed: number;
-  picking?: number;
   toShip?: number;
   shipped?: number;
   cancelled?: number;

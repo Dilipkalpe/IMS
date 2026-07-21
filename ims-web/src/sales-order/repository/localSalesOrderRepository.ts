@@ -98,7 +98,6 @@ export class LocalSalesOrderRepository implements SalesOrderRepository {
       draft,
       open: docs.filter((d) => d.status === 'open').length,
       confirmed,
-      picking,
       toShip: confirmed + picking + draft,
       shipped: docs.filter((d) => d.status === 'shipped').length,
       cancelled: docs.filter((d) => d.status === 'cancelled').length,
