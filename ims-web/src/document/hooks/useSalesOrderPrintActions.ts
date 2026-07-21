@@ -3,6 +3,7 @@ import { mapSalesOrderToPrintableDocument } from '../mappers/salesOrderPrintMapp
 import type { SalesOrderUiSnapshot } from '../mappers/salesOrderPrintMapper';
 import { useDocumentPrintService } from '../context/DocumentPrintContext';
 import type { DocumentActionOutcome } from '../contracts/printExportRequests';
+import { runDocumentPrint } from '../utils/runDocumentPrint';
 
 export function useSalesOrderPrintActions() {
   const printService = useDocumentPrintService();
@@ -14,7 +15,7 @@ export function useSalesOrderPrintActions() {
   const print = useCallback(
     async (snapshot: SalesOrderUiSnapshot, showDialog = true): Promise<DocumentActionOutcome> => {
       const doc = toPrintable(snapshot);
-      return printService.print('sales_order', doc, { showDialog });
+      return runDocumentPrint(printService, 'sales_order', doc, { showDialog });
     },
     [printService, toPrintable],
   );

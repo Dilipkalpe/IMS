@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { mapSalesInvoiceToPrintableDocument } from '../mappers/salesInvoicePrintMapper';
 import { useDocumentPrintService } from '../context/DocumentPrintContext';
 import type { DocumentActionOutcome } from '../contracts/printExportRequests';
+import { runDocumentPrint, runDocumentPreview } from '../utils/runDocumentPrint';
 import type { SalesInvoiceUiSnapshot } from '../mappers/salesInvoicePrintMapper';
 
 export function useSalesInvoicePrintActions() {
@@ -14,7 +15,7 @@ export function useSalesInvoicePrintActions() {
   const print = useCallback(
     async (snapshot: SalesInvoiceUiSnapshot, showDialog = true): Promise<DocumentActionOutcome> => {
       const doc = toPrintable(snapshot);
-      return printService.print('sales_invoice', doc, { showDialog });
+      return runDocumentPrint(printService, 'sales_invoice', doc, { showDialog });
     },
     [printService, toPrintable],
   );
@@ -22,7 +23,7 @@ export function useSalesInvoicePrintActions() {
   const preview = useCallback(
     async (snapshot: SalesInvoiceUiSnapshot): Promise<DocumentActionOutcome> => {
       const doc = toPrintable(snapshot);
-      return printService.preview('sales_invoice', doc);
+      return runDocumentPreview(printService, 'sales_invoice', doc);
     },
     [printService, toPrintable],
   );

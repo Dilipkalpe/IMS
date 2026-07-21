@@ -1,6 +1,6 @@
 /** Client-side list/register export (WPF StandardListExportService parity). */
 
-import { openHtmlPrintPreview, type OpenPrintPreviewOptions } from '../../utils/printPreview';
+import { openHtmlPrintPreview, notifyPrintFailure, type OpenPrintPreviewOptions } from '../../utils/printPreview';
 
 export interface ListExportColumn {
   id: string;
@@ -140,6 +140,7 @@ export function openListPrintPreview(
   };
   const outcome = openHtmlPrintPreview(html, previewOptions);
   if (!outcome.ok) {
+    notifyPrintFailure(outcome.message);
     return outcome;
   }
   if (options?.autoPrint) {

@@ -1,5 +1,5 @@
 import { apiFetch } from './client';
-import { openDeferredPrintWindow, openUrlPrintPreview } from '../utils/printPreview';
+import { openDeferredPrintWindow, openUrlPrintPreviewAsync } from '../utils/printPreview';
 
 export interface PayslipReport {
   runNo?: number;
@@ -35,19 +35,18 @@ function buildPayslipHtmlUrl(input: {
   return `${base}/api/payroll-reports/payslip-html?${params}`;
 }
 
-/** Open payslip HTML synchronously on user click (before async validation). */
-export function openPayslipHtmlPreview(input: {
+/** Load payslip HTML (with auth) and open print preview. */
+export async function openPayslipHtmlPreview(input: {
   periodMonth: string;
   employeeCode: string;
   runNo?: number;
   targetWindow?: Window | null;
-}): { ok: boolean; message: string; window?: Window | null } {
+}): Promise<{ ok: boolean; message: string; window?: Window | null }> {
   const url = buildPayslipHtmlUrl(input);
-  const outcome = openUrlPrintPreview(url, {
+  return openUrlPrintPreviewAsync(url, {
     targetWindow: input.targetWindow,
     title: `Payslip ${input.employeeCode}`,
   });
-  return outcome;
 }
 
 export { openDeferredPrintWindow };

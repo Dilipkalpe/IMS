@@ -5,6 +5,7 @@ import {
 } from '../mappers/purchaseReturnPrintMapper';
 import { useDocumentPrintService } from '../context/DocumentPrintContext';
 import type { DocumentActionOutcome } from '../contracts/printExportRequests';
+import { runDocumentPrint } from '../utils/runDocumentPrint';
 
 export function usePurchaseReturnPrintActions() {
   const printService = useDocumentPrintService();
@@ -16,7 +17,7 @@ export function usePurchaseReturnPrintActions() {
   const print = useCallback(
     async (snapshot: PurchaseReturnUiSnapshot, showDialog = true): Promise<DocumentActionOutcome> => {
       const doc = toPrintable(snapshot);
-      return printService.print('purchase_return', doc, { showDialog });
+      return runDocumentPrint(printService, 'purchase_return', doc, { showDialog });
     },
     [printService, toPrintable],
   );

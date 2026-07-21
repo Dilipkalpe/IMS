@@ -19,7 +19,8 @@ function resolveTargetWindow(options?: { targetWindow?: Window | null }): Window
     const w = options.targetWindow;
     return w && !w.closed ? w : null;
   }
-  return openDeferredPrintWindow();
+  // Do not window.open here — async work breaks the user gesture. Preview opens in print provider.
+  return null;
 }
 
 export class DocumentPrintService {

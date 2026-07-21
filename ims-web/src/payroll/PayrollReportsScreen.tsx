@@ -121,7 +121,7 @@ export function PayrollReportsScreen() {
     setError(null);
     try {
       await fetchPayslipByPeriod(payslipInput);
-      const outcome = openPayslipHtmlPreview({
+      const outcome = await openPayslipHtmlPreview({
         ...payslipInput,
         targetWindow: previewWin ?? undefined,
       });

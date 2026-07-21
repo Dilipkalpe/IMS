@@ -1,8 +1,11 @@
 /** Browser print preview — in-page iframe on HTTP; popup tab on HTTPS with iframe fallback. */
 
+import { authHeaders } from '../api/authToken';
+
 export const PRINT_WINDOW_FEATURES = 'noopener,noreferrer,width=900,height=700';
 
 const OVERLAY_ID = 'ims-print-preview-overlay';
+const BODY_LOCK_CLASS = 'ims-print-preview-active';
 
 /** Popups are unreliable on plain HTTP — use the in-page iframe overlay instead. */
 export function preferInPagePrintPreview(): boolean {
@@ -60,17 +63,56 @@ function triggerWindowPrint(win: Window): void {
   }, 250);
 }
 
-function removePrintOverlay(): void {
-  document.getElementById(OVERLAY_ID)?.remove();
+function lockBodyScroll(): void {
+  document.body.classList.add(BODY_LOCK_CLASS);
 }
 
-function openPrintPreviewInOverlay(html: string, options?: OpenPrintPreviewOptions): PrintPreviewOutcome {
-  removePrintOverlay();
+function unlockBodyScroll(): void {
+  document.body.classList.remove(BODY_LOCK_CLASS);
+}
 
+function removePrintOverlay(): void {
+  document.getElementById(OVERLAY_ID)?.remove();
+  unlockBodyScroll();
+}
+
+function writeHtmlToIframe(iframe: HTMLIFrameElement, html: string): boolean {
+  try {
+    iframe.srcdoc = html;
+    return true;
+  } catch {
+    const doc = iframe.contentDocument ?? iframe.contentWindow?.document;
+    if (!doc) return false;
+    doc.open();
+    doc.write(html);
+    doc.close();
+    return true;
+  }
+}
+
+function attachOverlayCloseHandlers(overlay: HTMLElement, onClose: () => void): void {
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      onClose();
+      document.removeEventListener('keydown', onKeyDown);
+    }
+  };
+  document.addEventListener('keydown', onKeyDown);
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) onClose();
+  });
+}
+
+function createPrintOverlayFrame(options?: { title?: string }): {
+  overlay: HTMLDivElement;
+  iframe: HTMLIFrameElement;
+  printBtn: HTMLButtonElement;
+} {
   const overlay = document.createElement('div');
   overlay.id = OVERLAY_ID;
   overlay.className = 'ims-print-preview-overlay';
   overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
   overlay.setAttribute('aria-label', 'Print preview');
 
   const panel = document.createElement('div');
@@ -101,31 +143,42 @@ function openPrintPreviewInOverlay(html: string, options?: OpenPrintPreviewOptio
 
   panel.append(toolbar, iframe);
   overlay.append(panel);
+
+  closeBtn.addEventListener('click', () => removePrintOverlay());
+
+  return { overlay, iframe, printBtn };
+}
+
+function openPrintPreviewInOverlay(html: string, options?: OpenPrintPreviewOptions): PrintPreviewOutcome {
+  removePrintOverlay();
+  lockBodyScroll();
+
+  const { overlay, iframe, printBtn } = createPrintOverlayFrame(options);
   document.body.append(overlay);
 
-  const close = () => removePrintOverlay();
-  closeBtn.addEventListener('click', close);
-  overlay.addEventListener('click', (event) => {
-    if (event.target === overlay) close();
-  });
-
-  const doc = iframe.contentDocument ?? iframe.contentWindow?.document;
-  if (doc) {
-    doc.open();
-    doc.write(html);
-    doc.close();
+  if (!writeHtmlToIframe(iframe, html)) {
+    removePrintOverlay();
+    return {
+      ok: false,
+      message: 'Could not open print preview. Try again or use Export/Download.',
+      usedFallback: true,
+    };
   }
+
+  const close = () => removePrintOverlay();
+  attachOverlayCloseHandlers(overlay, close);
 
   printBtn.addEventListener('click', () => {
     try {
       iframe.contentWindow?.focus();
       iframe.contentWindow?.print();
     } catch {
-      /* ignore */
+      window.alert('Print failed. Use Ctrl+P while the preview is focused.');
     }
   });
 
-  if (options?.autoPrint) {
+  // Browsers block programmatic print in iframes without a fresh user gesture on HTTP.
+  if (options?.autoPrint && !preferInPagePrintPreview()) {
     setTimeout(() => {
       try {
         iframe.contentWindow?.print();
@@ -137,71 +190,44 @@ function openPrintPreviewInOverlay(html: string, options?: OpenPrintPreviewOptio
 
   return {
     ok: true,
-    message: 'Print preview opened — click Print or Ctrl+P.',
+    message: options?.autoPrint && preferInPagePrintPreview()
+      ? 'Print preview ready — click Print to send to the printer.'
+      : 'Print preview opened — click Print or Ctrl+P.',
     usedFallback: true,
   };
 }
 
-function openUrlInOverlay(url: string, options?: { title?: string }): PrintPreviewOutcome {
-  removePrintOverlay();
-
-  const overlay = document.createElement('div');
-  overlay.id = OVERLAY_ID;
-  overlay.className = 'ims-print-preview-overlay';
-  overlay.setAttribute('role', 'dialog');
-  overlay.setAttribute('aria-label', 'Print preview');
-
-  const panel = document.createElement('div');
-  panel.className = 'ims-print-preview-panel';
-
-  const toolbar = document.createElement('div');
-  toolbar.className = 'ims-print-preview-toolbar';
-
-  const titleEl = document.createElement('span');
-  titleEl.className = 'ims-print-preview-title';
-  titleEl.textContent = options?.title?.trim() || 'Print preview';
-
-  const printBtn = document.createElement('button');
-  printBtn.type = 'button';
-  printBtn.className = 'ims-print-preview-btn ims-print-preview-btn--primary';
-  printBtn.textContent = 'Print';
-
-  const closeBtn = document.createElement('button');
-  closeBtn.type = 'button';
-  closeBtn.className = 'ims-print-preview-btn';
-  closeBtn.textContent = 'Close';
-
-  toolbar.append(titleEl, printBtn, closeBtn);
-
-  const iframe = document.createElement('iframe');
-  iframe.className = 'ims-print-preview-frame';
-  iframe.title = options?.title?.trim() || 'Print preview';
-  iframe.src = url;
-
-  panel.append(toolbar, iframe);
-  overlay.append(panel);
-  document.body.append(overlay);
-
-  const close = () => removePrintOverlay();
-  closeBtn.addEventListener('click', close);
-  overlay.addEventListener('click', (event) => {
-    if (event.target === overlay) close();
-  });
-
-  printBtn.addEventListener('click', () => {
-    try {
-      iframe.contentWindow?.focus();
-      iframe.contentWindow?.print();
-    } catch {
-      /* ignore */
+async function fetchPrintHtml(url: string): Promise<{ ok: true; html: string } | { ok: false; message: string }> {
+  try {
+    const res = await fetch(url, {
+      headers: {
+        Accept: 'text/html,application/xhtml+xml',
+        ...authHeaders(),
+      },
+    });
+    if (!res.ok) {
+      let detail = res.statusText || `HTTP ${res.status}`;
+      try {
+        const body = await res.text();
+        if (body.trim()) detail = body.slice(0, 180);
+      } catch {
+        /* ignore */
+      }
+      return { ok: false, message: `Could not load print preview (${detail}).` };
     }
-  });
+    return { ok: true, html: await res.text() };
+  } catch (err) {
+    return {
+      ok: false,
+      message: err instanceof Error ? err.message : 'Could not load print preview.',
+    };
+  }
+}
 
-  return {
-    ok: true,
-    message: 'Print preview opened — click Print or Ctrl+P.',
-    usedFallback: true,
-  };
+async function openUrlInOverlay(url: string, options?: { title?: string }): Promise<PrintPreviewOutcome> {
+  const loaded = await fetchPrintHtml(url);
+  if (!loaded.ok) return loaded;
+  return openPrintPreviewInOverlay(loaded.html, { title: options?.title });
 }
 
 /** Write HTML to a new tab, or an in-page iframe when popups are blocked. */
@@ -243,6 +269,39 @@ export function openUrlPrintPreview(
   options?: { targetWindow?: Window | null; title?: string },
 ): PrintPreviewOutcome {
   if (preferInPagePrintPreview()) {
+    return {
+      ok: false,
+      message: 'URL print preview requires openUrlPrintPreviewAsync on HTTP.',
+    };
+  }
+
+  const reuse =
+    options?.targetWindow && !options.targetWindow.closed ? options.targetWindow : null;
+
+  if (reuse) {
+    reuse.location.href = url;
+    reuse.focus();
+    return { ok: true, message: 'Print preview opened.', window: reuse };
+  }
+
+  const w = window.open(url, '_blank', PRINT_WINDOW_FEATURES);
+  if (w) {
+    w.focus();
+    return { ok: true, message: 'Print preview opened.', window: w };
+  }
+
+  return {
+    ok: false,
+    message: 'Popup blocked — allow popups for print preview, or use the in-page preview.',
+  };
+}
+
+/** Fetch authenticated print HTML, then open preview (required for payslip/API HTML on HTTP). */
+export async function openUrlPrintPreviewAsync(
+  url: string,
+  options?: { targetWindow?: Window | null; title?: string },
+): Promise<PrintPreviewOutcome> {
+  if (preferInPagePrintPreview()) {
     return openUrlInOverlay(url, { title: options?.title });
   }
 
@@ -262,4 +321,8 @@ export function openUrlPrintPreview(
   }
 
   return openUrlInOverlay(url, { title: options?.title });
+}
+
+export function notifyPrintFailure(message: string): void {
+  window.alert(message || 'Print failed.');
 }

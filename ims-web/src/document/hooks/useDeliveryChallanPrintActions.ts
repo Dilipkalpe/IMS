@@ -3,6 +3,7 @@ import { mapDeliveryChallanToPrintableDocument } from '../mappers/deliveryChalla
 import type { DeliveryChallanUiSnapshot } from '../mappers/deliveryChallanPrintMapper';
 import { useDocumentPrintService } from '../context/DocumentPrintContext';
 import type { DocumentActionOutcome } from '../contracts/printExportRequests';
+import { runDocumentPrint } from '../utils/runDocumentPrint';
 
 export function useDeliveryChallanPrintActions() {
   const printService = useDocumentPrintService();
@@ -14,7 +15,7 @@ export function useDeliveryChallanPrintActions() {
   const print = useCallback(
     async (snapshot: DeliveryChallanUiSnapshot, showDialog = true): Promise<DocumentActionOutcome> => {
       const doc = toPrintable(snapshot);
-      return printService.print('delivery_challan', doc, { showDialog });
+      return runDocumentPrint(printService, 'delivery_challan', doc, { showDialog });
     },
     [printService, toPrintable],
   );

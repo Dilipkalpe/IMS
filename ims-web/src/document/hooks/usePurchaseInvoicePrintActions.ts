@@ -3,6 +3,7 @@ import { mapPurchaseInvoiceToPrintableDocument } from '../mappers/purchaseInvoic
 import type { PurchaseInvoiceUiSnapshot } from '../mappers/purchaseInvoicePrintMapper';
 import { useDocumentPrintService } from '../context/DocumentPrintContext';
 import type { DocumentActionOutcome } from '../contracts/printExportRequests';
+import { runDocumentPrint } from '../utils/runDocumentPrint';
 
 export function usePurchaseInvoicePrintActions() {
   const printService = useDocumentPrintService();
@@ -14,7 +15,7 @@ export function usePurchaseInvoicePrintActions() {
   const print = useCallback(
     async (snapshot: PurchaseInvoiceUiSnapshot, showDialog = true): Promise<DocumentActionOutcome> => {
       const doc = toPrintable(snapshot);
-      return printService.print('purchase_invoice', doc, { showDialog });
+      return runDocumentPrint(printService, 'purchase_invoice', doc, { showDialog });
     },
     [printService, toPrintable],
   );

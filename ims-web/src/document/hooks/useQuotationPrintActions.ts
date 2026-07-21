@@ -3,6 +3,7 @@ import { mapQuotationToPrintableDocument } from '../mappers/quotationPrintMapper
 import type { QuotationUiSnapshot } from '../mappers/quotationPrintMapper';
 import { useDocumentPrintService } from '../context/DocumentPrintContext';
 import type { DocumentActionOutcome } from '../contracts/printExportRequests';
+import { runDocumentPrint } from '../utils/runDocumentPrint';
 
 export function useQuotationPrintActions() {
   const printService = useDocumentPrintService();
@@ -14,7 +15,7 @@ export function useQuotationPrintActions() {
   const print = useCallback(
     async (snapshot: QuotationUiSnapshot, showDialog = true): Promise<DocumentActionOutcome> => {
       const doc = toPrintable(snapshot);
-      return printService.print('quotation', doc, { showDialog });
+      return runDocumentPrint(printService, 'quotation', doc, { showDialog });
     },
     [printService, toPrintable],
   );

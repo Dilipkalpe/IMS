@@ -3,6 +3,7 @@ import { mapGrnToPrintableDocument } from '../mappers/grnPrintMapper';
 import type { GrnUiSnapshot } from '../mappers/grnPrintMapper';
 import { useDocumentPrintService } from '../context/DocumentPrintContext';
 import type { DocumentActionOutcome } from '../contracts/printExportRequests';
+import { runDocumentPrint } from '../utils/runDocumentPrint';
 
 export function useGrnPrintActions() {
   const printService = useDocumentPrintService();
@@ -14,7 +15,7 @@ export function useGrnPrintActions() {
   const print = useCallback(
     async (snapshot: GrnUiSnapshot, showDialog = true): Promise<DocumentActionOutcome> => {
       const doc = toPrintable(snapshot);
-      return printService.print('grn', doc, { showDialog });
+      return runDocumentPrint(printService, 'grn', doc, { showDialog });
     },
     [printService, toPrintable],
   );
