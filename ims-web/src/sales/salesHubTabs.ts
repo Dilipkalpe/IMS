@@ -17,13 +17,13 @@ export const SALES_HUB_TABS: SalesHubTab[] = [
   },
   {
     key: NavKeys.Quotation,
-    title: 'Quotes',
+    title: 'Quotations',
     iconGlyph: '\uE8E5',
     description: 'Customer quotations and price proposals.',
   },
   {
     key: NavKeys.DeliveryChallan,
-    title: 'Delivery Notes',
+    title: 'Deliveries',
     iconGlyph: '\uE7BF',
     description: 'Outbound delivery documentation against sales orders.',
   },

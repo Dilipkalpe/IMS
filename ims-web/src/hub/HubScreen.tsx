@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
+import { NavKeys } from '../navigation/navKeys';
 import { resolveScreenComponent } from '../navigation/resolveScreen';
+import { useSalesHubTabCounts } from '../sales/useSalesHubTabCounts';
 import { getHubDefinition } from './hubRegistry';
 import { useHubTab } from './HubContext';
 
@@ -15,6 +17,8 @@ export interface HubScreenProps {
 export function HubScreen({ hubNavKey }: HubScreenProps) {
   const hub = getHubDefinition(hubNavKey);
   const { activeTab, setActiveTab } = useHubTab(hubNavKey);
+  const salesTabCounts = useSalesHubTabCounts();
+  const tabCounts = hubNavKey === NavKeys.Sales ? salesTabCounts : undefined;
 
   if (!hub) return null;
 
@@ -24,6 +28,8 @@ export function HubScreen({ hubNavKey }: HubScreenProps) {
         <div className="module-hub__tabs">
           {hub.tabs.map((tab) => {
             const selected = activeTab === tab.key;
+            const count = tabCounts?.[tab.key];
+            const countLabel = count != null ? ` (${count})` : '';
             return (
               <button
                 key={tab.key}
@@ -31,13 +37,18 @@ export function HubScreen({ hubNavKey }: HubScreenProps) {
                 role="tab"
                 aria-selected={selected}
                 className={`si-tab-chip__btn${selected ? ' si-tab-chip__btn--active' : ''}`}
-                title={tab.description}
+                title={`${tab.description}${countLabel}`}
                 onClick={() => setActiveTab(tab.key)}
               >
                 <span className="icon-text module-hub__tab-icon" aria-hidden>
                   {tab.iconGlyph}
                 </span>
-                {tab.title}
+                <span className="module-hub__tab-label">{tab.title}</span>
+                {count != null ? (
+                  <span className="module-hub__tab-count" aria-label={`${count} records`}>
+                    {count}
+                  </span>
+                ) : null}
               </button>
             );
           })}
