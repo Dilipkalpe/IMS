@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react';
-import { CorporateDataGrid, buildGridTemplateColumns, type DataGridColumn } from '../components/datagrid/CorporateDataGrid';
+import { CorporateDataGrid, type DataGridColumn } from '../components/datagrid/CorporateDataGrid';
 import { ListGridArea } from '../components/loading';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
 import { useNumberedSalesSortField } from '../components/transaction/numberedSalesListScreenHelpers';
@@ -106,11 +106,6 @@ export function DeliveryChallanListScreen() {
 
   const columns = useMemo((): DataGridColumn<DeliveryChallanListRow>[] => {
     return [
-      salesListDocNoColumn('Delivery No.', (row) => void openWorkspace(row), 110),
-      { id: 'customer', header: 'Customer', width: '*', minWidth: 160, readOnly: true, getValue: (r) => r.customer },
-      { id: 'soReference', header: 'SO Ref', width: 100, readOnly: true, getValue: (r) => r.soReference },
-      salesListAmountColumn('Delivery Total'),
-      salesListStatusColumn(),
       createListActionColumn({
         onPrint: (row) => void printRow(row),
         onEdit: (row) => void openWorkspace(row),
@@ -118,13 +113,13 @@ export function DeliveryChallanListScreen() {
         canEdit,
         canDelete,
       }),
+      salesListDocNoColumn('Delivery No.', (row) => void openWorkspace(row), 110),
+      { id: 'customer', header: 'Customer', width: '*', minWidth: 160, readOnly: true, getValue: (r) => r.customer },
+      { id: 'soReference', header: 'SO Ref', width: 100, readOnly: true, getValue: (r) => r.soReference },
+      salesListAmountColumn('Delivery Total'),
+      salesListStatusColumn(),
     ];
   }, [canDelete, canEdit, handleDelete, openWorkspace, printRow]);
-
-  const gridTemplate = useMemo(
-    () => buildGridTemplateColumns(columns as DataGridColumn<unknown>[]),
-    [columns],
-  );
 
   const exportColumns = useMemo(
     () => columns.filter((c) => c.id !== 'actions').map((c) => ({ id: c.id, header: String(c.header) })),
@@ -181,42 +176,6 @@ export function DeliveryChallanListScreen() {
             statusMessage={list.statusMessage}
           />
           <ListGridArea loading={list.loading}>
-            <div className="si-list-column-filters" style={{ gridTemplateColumns: gridTemplate }}>
-              <input
-                type="search"
-                className="wpf-sales-compact-input si-list-column-filters__input"
-                placeholder="Filter delivery no…"
-                value={list.columnFilters.billNo}
-                disabled={list.loading}
-                onChange={(e) => list.setColumnFilter('billNo', e.target.value)}
-              />
-              <input
-                type="search"
-                className="wpf-sales-compact-input si-list-column-filters__input"
-                placeholder="Filter customer…"
-                value={list.columnFilters.customer}
-                disabled={list.loading}
-                onChange={(e) => list.setColumnFilter('customer', e.target.value)}
-              />
-              <span />
-              <input
-                type="search"
-                className="wpf-sales-compact-input si-list-column-filters__input"
-                placeholder="Filter amount…"
-                value={list.columnFilters.amount}
-                disabled={list.loading}
-                onChange={(e) => list.setColumnFilter('amount', e.target.value)}
-              />
-              <input
-                type="search"
-                className="wpf-sales-compact-input si-list-column-filters__input"
-                placeholder="Filter status…"
-                value={list.columnFilters.status}
-                disabled={list.loading}
-                onChange={(e) => list.setColumnFilter('status', e.target.value)}
-              />
-              <span />
-            </div>
             <CorporateDataGrid
               columns={columns}
               data={list.rows}

@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useMemo } from 'react';
-import { CorporateDataGrid, buildGridTemplateColumns, type DataGridColumn } from '../components/datagrid/CorporateDataGrid';
+import { CorporateDataGrid, type DataGridColumn } from '../components/datagrid/CorporateDataGrid';
 import { ListGridArea } from '../components/loading';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
-import { TransactionListColumnFilters } from '../components/transaction/TransactionListColumnFilters';
 import {
-  SALES_LIST_COLUMN_FILTER_DEFS,
   quotationSortField,
 } from '../components/transaction/transactionListQuery';
 import { useListNewShortcut } from '../components/transaction/useListNewShortcut';
@@ -112,10 +110,6 @@ export function QuotationListScreen() {
 
   const columns = useMemo((): DataGridColumn<QuotationListRow>[] => {
     return [
-      salesListDocNoColumn('Quote No.', (row) => void openWorkspace(row)),
-      { id: 'customer', header: 'Customer', width: '*', minWidth: 180, readOnly: true, getValue: (r) => r.customer },
-      salesListAmountColumn('Quote Total'),
-      salesListStatusColumn(),
       createListActionColumn({
         onPrint: (row) => void printRow(row),
         onEdit: (row) => void openWorkspace(row),
@@ -123,13 +117,12 @@ export function QuotationListScreen() {
         canEdit,
         canDelete,
       }),
+      salesListDocNoColumn('Quote No.', (row) => void openWorkspace(row)),
+      { id: 'customer', header: 'Customer', width: '*', minWidth: 180, readOnly: true, getValue: (r) => r.customer },
+      salesListAmountColumn('Quote Total'),
+      salesListStatusColumn(),
     ];
   }, [canDelete, canEdit, handleDelete, openWorkspace, printRow]);
-
-  const gridTemplate = useMemo(
-    () => buildGridTemplateColumns(columns as DataGridColumn<unknown>[]),
-    [columns],
-  );
 
   const exportColumns = useMemo(
     () => columns.filter((c) => c.id !== 'actions').map((c) => ({ id: c.id, header: String(c.header) })),
@@ -185,13 +178,6 @@ export function QuotationListScreen() {
             statusMessage={list.statusMessage}
           />
           <ListGridArea loading={list.loading}>
-            <TransactionListColumnFilters
-              columns={SALES_LIST_COLUMN_FILTER_DEFS}
-              values={list.columnFilters}
-              gridTemplate={gridTemplate}
-              disabled={list.loading}
-              onChange={list.setColumnFilter}
-            />
             <CorporateDataGrid
               columns={columns}
               data={list.rows}

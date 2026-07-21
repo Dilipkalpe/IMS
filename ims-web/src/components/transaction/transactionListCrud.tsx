@@ -52,7 +52,7 @@ export function createListActionColumn<T extends { id: string }>(handlers: {
     (canPrint ? 1 : 0) +
     (canEdit ? 1 : 0) +
     (canDelete ? 1 : 0);
-  const actionWidth = Math.max(88, actionCount * 32 + (actionCount - 1) * 4);
+  const actionWidth = Math.max(120, actionCount * 32 + (actionCount - 1) * 4 + 12);
   return {
     id: 'actions',
     header: 'Action',

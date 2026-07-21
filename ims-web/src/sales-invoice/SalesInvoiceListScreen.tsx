@@ -1,16 +1,12 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useListNewShortcut } from '../components/transaction/useListNewShortcut';
-import { CorporateDataGrid, buildGridTemplateColumns, type DataGridColumn } from '../components/datagrid/CorporateDataGrid';
+import { CorporateDataGrid, type DataGridColumn } from '../components/datagrid/CorporateDataGrid';
 import { ListGridArea } from '../components/loading';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
-import { TransactionListColumnFilters } from '../components/transaction/TransactionListColumnFilters';
 import {
   NUMBERED_SALES_SORTABLE_COLUMN_IDS,
   useNumberedSalesSortField,
 } from '../components/transaction/numberedSalesListScreenHelpers';
-import {
-  SALES_LIST_COLUMN_FILTER_DEFS,
-} from '../components/transaction/transactionListQuery';
 import { TransactionListPagination } from '../components/transaction/TransactionListPagination';
 import { SALES_MODULE_CONFIG } from '../components/transaction/salesModuleConfig';
 import {
@@ -114,10 +110,6 @@ export function SalesInvoiceListScreen() {
 
   const columns = useMemo((): DataGridColumn<SalesInvoiceListRow>[] => {
     return [
-      salesListDocNoColumn('Invoice No.', (row) => void openWorkspace(row)),
-      { id: 'customer', header: 'Customer', width: '*', minWidth: 180, readOnly: true, getValue: (r) => r.customer },
-      salesListAmountColumn('Invoice Total'),
-      salesListStatusColumn(),
       createListActionColumn({
         onPrint: (row) => void printRow(row),
         onEdit: (row) => void openWorkspace(row),
@@ -125,13 +117,12 @@ export function SalesInvoiceListScreen() {
         canEdit,
         canDelete,
       }),
+      salesListDocNoColumn('Invoice No.', (row) => void openWorkspace(row)),
+      { id: 'customer', header: 'Customer', width: '*', minWidth: 180, readOnly: true, getValue: (r) => r.customer },
+      salesListAmountColumn('Invoice Total'),
+      salesListStatusColumn(),
     ];
   }, [canDelete, canEdit, handleDelete, openWorkspace, printRow]);
-
-  const gridTemplate = useMemo(
-    () => buildGridTemplateColumns(columns as DataGridColumn<unknown>[]),
-    [columns],
-  );
 
   const exportColumns = useMemo(
     () => columns.filter((c) => c.id !== 'actions').map((c) => ({ id: c.id, header: String(c.header) })),
@@ -187,13 +178,6 @@ export function SalesInvoiceListScreen() {
             statusMessage={list.statusMessage}
           />
           <ListGridArea loading={list.loading}>
-            <TransactionListColumnFilters
-              columns={SALES_LIST_COLUMN_FILTER_DEFS}
-              values={list.columnFilters}
-              gridTemplate={gridTemplate}
-              disabled={list.loading}
-              onChange={list.setColumnFilter}
-            />
             <CorporateDataGrid
               columns={columns}
               data={list.rows}

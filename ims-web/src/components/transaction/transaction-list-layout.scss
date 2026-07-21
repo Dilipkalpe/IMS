@@ -81,6 +81,7 @@
   width: 100%;
   max-width: none;
   min-width: 0;
+  box-sizing: border-box;
 
   .corporate-data-grid {
     min-width: 0;
@@ -94,6 +95,17 @@
     min-width: 0;
     max-height: none;
     overflow: auto;
+  }
+}
+
+.sales-hub-list .si-list-grid-wrap {
+  .si-list-table-scroll {
+    overflow: visible;
+  }
+
+  .corporate-data-grid__body {
+    overflow-x: auto;
+    overflow-y: auto;
   }
 }
 

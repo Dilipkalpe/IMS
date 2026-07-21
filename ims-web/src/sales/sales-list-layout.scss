@@ -12,10 +12,18 @@
     margin: 0 16px;
   }
 
+  .si-list-table-scroll {
+    width: 100%;
+    min-width: 0;
+  }
+
   .corporate-data-grid {
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     overflow: hidden;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 
   .corporate-data-grid__header {
@@ -35,13 +43,22 @@
     border-right-color: #eef2f6;
     border-bottom-color: #eef2f6;
     padding: 8px 12px;
+    min-width: 0;
   }
 
-  .si-list-column-filters {
-    border: 1px solid #e2e8f0;
-    border-bottom: 0;
-    border-radius: 8px 8px 0 0;
-    background: #f8fafc;
+  /* Action column is first — keep icons fully visible with stable width */
+  .corporate-data-grid__header-cell:first-child,
+  .corporate-data-grid__cell:first-child {
+    min-width: 120px;
+    padding-left: 12px;
+    padding-right: 10px;
+    overflow: visible;
+  }
+
+  .corporate-data-grid__cell:first-child .si-list-row-actions {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow: visible;
   }
 
   .si-list-pagination {
