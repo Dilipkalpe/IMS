@@ -13,10 +13,20 @@ export interface ListExportMenuProps {
   disabled?: boolean;
   busy?: boolean;
   onExport: (format: ListExportFormat) => void;
+  buttonLabel?: string;
+  buttonClassName?: string;
+  showChevron?: boolean;
 }
 
 /** WPF StandardListView export popup — Excel / CSV / PDF / Print. */
-export function ListExportMenu({ disabled, busy, onExport }: ListExportMenuProps) {
+export function ListExportMenu({
+  disabled,
+  busy,
+  onExport,
+  buttonLabel = 'Export Data',
+  buttonClassName,
+  showChevron = false,
+}: ListExportMenuProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -42,13 +52,14 @@ export function ListExportMenu({ disabled, busy, onExport }: ListExportMenuProps
     <div className="list-export-menu" ref={rootRef}>
       <button
         type="button"
-        className="wpf-action-button"
+        className={['wpf-action-button', buttonClassName].filter(Boolean).join(' ')}
         disabled={disabled || busy}
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
-        {busy ? 'Exporting…' : 'Export Data'}
+        {busy ? 'Exporting…' : buttonLabel}
+        {showChevron && !busy ? <span aria-hidden> ▾</span> : null}
       </button>
       {open ? (
         <div className="list-export-menu__popup" role="menu">

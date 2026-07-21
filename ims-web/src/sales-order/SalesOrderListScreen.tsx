@@ -11,15 +11,20 @@ import { useListNewShortcut } from '../components/transaction/useListNewShortcut
 import { TransactionListPagination } from '../components/transaction/TransactionListPagination';
 import { SALES_MODULE_CONFIG } from '../components/transaction/salesModuleConfig';
 import { createListActionColumn, useListRowSelection } from '../components/transaction/transactionListCrud';
-import { ListExportMenu } from '../components/transaction/ListExportMenu';
 import { useListExportActions } from '../components/transaction/useListExportActions';
 import { useProtectedSalesListActions } from '../components/transaction/useProtectedSalesListActions';
 import { useTransactionListLoader } from '../components/transaction/useTransactionListLoader';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { FormKeyboardScope } from '../keyboard/FormKeyboardScope';
-import { FIELD_FOCUS_KEY } from '../keyboard/formKeyboardNavigation';
 import { RefinedScreenShell } from '../screens/RefinedScreenShell';
-import '../sales-invoice/sales-invoice.scss';
+import { SalesListSectionHeader } from '../sales/SalesListSectionHeader';
+import { SalesListToolbar } from '../sales/SalesListToolbar';
+import {
+  salesListAmountColumn,
+  salesListDocNoColumn,
+  salesListStatusColumn,
+} from '../sales/salesListColumnHelpers';
+import '../sales/sales-list-layout.scss';
 import { useSalesOrderNavIntent } from './context/SalesOrderNavIntent';
 import { invalidateSalesOrderList } from './repository/listCache';
 import { listRowsFromRecords } from './repository/localSalesOrderRepository';
@@ -39,7 +44,7 @@ import { parseFormattedSoNo } from './soDocumentNo';
 import type { SalesOrderListRow } from './types';
 import type { SalesOrderRecord } from './repository/types';
 
-const SORTABLE_COLUMN_IDS = ['billNo', 'date', 'customer', 'amount', 'status'];
+const SORTABLE_COLUMN_IDS = ['billNo', 'customer', 'amount', 'status'];
 
 export function SalesOrderListScreen() {
   const navigate = useAppNavigation();
@@ -125,6 +130,10 @@ export function SalesOrderListScreen() {
 
   const columns = useMemo((): DataGridColumn<SalesOrderListRow>[] => {
     return [
+      salesListDocNoColumn('Order No.', (row) => void openWorkspace(row)),
+      { id: 'customer', header: 'Customer', width: '*', minWidth: 180, readOnly: true, getValue: (r) => r.customer },
+      salesListAmountColumn('Order Total'),
+      salesListStatusColumn(),
       createListActionColumn({
         onPrint: (row) => void printRow(row),
         onEdit: (row) => void openWorkspace(row),
@@ -132,11 +141,6 @@ export function SalesOrderListScreen() {
         canEdit,
         canDelete,
       }),
-      { id: 'billNo', header: 'Order No', width: 120, readOnly: true, getValue: (r) => r.billNo },
-      { id: 'date', header: 'Date', width: 100, readOnly: true, getValue: (r) => r.date },
-      { id: 'customer', header: 'Customer', width: '*', minWidth: 180, readOnly: true, getValue: (r) => r.customer },
-      { id: 'amount', header: 'Amount', width: 110, readOnly: true, getValue: (r) => r.amount },
-      { id: 'status', header: 'Status', width: 90, readOnly: true, getValue: (r) => r.status },
     ];
   }, [canDelete, canEdit, deleteRow, openWorkspace, printRow]);
 
@@ -177,56 +181,27 @@ export function SalesOrderListScreen() {
   return (
     <RefinedScreenShell className="sales-invoice-list-screen">
       <TransactionEntryShell title="Sales Orders">
-        <FormKeyboardScope className="si-list-layout" autoFocusFieldKey="list-search">
-          <div className="si-list-toolbar">
-            <div className="si-list-toolbar__row">
-              <button
-                type="button"
-                className="wpf-action-button"
-                {...{ [FIELD_FOCUS_KEY]: 'list-new' }}
-                title="New order (Ctrl+N)"
-                onClick={() => void openWorkspace()}
-                disabled={!canAdd}
-              >
-                New
-              </button>
-              <input
-                className="wpf-form-input si-list-toolbar__search"
-                {...{ [FIELD_FOCUS_KEY]: 'list-search' }}
-                placeholder="Search order no, customer…"
-                value={list.searchInput}
-                onChange={(e) => list.setSearchInput(e.target.value)}
-              />
-              <select
-                className="wpf-form-combo si-list-toolbar__filter"
-                value={list.statusFilter}
-                onChange={(e) => list.setStatusFilter(e.target.value)}
-              >
-                {SALES_ORDER_STATUS_FILTERS.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-              <button type="button" className="wpf-action-button" onClick={() => void list.reload()} disabled={list.loading}>
-                Refresh
-              </button>
-              <button
-                type="button"
-                className="wpf-action-button"
-                onClick={list.clearFilters}
-                disabled={!list.hasActiveFilters}
-              >
-                Clear filters
-              </button>
-              <ListExportMenu
-                disabled={listExport.exportDisabled}
-                busy={listExport.exporting}
-                onExport={(format) => void listExport.runExport(format)}
-              />
-            </div>
-            {list.statusMessage ? (
-              <p className="si-list-toolbar__status" role="status">{list.statusMessage}</p>
-            ) : null}
-          </div>
+        <FormKeyboardScope className="si-list-layout sales-hub-list" autoFocusFieldKey="list-search">
+          <SalesListSectionHeader title="Sales Orders" iconGlyph={'\uE8A1'} />
+          <SalesListToolbar
+            searchPlaceholder="Search orders, customers..."
+            searchValue={list.searchInput}
+            onSearchChange={list.setSearchInput}
+            statusFilter={list.statusFilter}
+            statusOptions={SALES_ORDER_STATUS_FILTERS}
+            onStatusFilterChange={list.setStatusFilter}
+            onRefresh={() => void list.reload()}
+            onClearFilters={list.clearFilters}
+            hasActiveFilters={list.hasActiveFilters}
+            loading={list.loading}
+            canAdd={canAdd}
+            onAddNew={() => void openWorkspace()}
+            addNewTitle="New order (Ctrl+N)"
+            exportDisabled={listExport.exportDisabled}
+            exportBusy={listExport.exporting}
+            onExport={(format) => void listExport.runExport(format)}
+            statusMessage={list.statusMessage}
+          />
           <ListGridArea loading={list.loading}>
             <TransactionListColumnFilters
               columns={SALES_LIST_COLUMN_FILTER_DEFS}
@@ -252,6 +227,7 @@ export function SalesOrderListScreen() {
               onRowDoubleClick={(row) => void openWorkspace(row)}
             />
             <TransactionListPagination
+              variant="sales"
               page={list.page}
               pageSize={list.pageSize}
               totalPages={list.totalPages}

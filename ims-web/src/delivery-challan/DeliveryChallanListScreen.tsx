@@ -10,7 +10,6 @@ import {
   useDocumentListDelete,
   useListRowSelection,
 } from '../components/transaction/transactionListCrud';
-import { ListExportMenu } from '../components/transaction/ListExportMenu';
 import { useListExportActions } from '../components/transaction/useListExportActions';
 import { useListNewShortcut } from '../components/transaction/useListNewShortcut';
 import { useProtectedSalesListActions } from '../components/transaction/useProtectedSalesListActions';
@@ -22,9 +21,15 @@ import {
   useSalesListRowPrint,
 } from '../components/transaction/useSalesListRowPrint';
 import { FormKeyboardScope } from '../keyboard/FormKeyboardScope';
-import { FIELD_FOCUS_KEY } from '../keyboard/formKeyboardNavigation';
 import { RefinedScreenShell } from '../screens/RefinedScreenShell';
-import '../sales-invoice/sales-invoice.scss';
+import { SalesListSectionHeader } from '../sales/SalesListSectionHeader';
+import { SalesListToolbar } from '../sales/SalesListToolbar';
+import {
+  salesListAmountColumn,
+  salesListDocNoColumn,
+  salesListStatusColumn,
+} from '../sales/salesListColumnHelpers';
+import '../sales/sales-list-layout.scss';
 import { useDeliveryChallanNavIntent } from './context/DeliveryChallanNavIntent';
 import { invalidateDeliveryChallanList } from './repository/listCache';
 import { listRowsFromRecords } from './repository/localDeliveryChallanRepository';
@@ -33,7 +38,7 @@ import { useDeliveryChallanListVersion, useDeliveryChallanRepositoryOptional } f
 import type { DeliveryChallanListRow } from './types';
 import type { DeliveryChallanRecord } from './repository/types';
 
-const DC_SORTABLE_IDS = ['billNo', 'date', 'customer', 'amount', 'status'];
+const DC_SORTABLE_IDS = ['billNo', 'customer', 'amount', 'status'];
 
 export function DeliveryChallanListScreen() {
   const navigate = useAppNavigation();
@@ -101,6 +106,11 @@ export function DeliveryChallanListScreen() {
 
   const columns = useMemo((): DataGridColumn<DeliveryChallanListRow>[] => {
     return [
+      salesListDocNoColumn('Delivery No.', (row) => void openWorkspace(row), 110),
+      { id: 'customer', header: 'Customer', width: '*', minWidth: 160, readOnly: true, getValue: (r) => r.customer },
+      { id: 'soReference', header: 'SO Ref', width: 100, readOnly: true, getValue: (r) => r.soReference },
+      salesListAmountColumn('Delivery Total'),
+      salesListStatusColumn(),
       createListActionColumn({
         onPrint: (row) => void printRow(row),
         onEdit: (row) => void openWorkspace(row),
@@ -108,12 +118,6 @@ export function DeliveryChallanListScreen() {
         canEdit,
         canDelete,
       }),
-      { id: 'billNo', header: 'DC No', width: 110, readOnly: true, getValue: (r) => r.billNo },
-      { id: 'date', header: 'Date', width: 100, readOnly: true, getValue: (r) => r.date },
-      { id: 'customer', header: 'Customer', width: '*', minWidth: 160, readOnly: true, getValue: (r) => r.customer },
-      { id: 'soReference', header: 'SO Ref', width: 100, readOnly: true, getValue: (r) => r.soReference },
-      { id: 'amount', header: 'Amount', width: 100, readOnly: true, getValue: (r) => r.amount },
-      { id: 'status', header: 'Status', width: 90, readOnly: true, getValue: (r) => r.status },
     ];
   }, [canDelete, canEdit, handleDelete, openWorkspace, printRow]);
 
@@ -154,81 +158,37 @@ export function DeliveryChallanListScreen() {
 
   return (
     <RefinedScreenShell className="sales-invoice-list-screen">
-      <TransactionEntryShell title="Delivery Challan">
-        <FormKeyboardScope className="si-list-layout" autoFocusFieldKey="list-search">
-          <div className="si-list-toolbar">
-            <div className="si-list-toolbar__row">
-              <button
-                type="button"
-                className="wpf-action-button"
-                {...{ [FIELD_FOCUS_KEY]: 'list-new' }}
-                onClick={() => void openWorkspace()}
-                disabled={!canAdd}
-              >
-                New
-              </button>
-              <button
-                type="button"
-                className="wpf-action-button"
-                onClick={() => selectedRow && void openWorkspace(selectedRow)}
-                disabled={!selectedRow || !canEdit}
-              >
-                Edit
-              </button>
-              <button
-                type="button"
-                className="wpf-action-button"
-                onClick={() => selectedRow && void handleDelete(selectedRow)}
-                disabled={!selectedRow || !canDelete}
-              >
-                Delete
-              </button>
-              <input
-                className="wpf-form-input si-list-toolbar__search"
-                {...{ [FIELD_FOCUS_KEY]: 'list-search' }}
-                placeholder="Search DC no, customer, SO…"
-                value={list.searchInput}
-                onChange={(e) => list.setSearchInput(e.target.value)}
-              />
-              <select className="wpf-form-combo si-list-toolbar__filter" value={list.statusFilter} onChange={(e) => list.setStatusFilter(e.target.value)}>
-                {['All', 'Open', 'Draft', 'Posted'].map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-              <button type="button" className="wpf-action-button" onClick={() => void list.reload()} disabled={list.loading}>
-                Refresh
-              </button>
-              <button type="button" className="wpf-action-button" onClick={list.clearFilters} disabled={!list.hasActiveFilters}>
-                Clear filters
-              </button>
-              <ListExportMenu
-                disabled={listExport.exportDisabled}
-                busy={listExport.exporting}
-                onExport={(format) => void listExport.runExport(format)}
-              />
-            </div>
-            {list.statusMessage ? (
-              <p className="si-list-toolbar__status" role="status">{list.statusMessage}</p>
-            ) : null}
-          </div>
+      <TransactionEntryShell title="Deliveries">
+        <FormKeyboardScope className="si-list-layout sales-hub-list" autoFocusFieldKey="list-search">
+          <SalesListSectionHeader title="Deliveries" iconGlyph={'\uE7BF'} />
+          <SalesListToolbar
+            searchPlaceholder="Search deliveries, customers..."
+            searchValue={list.searchInput}
+            onSearchChange={list.setSearchInput}
+            statusFilter={list.statusFilter}
+            statusOptions={['All', 'Open', 'Draft', 'Posted']}
+            onStatusFilterChange={list.setStatusFilter}
+            onRefresh={() => void list.reload()}
+            onClearFilters={list.clearFilters}
+            hasActiveFilters={list.hasActiveFilters}
+            loading={list.loading}
+            canAdd={canAdd}
+            onAddNew={() => void openWorkspace()}
+            addNewTitle="New delivery (Ctrl+N)"
+            exportDisabled={listExport.exportDisabled}
+            exportBusy={listExport.exporting}
+            onExport={(format) => void listExport.runExport(format)}
+            statusMessage={list.statusMessage}
+          />
           <ListGridArea loading={list.loading}>
             <div className="si-list-column-filters" style={{ gridTemplateColumns: gridTemplate }}>
-              <div className="si-list-column-filters__spacer" aria-hidden />
               <input
                 type="search"
                 className="wpf-sales-compact-input si-list-column-filters__input"
-                placeholder="Filter DC no…"
+                placeholder="Filter delivery no…"
                 value={list.columnFilters.billNo}
                 disabled={list.loading}
                 onChange={(e) => list.setColumnFilter('billNo', e.target.value)}
-              />
-              <input
-                type="search"
-                className="wpf-sales-compact-input si-list-column-filters__input"
-                placeholder="Filter date…"
-                value={list.columnFilters.date}
-                disabled={list.loading}
-                onChange={(e) => list.setColumnFilter('date', e.target.value)}
               />
               <input
                 type="search"
@@ -255,6 +215,7 @@ export function DeliveryChallanListScreen() {
                 disabled={list.loading}
                 onChange={(e) => list.setColumnFilter('status', e.target.value)}
               />
+              <span />
             </div>
             <CorporateDataGrid
               columns={columns}
@@ -273,6 +234,7 @@ export function DeliveryChallanListScreen() {
               onRowDoubleClick={(row) => void openWorkspace(row)}
             />
             <TransactionListPagination
+              variant="sales"
               page={list.page}
               pageSize={list.pageSize}
               totalPages={list.totalPages}

@@ -15,7 +15,6 @@ import {
   useDocumentListDelete,
   useListRowSelection,
 } from '../components/transaction/transactionListCrud';
-import { ListExportMenu } from '../components/transaction/ListExportMenu';
 import { useListExportActions } from '../components/transaction/useListExportActions';
 import { useProtectedSalesListActions } from '../components/transaction/useProtectedSalesListActions';
 import { useTransactionListLoader } from '../components/transaction/useTransactionListLoader';
@@ -26,9 +25,15 @@ import {
   useSalesListRowPrint,
 } from '../components/transaction/useSalesListRowPrint';
 import { FormKeyboardScope } from '../keyboard/FormKeyboardScope';
-import { FIELD_FOCUS_KEY } from '../keyboard/formKeyboardNavigation';
 import { RefinedScreenShell } from '../screens/RefinedScreenShell';
-import '../sales-invoice/sales-invoice.scss';
+import { SalesListSectionHeader } from '../sales/SalesListSectionHeader';
+import { SalesListToolbar } from '../sales/SalesListToolbar';
+import {
+  salesListAmountColumn,
+  salesListDocNoColumn,
+  salesListStatusColumn,
+} from '../sales/salesListColumnHelpers';
+import '../sales/sales-list-layout.scss';
 import { useQuotationNavIntent } from './context/QuotationNavIntent';
 import { invalidateQuotationList } from './repository/listCache';
 import { listRowsFromRecords } from './repository/localQuotationRepository';
@@ -107,6 +112,10 @@ export function QuotationListScreen() {
 
   const columns = useMemo((): DataGridColumn<QuotationListRow>[] => {
     return [
+      salesListDocNoColumn('Quote No.', (row) => void openWorkspace(row)),
+      { id: 'customer', header: 'Customer', width: '*', minWidth: 180, readOnly: true, getValue: (r) => r.customer },
+      salesListAmountColumn('Quote Total'),
+      salesListStatusColumn(),
       createListActionColumn({
         onPrint: (row) => void printRow(row),
         onEdit: (row) => void openWorkspace(row),
@@ -114,11 +123,6 @@ export function QuotationListScreen() {
         canEdit,
         canDelete,
       }),
-      { id: 'billNo', header: 'Quote No', width: 120, readOnly: true, getValue: (r) => r.billNo },
-      { id: 'date', header: 'Date', width: 100, readOnly: true, getValue: (r) => r.date },
-      { id: 'customer', header: 'Customer', width: '*', minWidth: 180, readOnly: true, getValue: (r) => r.customer },
-      { id: 'amount', header: 'Amount', width: 110, readOnly: true, getValue: (r) => r.amount },
-      { id: 'status', header: 'Status', width: 90, readOnly: true, getValue: (r) => r.status },
     ];
   }, [canDelete, canEdit, handleDelete, openWorkspace, printRow]);
 
@@ -158,64 +162,28 @@ export function QuotationListScreen() {
 
   return (
     <RefinedScreenShell className="sales-invoice-list-screen">
-      <TransactionEntryShell title="Quotation">
-        <FormKeyboardScope className="si-list-layout" autoFocusFieldKey="list-search">
-          <div className="si-list-toolbar">
-            <div className="si-list-toolbar__row">
-              <button
-                type="button"
-                className="wpf-action-button"
-                {...{ [FIELD_FOCUS_KEY]: 'list-new' }}
-                title="New quotation (Ctrl+N)"
-                onClick={() => void openWorkspace()}
-                disabled={!canAdd}
-              >
-                New
-              </button>
-              <button
-                type="button"
-                className="wpf-action-button"
-                onClick={() => selectedRow && void openWorkspace(selectedRow)}
-                disabled={!selectedRow || !canEdit}
-              >
-                Edit
-              </button>
-              <button
-                type="button"
-                className="wpf-action-button"
-                onClick={() => selectedRow && void handleDelete(selectedRow)}
-                disabled={!selectedRow || !canDelete}
-              >
-                Delete
-              </button>
-              <input
-                className="wpf-form-input si-list-toolbar__search"
-                {...{ [FIELD_FOCUS_KEY]: 'list-search' }}
-                placeholder="Search quote no, customer…"
-                value={list.searchInput}
-                onChange={(e) => list.setSearchInput(e.target.value)}
-              />
-              <select className="wpf-form-combo si-list-toolbar__filter" value={list.statusFilter} onChange={(e) => list.setStatusFilter(e.target.value)}>
-                {['All', 'Open', 'Draft', 'Confirmed'].map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-              <button type="button" className="wpf-action-button" onClick={() => void list.reload()} disabled={list.loading}>
-                Refresh
-              </button>
-              <button type="button" className="wpf-action-button" onClick={list.clearFilters} disabled={!list.hasActiveFilters}>
-                Clear filters
-              </button>
-              <ListExportMenu
-                disabled={listExport.exportDisabled}
-                busy={listExport.exporting}
-                onExport={(format) => void listExport.runExport(format)}
-              />
-            </div>
-            {list.statusMessage ? (
-              <p className="si-list-toolbar__status" role="status">{list.statusMessage}</p>
-            ) : null}
-          </div>
+      <TransactionEntryShell title="Quotations">
+        <FormKeyboardScope className="si-list-layout sales-hub-list" autoFocusFieldKey="list-search">
+          <SalesListSectionHeader title="Quotations" iconGlyph={'\uE8E5'} />
+          <SalesListToolbar
+            searchPlaceholder="Search quotations, customers..."
+            searchValue={list.searchInput}
+            onSearchChange={list.setSearchInput}
+            statusFilter={list.statusFilter}
+            statusOptions={['All', 'Open', 'Draft', 'Confirmed']}
+            onStatusFilterChange={list.setStatusFilter}
+            onRefresh={() => void list.reload()}
+            onClearFilters={list.clearFilters}
+            hasActiveFilters={list.hasActiveFilters}
+            loading={list.loading}
+            canAdd={canAdd}
+            onAddNew={() => void openWorkspace()}
+            addNewTitle="New quotation (Ctrl+N)"
+            exportDisabled={listExport.exportDisabled}
+            exportBusy={listExport.exporting}
+            onExport={(format) => void listExport.runExport(format)}
+            statusMessage={list.statusMessage}
+          />
           <ListGridArea loading={list.loading}>
             <TransactionListColumnFilters
               columns={SALES_LIST_COLUMN_FILTER_DEFS}
@@ -241,6 +209,7 @@ export function QuotationListScreen() {
               onRowDoubleClick={(row) => void openWorkspace(row)}
             />
             <TransactionListPagination
+              variant="sales"
               page={list.page}
               pageSize={list.pageSize}
               totalPages={list.totalPages}

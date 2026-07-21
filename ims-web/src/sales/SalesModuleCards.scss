@@ -2,14 +2,14 @@
 
 .sales-module-cards {
   flex-shrink: 0;
-  padding: 16px 16px 12px;
+  padding: 16px 16px 0;
   background: var(--transaction-page-background, var(--content-background, #eef1f4));
 }
 
 .sales-module-cards__row {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
   width: 100%;
   min-width: 0;
 }
@@ -20,13 +20,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 120px;
-  padding: 18px 16px 14px;
-  border: 2px solid transparent;
+  min-height: 108px;
+  padding: 20px 18px 16px;
+  border: 2px solid #e8edf2;
   border-radius: 12px;
-  background: var(--card, #ffffff);
+  background: #ffffff;
   box-shadow:
-    0 1px 3px rgba(15, 23, 42, 0.08),
+    0 2px 6px rgba(15, 23, 42, 0.06),
     0 1px 2px rgba(15, 23, 42, 0.04);
   color: inherit;
   cursor: pointer;
@@ -38,8 +38,8 @@
 
   &:hover {
     box-shadow:
-      0 4px 12px rgba(15, 23, 42, 0.1),
-      0 2px 4px rgba(15, 23, 42, 0.06);
+      0 6px 16px rgba(15, 23, 42, 0.08),
+      0 2px 4px rgba(15, 23, 42, 0.05);
   }
 
   &:focus-visible {
@@ -50,8 +50,8 @@
   &--active {
     border-color: var(--teal, #00857a);
     box-shadow:
-      0 2px 8px rgba(0, 133, 122, 0.12),
-      0 1px 3px rgba(15, 23, 42, 0.08);
+      0 4px 14px rgba(0, 133, 122, 0.14),
+      0 2px 4px rgba(15, 23, 42, 0.06);
   }
 }
 
@@ -59,15 +59,15 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
+  gap: 8px;
   min-width: 0;
 }
 
 .sales-module-cards__icon {
   flex-shrink: 0;
-  font-size: 28px;
+  font-size: 32px;
   line-height: 1;
-  color: #64748b;
+  color: #94a3b8;
 
   .sales-module-cards__card--active & {
     color: var(--teal, #00857a);
@@ -75,11 +75,12 @@
 }
 
 .sales-module-cards__count {
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 700;
   line-height: 1;
   color: #0f172a;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
 
   .sales-module-cards__card--active & {
     color: var(--teal, #00857a);
@@ -100,7 +101,7 @@
 
 @include bp-down(lg) {
   .sales-module-cards {
-    padding: 12px 10px 10px;
+    padding: 12px 10px 0;
     overflow: hidden;
   }
 
@@ -115,9 +116,9 @@
   }
 
   .sales-module-cards__card {
-    flex: 0 0 148px;
-    min-width: 148px;
-    min-height: 112px;
+    flex: 0 0 152px;
+    min-width: 152px;
+    min-height: 104px;
     scroll-snap-align: start;
   }
 }

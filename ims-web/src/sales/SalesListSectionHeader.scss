@@ -1,0 +1,23 @@
+.sales-list-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 16px 12px;
+  background: #ffffff;
+  border-bottom: 1px solid #e8edf2;
+}
+
+.sales-list-section-header__icon {
+  flex-shrink: 0;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--teal, #00857a);
+}
+
+.sales-list-section-header__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #0f172a;
+}
