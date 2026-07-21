@@ -145,6 +145,13 @@ export function reconcilePrintPreviewBodyLock(): void {
   }
 }
 
+/** Restore natural document scrolling on mobile (clears stale inline locks). */
+export function ensureMobileDocumentScroll(): void {
+  if (!isMobilePrintViewport()) return;
+  document.body.classList.remove(BODY_LOCK_CLASS);
+  clearScrollLockStyles();
+}
+
 function writeHtmlToIframe(iframe: HTMLIFrameElement, html: string): boolean {
   try {
     iframe.srcdoc = html;

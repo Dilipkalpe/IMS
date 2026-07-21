@@ -439,9 +439,8 @@
   .main-window__content-host {
     overflow-x: hidden;
     overflow-y: visible;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
-    touch-action: pan-y;
+    overscroll-behavior: auto;
+    touch-action: auto;
     flex: none;
     height: auto;
     min-height: 0;
@@ -451,6 +450,7 @@
       min-height: auto;
       height: auto;
       overflow: visible;
+      touch-action: auto;
     }
   }
 
@@ -476,10 +476,14 @@
     transform: translateX(-105%);
     transition: transform 0.22s ease;
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.28);
+    pointer-events: none;
+    visibility: hidden;
   }
 
   .main-window--sidebar-open .main-window__sidebar {
     transform: translateX(0);
+    pointer-events: auto;
+    visibility: visible;
   }
 
   .main-window__sidebar-collapse-wrap {

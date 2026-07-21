@@ -62,6 +62,7 @@ import { placeholders } from '../placeholders';
 import { getAuthSession, logout } from '../api/auth';
 import { HeaderUserMenu } from '../components/header/HeaderUserMenu';
 import { useCompanyBranding } from '../hooks/useCompanyBranding';
+import { ensureMobileDocumentScroll } from '../utils/printPreview';
 import './MainWindow.scss';
 
 export interface MainWindowProps {
@@ -135,11 +136,32 @@ function MainWindowShell({ initialNavKey = NavKeys.Dashboard, onLogout }: MainWi
     const onChange = () => {
       if (!mq.matches) {
         setSidebarOpen(false);
+        document.body.style.removeProperty('overflow');
+      } else {
+        ensureMobileDocumentScroll();
       }
     };
     mq.addEventListener('change', onChange);
     return () => mq.removeEventListener('change', onChange);
   }, []);
+
+  useEffect(() => {
+    ensureMobileDocumentScroll();
+  }, []);
+
+  useEffect(() => {
+    if (!isMobileNav()) return;
+
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden';
+      return;
+    }
+
+    ensureMobileDocumentScroll();
+    return () => {
+      document.body.style.removeProperty('overflow');
+    };
+  }, [sidebarOpen, isMobileNav]);
 
   const headerTitle = useMemo(() => {
     const workspaceTitle = formatWorkspaceEntryHeaderTitle(
