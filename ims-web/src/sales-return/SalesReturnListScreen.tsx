@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CorporateDataGrid, buildGridTemplateColumns, type DataGridColumn } from '../components/datagrid/CorporateDataGrid';
 import { ListGridArea } from '../components/loading';
 import { TransactionEntryShell } from '../components/transaction/TransactionEntryShell';
@@ -17,11 +17,14 @@ import {
   useDocumentListDelete,
   useListRowSelection,
 } from '../components/transaction/transactionListCrud';
-import { ListMoreMenu } from '../components/transaction/ListMoreMenu';
+import { ListExportMenu } from '../components/transaction/ListExportMenu';
 import { useListExportActions } from '../components/transaction/useListExportActions';
 import { useListNewShortcut } from '../components/transaction/useListNewShortcut';
 import { useProtectedSalesListActions } from '../components/transaction/useProtectedSalesListActions';
 import { useTransactionListLoader } from '../components/transaction/useTransactionListLoader';
+import { ListStatsRow } from '../components/transaction/ListStatsRow';
+import { buildDataSourceStat, listStat } from '../components/transaction/listStatBuilders';
+import { useListStats } from '../components/transaction/useListStats';
 import { useAppNavigation } from '../context/AppNavigationContext';
 import { mapSalesReturnToPrintableDocument } from '../document/mappers/salesReturnPrintMapper';
 import {
@@ -49,6 +52,7 @@ export function SalesReturnListScreen() {
   const repoCtx = useSalesReturnRepositoryOptional();
   const repository = repoCtx?.repository;
   const listVersion = useSalesReturnListVersion();
+  const [stats, setStats] = useState({ total: 0, draft: 0, open: 0, confirmed: 0 });
   const toSortField = useNumberedSalesSortField('returnDate');
 
   const mapRows = useCallback(
@@ -70,7 +74,18 @@ export function SalesReturnListScreen() {
     docLabelPlural: 'sales return(s)',
   });
 
-  const { selectedId, setSelectedId } = useListRowSelection(list.rows);
+  const onStats = useCallback((listStats: Awaited<ReturnType<NonNullable<typeof repository>['fetchStats']>>) => {
+    setStats({
+      total: listStats.total,
+      draft: listStats.draft,
+      open: listStats.open,
+      confirmed: listStats.confirmed,
+    });
+  }, []);
+
+  useListStats(repository, listVersion, onStats);
+
+  const { selectedId, setSelectedId, selectedRow } = useListRowSelection(list.rows);
 
   const openWorkspaceRaw = useCallback(
     (row?: SalesReturnListRow) => {
@@ -159,44 +174,65 @@ export function SalesReturnListScreen() {
   useListNewShortcut(canAdd, () => void openWorkspace());
 
   return (
-    <RefinedScreenShell className="sales-invoice-list-screen transaction-list-screen">
-      <TransactionEntryShell title="Returns">
+    <RefinedScreenShell className="sales-invoice-list-screen">
+      <TransactionEntryShell title="Sales Return">
         <FormKeyboardScope className="si-list-layout" autoFocusFieldKey="list-search">
+          <ListStatsRow
+            stats={[
+              listStat('Total returns', stats.total, 'total'),
+              listStat('Open', stats.open, 'open'),
+              listStat('Draft', stats.draft, 'draft'),
+              buildDataSourceStat(repoCtx?.mode),
+            ]}
+          />
           <div className="si-list-toolbar">
             <div className="si-list-toolbar__row">
-              <select
-                className="wpf-form-combo si-list-toolbar__filter-pick"
-                value={list.statusFilter}
-                onChange={(e) => list.setStatusFilter(e.target.value)}
-                aria-label="Status filter"
-              >
-                {['All', 'Open', 'Draft', 'Confirmed'].map((s) => (
-                  <option key={s} value={s}>{s === 'All' ? '-- Filters --' : s}</option>
-                ))}
-              </select>
-              <input
-                className="wpf-form-input si-list-toolbar__search"
-                {...{ [FIELD_FOCUS_KEY]: 'list-search' }}
-                placeholder="Enter Filter Value"
-                value={list.searchInput}
-                onChange={(e) => list.setSearchInput(e.target.value)}
-              />
               <button
                 type="button"
-                className="wpf-action-button si-list-toolbar__add-new"
+                className="wpf-action-button"
                 {...{ [FIELD_FOCUS_KEY]: 'list-new' }}
                 onClick={() => void openWorkspace()}
                 disabled={!canAdd}
               >
-                + Add New
+                New
               </button>
-              <ListMoreMenu
-                disabled={list.loading}
-                exportBusy={listExport.exporting}
-                exportDisabled={listExport.exportDisabled}
-                canClearFilters={list.hasActiveFilters}
-                onRefresh={() => void list.reload()}
-                onClearFilters={list.clearFilters}
+              <button
+                type="button"
+                className="wpf-action-button"
+                onClick={() => selectedRow && void openWorkspace(selectedRow)}
+                disabled={!selectedRow || !canEdit}
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                className="wpf-action-button"
+                onClick={() => selectedRow && void handleDelete(selectedRow)}
+                disabled={!selectedRow || !canDelete}
+              >
+                Delete
+              </button>
+              <input
+                className="wpf-form-input si-list-toolbar__search"
+                {...{ [FIELD_FOCUS_KEY]: 'list-search' }}
+                placeholder="Search return no, customer…"
+                value={list.searchInput}
+                onChange={(e) => list.setSearchInput(e.target.value)}
+              />
+              <select className="wpf-form-combo si-list-toolbar__filter" value={list.statusFilter} onChange={(e) => list.setStatusFilter(e.target.value)}>
+                {['All', 'Open', 'Draft', 'Confirmed'].map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+              <button type="button" className="wpf-action-button" onClick={() => void list.reload()} disabled={list.loading}>
+                Refresh
+              </button>
+              <button type="button" className="wpf-action-button" onClick={list.clearFilters} disabled={!list.hasActiveFilters}>
+                Clear filters
+              </button>
+              <ListExportMenu
+                disabled={listExport.exportDisabled}
+                busy={listExport.exporting}
                 onExport={(format) => void listExport.runExport(format)}
               />
             </div>

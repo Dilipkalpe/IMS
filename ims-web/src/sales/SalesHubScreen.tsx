@@ -1,6 +1,6 @@
 import { lazy, Suspense, type ComponentType } from 'react';
-import { useHubTab } from '../hub/HubContext';
 import { NavKeys } from '../navigation/navKeys';
+import { useSalesHubTab } from './SalesHubContext';
 import { SALES_HUB_TABS } from './salesHubTabs';
 import './sales-hub.scss';
 
@@ -41,7 +41,7 @@ function SalesHubTabPanel({ tabKey }: { tabKey: string }) {
 }
 
 export function SalesHubScreen() {
-  const { activeTab, setActiveTab } = useHubTab(NavKeys.Sales);
+  const { activeTab, setActiveTab } = useSalesHubTab();
 
   return (
     <div className="sales-hub" data-wpf-source="Views/SalesHubView.xaml">
